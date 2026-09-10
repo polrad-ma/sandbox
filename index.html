@@ -2,780 +2,442 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
 
 <title>War Map Sandbox</title>
 
 <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
 />
 
 <style>
-
 * {
-    box-sizing: border-box;
+  box-sizing: border-box;
 }
 
 html,
 body {
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    overflow: hidden;
-    font-family: Arial, Helvetica, sans-serif;
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
 }
 
 #map {
-    position: fixed;
-    inset: 0;
+  width: 100%;
+  height: 100%;
+  background: #ddd;
 }
 
-
-/* =========================================================
+/* =========================
    START SCREEN
-========================================================= */
+========================= */
 
 #startScreen {
-    position: fixed;
-    inset: 0;
-
-    z-index: 10000;
-
-    background: #111;
-    color: white;
-
-    display: flex;
-    flex-direction: column;
-
-    align-items: center;
-    justify-content: center;
+  position: fixed;
+  inset: 0;
+  z-index: 10000;
+  background: #111;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-#startScreen h1 {
-    margin: 0 0 8px;
-    font-size: 42px;
+.startBox {
+  width: min(700px, calc(100% - 40px));
+  text-align: center;
 }
 
-#startScreen p {
-    color: #aaa;
-    margin: 0 0 35px;
+.startBox h1 {
+  margin: 0 0 10px;
+  font-size: 34px;
 }
 
-.startButtons {
-    display: flex;
-    gap: 20px;
+.startBox p {
+  color: #aaa;
+  margin-bottom: 30px;
+}
+
+.startOptions {
+  display: flex;
+  gap: 18px;
+  justify-content: center;
+  flex-wrap: wrap;
 }
 
 .startButton {
-    width: 270px;
-    height: 160px;
-
-    border-radius: 12px;
-    border: 1px solid #444;
-
-    background: #1d1d1d;
-    color: white;
-
-    cursor: pointer;
-
-    display: flex;
-    flex-direction: column;
-
-    justify-content: center;
-    align-items: center;
-
-    transition: .15s;
+  width: 280px;
+  min-height: 150px;
+  border: 1px solid #444;
+  border-radius: 12px;
+  background: #1d1d1d;
+  color: white;
+  cursor: pointer;
+  padding: 25px;
+  transition: .15s;
 }
 
 .startButton:hover {
-    background: #292929;
-    border-color: #777;
-    transform: translateY(-2px);
+  background: #292929;
+  transform: translateY(-2px);
 }
 
 .startButton .icon {
-    font-size: 42px;
-    margin-bottom: 13px;
+  font-size: 38px;
+  margin-bottom: 12px;
 }
 
 .startButton strong {
-    font-size: 18px;
+  display: block;
+  font-size: 18px;
+  margin-bottom: 7px;
 }
 
-.startButton small {
-    color: #999;
-    margin-top: 5px;
+.startButton span {
+  color: #aaa;
+  font-size: 13px;
 }
 
+/* =========================
+   TOOLBAR
+========================= */
 
-/* =========================================================
-   TOP TOOLBAR
-========================================================= */
-
-#topBar {
-    position: fixed;
-
-    z-index: 2000;
-
-    top: 12px;
-    left: 50%;
-
-    transform: translateX(-50%);
-
-    display: none;
-
-    background: rgba(20,20,20,.95);
-
-    border: 1px solid #444;
-    border-radius: 10px;
-
-    padding: 7px;
-
-    gap: 5px;
-
-    box-shadow: 0 5px 20px rgba(0,0,0,.4);
+#toolbar {
+  position: fixed;
+  z-index: 5000;
+  top: 15px;
+  left: 15px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  max-width: calc(100% - 30px);
 }
 
 .toolButton {
-    border: 0;
-    border-radius: 6px;
-
-    padding: 9px 12px;
-
-    background: #2b2b2b;
-    color: white;
-
-    cursor: pointer;
-
-    font-size: 13px;
+  border: 0;
+  border-radius: 6px;
+  background: rgba(255,255,255,.96);
+  padding: 9px 12px;
+  cursor: pointer;
+  box-shadow: 0 2px 7px rgba(0,0,0,.25);
+  font-size: 13px;
 }
 
 .toolButton:hover {
-    background: #3a3a3a;
+  background: white;
 }
 
 .toolButton.active {
-    background: #555;
+  background: #1976d2;
+  color: white;
 }
 
+/* =========================
+   DRAWING BAR
+========================= */
 
-/* =========================================================
-   DRAW BAR
-========================================================= */
-
-#drawBar {
-    position: fixed;
-
-    z-index: 3000;
-
-    left: 50%;
-    bottom: 20px;
-
-    transform: translateX(-50%);
-
-    display: none;
-
-    align-items: center;
-
-    background: rgba(20,20,20,.97);
-
-    border: 1px solid #555;
-
-    border-radius: 10px;
-
-    padding: 7px;
-
-    gap: 5px;
-
-    box-shadow: 0 5px 20px rgba(0,0,0,.4);
+#drawingBar {
+  position: fixed;
+  z-index: 5001;
+  top: 65px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: none;
+  align-items: center;
+  gap: 8px;
+  background: rgba(30,30,30,.94);
+  color: white;
+  border-radius: 8px;
+  padding: 8px 12px;
+  box-shadow: 0 3px 12px rgba(0,0,0,.35);
 }
 
-.finishButton {
-    background: #16833c;
+#drawingBar button {
+  border: 0;
+  border-radius: 5px;
+  padding: 7px 12px;
+  cursor: pointer;
 }
 
-.finishButton:hover {
-    background: #1c9c49;
+#finishButton {
+  background: #2e7d32;
+  color: white;
 }
 
-.cancelButton {
-    background: #8b2525;
-}
-
-.cancelButton:hover {
-    background: #a82d2d;
+#cancelButton {
+  background: #c62828;
+  color: white;
 }
 
 #pointCounter {
-    color: #aaa;
-    padding: 0 9px;
-    font-size: 13px;
+  font-size: 12px;
+  color: #ddd;
 }
 
+/* =========================
+   RIGHT PANEL
+========================= */
 
-/* =========================================================
-   PANELS
-========================================================= */
-
-.panel {
-    position: fixed;
-
-    z-index: 2000;
-
-    background: rgba(20,20,20,.96);
-
-    color: white;
-
-    border: 1px solid #444;
-    border-radius: 10px;
-
-    box-shadow: 0 5px 20px rgba(0,0,0,.4);
+#sidePanel {
+  position: fixed;
+  z-index: 5000;
+  top: 15px;
+  right: 15px;
+  width: 270px;
+  max-height: calc(100vh - 30px);
+  overflow-y: auto;
+  display: none;
+  background: rgba(255,255,255,.97);
+  border-radius: 9px;
+  box-shadow: 0 3px 15px rgba(0,0,0,.3);
+  padding: 14px;
 }
 
-#layersPanel {
-    left: 12px;
-    top: 12px;
-
-    width: 220px;
-
-    display: none;
-
-    padding: 14px;
+#sidePanel h3 {
+  margin: 0 0 12px;
 }
 
-#settingsPanel {
-    right: 12px;
-    top: 12px;
-
-    width: 260px;
-
-    display: none;
-
-    padding: 15px;
+.panelSection {
+  border-top: 1px solid #ddd;
+  padding-top: 12px;
+  margin-top: 12px;
 }
 
-.panel h3 {
-    margin: 0 0 14px;
-    font-size: 15px;
+.panelButton {
+  width: 100%;
+  padding: 8px;
+  margin-top: 6px;
+  border: 1px solid #ccc;
+  background: white;
+  border-radius: 5px;
+  cursor: pointer;
 }
 
-.layerRow {
-    display: flex;
-    align-items: center;
-
-    gap: 8px;
-
-    padding: 8px 0;
-
-    border-bottom: 1px solid #333;
+.panelButton:hover {
+  background: #f2f2f2;
 }
 
-.setting {
-    margin-bottom: 14px;
+/* =========================
+   HELP
+========================= */
+
+#status {
+  position: fixed;
+  z-index: 5000;
+  left: 15px;
+  bottom: 15px;
+  background: rgba(0,0,0,.75);
+  color: white;
+  padding: 7px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  pointer-events: none;
 }
 
-.setting label {
-    display: block;
+/* =========================
+   IMAGE UPLOAD
+========================= */
 
-    font-size: 13px;
-
-    color: #aaa;
-
-    margin-bottom: 5px;
+#imageInput {
+  display: none;
 }
 
-.setting input {
-    width: 100%;
+/* Vertex handles */
+
+.vertexHandle {
+  background: white;
+  border: 2px solid #1976d2;
+  width: 13px !important;
+  height: 13px !important;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,.5);
 }
 
-
-/* =========================================================
-   UPLOAD PANEL
-========================================================= */
-
-#uploadPanel {
-    position: fixed;
-    inset: 0;
-
-    z-index: 11000;
-
-    display: none;
-
-    background: rgba(0,0,0,.78);
-
-    align-items: center;
-    justify-content: center;
+.midpointHandle {
+  background: rgba(255,255,255,.9);
+  border: 2px solid #777;
+  width: 9px !important;
+  height: 9px !important;
+  border-radius: 50%;
+  box-shadow: 0 1px 3px rgba(0,0,0,.4);
 }
 
-.uploadBox {
-    width: 450px;
-
-    background: #1c1c1c;
-
-    color: white;
-
-    border: 1px solid #444;
-
-    border-radius: 12px;
-
-    padding: 25px;
+/* Make sure Leaflet edit markers stay above everything */
+.leaflet-marker-icon.vertexHandle,
+.leaflet-marker-icon.midpointHandle {
+  z-index: 10000 !important;
 }
 
-.uploadBox h2 {
-    margin-top: 0;
+/* Mobile */
+@media(max-width:700px) {
+  #toolbar {
+    max-width: calc(100% - 30px);
+  }
+
+  .toolButton {
+    padding: 8px 9px;
+    font-size: 12px;
+  }
+
+  #sidePanel {
+    width: 230px;
+  }
 }
-
-.uploadBox p {
-    color: #aaa;
-    line-height: 1.5;
-}
-
-.uploadBox input {
-    width: 100%;
-    margin: 15px 0;
-}
-
-.uploadBox label {
-    display: block;
-
-    color: #aaa;
-
-    font-size: 13px;
-
-    margin-top: 10px;
-}
-
-.uploadBox select {
-    width: 100%;
-
-    padding: 9px;
-
-    background: #292929;
-    color: white;
-
-    border: 1px solid #444;
-
-    border-radius: 5px;
-}
-
-.uploadActions {
-    display: flex;
-
-    gap: 7px;
-
-    margin-top: 18px;
-}
-
-
-/* =========================================================
-   VERTEX HANDLES
-========================================================= */
-
-.vertex-handle {
-    background: transparent !important;
-    border: 0 !important;
-}
-
-.vertex-dot {
-    width: 13px;
-    height: 13px;
-
-    background: white;
-
-    border: 2px solid #222;
-
-    border-radius: 50%;
-
-    box-shadow: 0 1px 5px rgba(0,0,0,.8);
-}
-
-.midpoint-dot {
-    width: 10px;
-    height: 10px;
-
-    background: #aaa;
-
-    border: 2px solid #222;
-
-    border-radius: 50%;
-
-    box-shadow: 0 1px 4px rgba(0,0,0,.8);
-}
-
-
-/* =========================================================
-   TEXT
-========================================================= */
-
-.map-text {
-    color: white;
-
-    font-size: 16px;
-    font-weight: bold;
-
-    white-space: nowrap;
-
-    text-shadow:
-        1px 1px 2px black,
-        -1px -1px 2px black,
-        1px -1px 2px black,
-        -1px 1px 2px black;
-}
-
-
-/* =========================================================
-   LEAFLET
-========================================================= */
-
-.leaflet-control-attribution {
-    font-size: 10px;
-}
-
 </style>
 </head>
 
-
 <body>
 
-
-<!-- =======================================================
+<!-- =========================
      START SCREEN
-======================================================= -->
+========================= -->
 
 <div id="startScreen">
+  <div class="startBox">
 
     <h1>War Map Sandbox</h1>
 
-    <p>Choose the map you want to work with</p>
+    <p>
+      Create and edit your own map with polygons, lines and curved front lines.
+    </p>
 
-    <div class="startButtons">
+    <div class="startOptions">
 
-        <button
-            class="startButton"
-            onclick="startRealMap()"
-        >
-            <div class="icon">🌍</div>
-            <strong>OpenStreetMap</strong>
-            <small>Real-world map</small>
-        </button>
+      <button class="startButton" id="realMapButton">
+        <div class="icon">🌍</div>
+        <strong>OpenStreetMap</strong>
+        <span>
+          Use a real-world interactive map with satellite imagery and OSM labels.
+        </span>
+      </button>
 
-
-        <button
-            class="startButton"
-            onclick="openUpload()"
-        >
-            <div class="icon">🖼️</div>
-            <strong>Upload Map</strong>
-            <small>Use your own map</small>
-        </button>
+      <button class="startButton" id="uploadMapButton">
+        <div class="icon">🖼️</div>
+        <strong>Upload a map image</strong>
+        <span>
+          Upload your own map and draw directly over it.
+        </span>
+      </button>
 
     </div>
+  </div>
+</div>
+
+<input
+  type="file"
+  id="imageInput"
+  accept="image/*"
+/>
+
+<!-- =========================
+     TOOLBAR
+========================= -->
+
+<div id="toolbar">
+
+  <button class="toolButton active" data-tool="select">
+    Select
+  </button>
+
+  <button class="toolButton" data-tool="polygon">
+    Polygon
+  </button>
+
+  <button class="toolButton" data-tool="line">
+    Line
+  </button>
+
+  <button class="toolButton" data-tool="curve">
+    Curved line
+  </button>
+
+  <button class="toolButton" data-tool="marker">
+    Marker
+  </button>
+
+  <button class="toolButton" data-tool="delete">
+    Delete
+  </button>
+
+  <button class="toolButton" id="undoButton">
+    ↶ Undo
+  </button>
+
+  <button class="toolButton" id="redoButton">
+    ↷ Redo
+  </button>
+
+  <button class="toolButton" id="layersButton">
+    Layers
+  </button>
+
+  <button class="toolButton" id="newMapButton">
+    New
+  </button>
 
 </div>
 
+<!-- =========================
+     DRAWING BAR
+========================= -->
 
-<!-- =======================================================
-     UPLOAD
-======================================================= -->
+<div id="drawingBar">
 
-<div id="uploadPanel">
+  <button id="finishButton">
+    Finish
+  </button>
 
-    <div class="uploadBox">
+  <button id="cancelButton">
+    Cancel
+  </button>
 
-        <h2>Upload Map</h2>
-
-        <p>
-            Upload a PNG, JPG or WebP map. The image will
-            remain at its correct proportions.
-        </p>
-
-        <input
-            id="imageInput"
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-        >
-
-        <label>Image processing</label>
-
-        <select id="qualitySelect">
-
-            <option value="1">
-                Original
-            </option>
-
-            <option value="2">
-                Enhanced ×2
-            </option>
-
-            <option value="3">
-                High resolution ×3
-            </option>
-
-            <option value="4">
-                High resolution ×4
-            </option>
-
-        </select>
-
-
-        <div class="uploadActions">
-
-            <button
-                class="toolButton"
-                onclick="loadImageMap()"
-            >
-                Open Map
-            </button>
-
-            <button
-                class="toolButton"
-                onclick="closeUpload()"
-            >
-                Cancel
-            </button>
-
-        </div>
-
-    </div>
+  <span id="pointCounter">
+    0 points
+  </span>
 
 </div>
 
+<!-- =========================
+     SIDE PANEL
+========================= -->
 
-<!-- =======================================================
-     MAP
-======================================================= -->
+<div id="sidePanel">
+
+  <h3>Layers</h3>
+
+  <div class="panelSection">
+
+    <label>
+      <input type="checkbox" id="showObjects" checked>
+      Show drawings
+    </label>
+
+  </div>
+
+  <div class="panelSection">
+
+    <b>Drawing instructions</b>
+
+    <p style="font-size:12px;color:#666;line-height:1.5">
+      Choose Polygon, Line or Curved line and click points on the map.
+      When finished, press <b>Finish</b>.
+      Finished objects remain editable.
+    </p>
+
+  </div>
+
+</div>
+
+<div id="status">
+  Ready.
+</div>
 
 <div id="map"></div>
 
-
-<!-- =======================================================
-     TOP BAR
-======================================================= -->
-
-<div id="topBar">
-
-    <button
-        class="toolButton"
-        onclick="setTool('select')"
-    >
-        Select
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="setTool('polygon')"
-    >
-        🔺 Polygon
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="setTool('curve')"
-    >
-        〰 Curved Line
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="setTool('line')"
-    >
-        ━ Line
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="setTool('marker')"
-    >
-        📍 Marker
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="setTool('text')"
-    >
-        T Text
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="setTool('delete')"
-    >
-        🗑 Delete
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="undo()"
-    >
-        ↶
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="redo()"
-    >
-        ↷
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="toggleLayers()"
-    >
-        Layers
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="toggleSettings()"
-    >
-        ⚙
-    </button>
-
-    <button
-        class="toolButton"
-        onclick="newMap()"
-    >
-        New
-    </button>
-
-</div>
-
-
-<!-- =======================================================
-     DRAW BAR
-======================================================= -->
-
-<div id="drawBar">
-
-    <button
-        class="toolButton finishButton"
-        onclick="finishDrawing()"
-    >
-        ✓ Finish
-    </button>
-
-    <button
-        class="toolButton cancelButton"
-        onclick="cancelDrawing()"
-    >
-        ✕ Cancel
-    </button>
-
-    <span id="pointCounter">
-        0 points
-    </span>
-
-</div>
-
-
-<!-- =======================================================
-     LAYERS
-======================================================= -->
-
-<div
-    id="layersPanel"
-    class="panel"
->
-
-    <h3>Layers</h3>
-
-    <div class="layerRow">
-        <input type="checkbox" checked>
-        <span>Background</span>
-    </div>
-
-    <div class="layerRow">
-        <input type="checkbox" checked>
-        <span>Territories</span>
-    </div>
-
-    <div class="layerRow">
-        <input type="checkbox" checked>
-        <span>Frontlines</span>
-    </div>
-
-    <div class="layerRow">
-        <input type="checkbox" checked>
-        <span>Markers</span>
-    </div>
-
-    <div class="layerRow">
-        <input type="checkbox" checked>
-        <span>Text</span>
-    </div>
-
-</div>
-
-
-<!-- =======================================================
-     SETTINGS
-======================================================= -->
-
-<div
-    id="settingsPanel"
-    class="panel"
->
-
-    <h3>Object Settings</h3>
-
-
-    <div class="setting">
-
-        <label>Color</label>
-
-        <input
-            id="colorPicker"
-            type="color"
-            value="#ff0000"
-        >
-
-    </div>
-
-
-    <div class="setting">
-
-        <label>Opacity</label>
-
-        <input
-            id="opacitySlider"
-            type="range"
-            min="0"
-            max="1"
-            step=".05"
-            value=".45"
-        >
-
-    </div>
-
-
-    <div class="setting">
-
-        <label>Line Width</label>
-
-        <input
-            id="widthSlider"
-            type="range"
-            min="1"
-            max="15"
-            value="3"
-        >
-
-    </div>
-
-
-    <button
-        class="toolButton"
-        onclick="applySettings()"
-    >
-        Apply
-    </button>
-
-</div>
-
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-
 
 <script>
 
@@ -785,748 +447,443 @@ body {
 
 let map = null;
 
-let mapMode = null;
-
-let osmLayer = null;
-let satelliteLayer = null;
-let imageLayer = null;
-
-let objects = [];
-
-let selectedObject = null;
-
 let currentTool = "select";
 
 let drawing = false;
-
 let currentPoints = [];
 
 let previewLayer = null;
 
-let vertexHandles = [];
+let objects = [];
+let selectedObject = null;
 
-let midpointHandles = [];
+let editHandles = [];
 
-let undoHistory = [];
-
+let history = [];
 let redoHistory = [];
 
 let historyTimer = null;
 
+let uploadedImageLayer = null;
+
 
 /* =========================================================
-   REAL WORLD MAP
+   BASEMAPS
 ========================================================= */
 
-function startRealMap() {
+let satellite;
+let osm;
+let hybrid;
 
-    document.getElementById(
-        "startScreen"
-    ).style.display = "none";
 
-    mapMode = "real";
+/* =========================================================
+   START SCREEN
+========================================================= */
 
-    initializeRealMap();
+document.getElementById("realMapButton").onclick = function() {
+  document.getElementById("startScreen").style.display = "none";
+  initializeRealMap();
+};
 
-}
+document.getElementById("uploadMapButton").onclick = function() {
+  document.getElementById("imageInput").click();
+};
 
+document.getElementById("imageInput").addEventListener("change", function(e) {
+
+  const file = e.target.files[0];
+
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+
+    const img = new Image();
+
+    img.onload = function() {
+      initializeImageMap(img);
+    };
+
+    img.src = event.target.result;
+  };
+
+  reader.readAsDataURL(file);
+});
+
+
+/* =========================================================
+   REAL MAP
+========================================================= */
 
 function initializeRealMap() {
 
-    if (map) {
-        map.remove();
+  map = L.map("map", {
+    center: [48.3, 37.5],
+    zoom: 7,
+    zoomControl: true,
+    preferCanvas: false
+  });
+
+  osm = L.tileLayer(
+    "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
     }
+  );
 
+  satellite = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 19,
+      attribution:
+        "Tiles &copy; Esri"
+    }
+  );
 
-    map = L.map(
-        "map",
-        {
-            zoomControl: true
-        }
-    ).setView(
-        [48.5, 37.5],
-        6
-    );
+  const esriLabels = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 19,
+      attribution: "Labels &copy; Esri"
+    }
+  );
 
+  hybrid = L.layerGroup([
+    satellite,
+    esriLabels
+  ]);
 
-    osmLayer = L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-        {
-            maxZoom: 19,
-            attribution:
-                "&copy; OpenStreetMap contributors"
-        }
-    );
+  hybrid.addTo(map);
 
+  L.control.layers(
+    {
+      "Satellite + Esri Labels": hybrid,
+      "Satellite (Esri)": satellite,
+      "OpenStreetMap": osm
+    },
+    null,
+    {
+      position: "topright"
+    }
+  ).addTo(map);
 
-    satelliteLayer = L.tileLayer(
-        "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-        {
-            maxZoom: 19,
-            attribution: "Esri"
-        }
-    );
-
-
-    osmLayer.addTo(map);
-
-
-    L.control.layers(
-        {
-            "OpenStreetMap": osmLayer,
-            "Satellite": satelliteLayer
-        }
-    ).addTo(map);
-
-
-    finishMapSetup();
-
+  finishMapInitialization();
 }
 
 
 /* =========================================================
-   UPLOAD
+   IMAGE MAP
 ========================================================= */
 
-function openUpload() {
+function initializeImageMap(img) {
 
-    document.getElementById(
-        "uploadPanel"
-    ).style.display = "flex";
+  document.getElementById("startScreen").style.display = "none";
 
-}
+  /*
+     Use CRS.Simple so that the uploaded image behaves like
+     a large flat map.
 
+     The important part is that width and height are taken
+     directly from the image, preserving its aspect ratio.
+  */
 
-function closeUpload() {
+  map = L.map("map", {
+    crs: L.CRS.Simple,
+    minZoom: -5,
+    maxZoom: 8,
+    zoomControl: true
+  });
 
-    document.getElementById(
-        "uploadPanel"
-    ).style.display = "none";
+  const originalWidth = img.naturalWidth;
+  const originalHeight = img.naturalHeight;
 
-}
+  /*
+     Browser canvas enlargement.
 
+     This does NOT change the aspect ratio.
+  */
 
-/* =========================================================
-   LOAD IMAGE
-========================================================= */
+  const scale = Math.max(
+    1,
+    Math.min(2, 4096 / Math.max(originalWidth, originalHeight))
+  );
 
-function loadImageMap() {
+  const canvas = document.createElement("canvas");
 
-    const input =
-        document.getElementById(
-            "imageInput"
-        );
+  canvas.width = Math.round(originalWidth * scale);
+  canvas.height = Math.round(originalHeight * scale);
 
+  const ctx = canvas.getContext("2d");
 
-    if (!input.files.length) {
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
 
-        alert(
-            "Please select a map image."
-        );
+  ctx.drawImage(
+    img,
+    0,
+    0,
+    canvas.width,
+    canvas.height
+  );
 
-        return;
+  const imageWidth = canvas.width;
+  const imageHeight = canvas.height;
+
+  const imageUrl = canvas.toDataURL("image/png");
+
+  const bounds = [
+    [0, 0],
+    [imageHeight, imageWidth]
+  ];
+
+  uploadedImageLayer = L.imageOverlay(
+    imageUrl,
+    bounds,
+    {
+      interactive: false
     }
+  ).addTo(map);
 
+  map.fitBounds(bounds);
 
-    const file = input.files[0];
-
-    const reader =
-        new FileReader();
-
-
-    reader.onload = function(event) {
-
-        const img =
-            new Image();
-
-
-        img.onload = function() {
-
-            createImageMap(img);
-
-        };
-
-
-        img.src =
-            event.target.result;
-
-    };
-
-
-    reader.readAsDataURL(file);
-
-}
-
-
-/* =========================================================
-   CREATE IMAGE MAP
-========================================================= */
-
-function createImageMap(img) {
-
-    if (map) {
-        map.remove();
-    }
-
-
-    mapMode = "image";
-
-
-    const scale =
-        Number(
-            document.getElementById(
-                "qualitySelect"
-            ).value
-        );
-
-
-    /*
-     * Keep exact aspect ratio.
-     */
-
-    const width =
-        Math.round(
-            img.naturalWidth * scale
-        );
-
-    const height =
-        Math.round(
-            img.naturalHeight * scale
-        );
-
-
-    const canvas =
-        document.createElement(
-            "canvas"
-        );
-
-
-    canvas.width = width;
-    canvas.height = height;
-
-
-    const ctx =
-        canvas.getContext(
-            "2d"
-        );
-
-
-    ctx.imageSmoothingEnabled = true;
-
-    ctx.imageSmoothingQuality =
-        "high";
-
-
-    ctx.drawImage(
-        img,
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    const imageData =
-        canvas.toDataURL(
-            "image/jpeg",
-            .96
-        );
-
-
-    /*
-     * IMPORTANT:
-     *
-     * CRS.Simple means that the image itself
-     * becomes the coordinate system.
-     */
-
-    map =
-        L.map(
-            "map",
-            {
-                crs: L.CRS.Simple,
-
-                minZoom: -5,
-
-                maxZoom: 8,
-
-                zoomControl: true,
-
-                attributionControl: false
-            }
-        );
-
-
-    const bounds = [
-        [0, 0],
-        [height, width]
-    ];
-
-
-    imageLayer =
-        L.imageOverlay(
-            imageData,
-            bounds,
-            {
-                interactive: false
-            }
-        ).addTo(map);
-
-
-    map.fitBounds(
-        bounds
-    );
-
-
-    finishMapSetup();
-
-
-    closeUpload();
-
+  finishMapInitialization();
 }
 
 
 /* =========================================================
-   MAP SETUP
+   COMMON MAP INITIALIZATION
 ========================================================= */
 
-function finishMapSetup() {
+function finishMapInitialization() {
 
-    document.getElementById(
-        "topBar"
-    ).style.display = "flex";
+  document.getElementById("toolbar").style.display = "flex";
+  document.getElementById("status").innerText =
+    "Ready. Choose a drawing tool.";
 
+  map.on("click", handleMapClick);
 
-    map.on(
-        "click",
-        onMapClick
-    );
+  /*
+     Clicking empty map deselects the current object,
+     unless we are currently drawing.
+  */
 
+  map.on("click", function() {
 
-    /*
-     * Start with a clean history.
-     */
+    if (!drawing && currentTool === "select") {
+      clearSelection();
+    }
 
-    undoHistory = [];
+  });
 
-    redoHistory = [];
-
-    saveHistory();
-
+  updateToolbar();
 }
 
 
 /* =========================================================
-   MAP CLICK
+   TOOL SELECTION
 ========================================================= */
 
-function onMapClick(e) {
+document.querySelectorAll(".toolButton[data-tool]").forEach(button => {
 
-    if (currentTool === "polygon") {
+  button.addEventListener("click", function() {
 
-        addPoint(e.latlng);
+    const tool = this.dataset.tool;
 
-        return;
-
+    if (drawing) {
+      cancelDrawing();
     }
 
+    setTool(tool);
 
-    if (currentTool === "curve") {
+  });
 
-        addPoint(e.latlng);
+});
 
-        return;
-
-    }
-
-
-    if (currentTool === "line") {
-
-        addPoint(e.latlng);
-
-        return;
-
-    }
-
-
-    if (currentTool === "marker") {
-
-        createMarker(
-            e.latlng
-        );
-
-        return;
-
-    }
-
-
-    if (currentTool === "text") {
-
-        createText(
-            e.latlng
-        );
-
-        return;
-
-    }
-
-
-    if (currentTool === "select") {
-
-        clearSelection();
-
-    }
-
-}
-
-
-/* =========================================================
-   SET TOOL
-========================================================= */
 
 function setTool(tool) {
 
-    if (drawing) {
+  currentTool = tool;
 
-        cancelDrawing();
+  updateToolbar();
 
-    }
+  if (tool === "polygon" ||
+      tool === "line" ||
+      tool === "curve") {
 
+    startDrawing(tool);
+    return;
+  }
 
-    currentTool = tool;
+  if (tool === "delete") {
 
-    currentPoints = [];
+    document.getElementById("status").innerText =
+      "Click an object to delete it.";
 
-    drawing = false;
+    return;
+  }
 
-
-    document
-        .querySelectorAll(
-            "#topBar .toolButton"
-        )
-        .forEach(
-            button => {
-                button.classList.remove(
-                    "active"
-                );
-            }
-        );
-
-
-    /*
-     * Highlight selected tool.
-     */
-
-    const buttons =
-        document.querySelectorAll(
-            "#topBar .toolButton"
-        );
-
-
-    if (
-        tool === "polygon"
-    ) {
-        buttons[1].classList.add(
-            "active"
-        );
-    }
-
-    if (
-        tool === "curve"
-    ) {
-        buttons[2].classList.add(
-            "active"
-        );
-    }
-
-    if (
-        tool === "line"
-    ) {
-        buttons[3].classList.add(
-            "active"
-        );
-    }
-
-
-    if (
-        tool === "delete"
-    ) {
-        buttons[6].classList.add(
-            "active"
-        );
-    }
-
-
-    if (
-        tool === "polygon" ||
-        tool === "curve" ||
-        tool === "line"
-    ) {
-
-        drawing = true;
-
-        showDrawBar();
-
-    }
+  document.getElementById("status").innerText =
+    "Select an object or choose a drawing tool.";
 
 }
 
 
 /* =========================================================
-   ADD DRAWING POINT
+   TOOLBAR VISUAL STATE
 ========================================================= */
 
-function addPoint(latlng) {
+function updateToolbar() {
 
-    if (!drawing) {
-        return;
-    }
+  document.querySelectorAll(".toolButton[data-tool]")
+    .forEach(button => {
 
+      button.classList.toggle(
+        "active",
+        button.dataset.tool === currentTool
+      );
 
-    currentPoints.push({
-        lat: latlng.lat,
-        lng: latlng.lng
     });
-
-
-    updatePreview();
-
-    updatePointCounter();
 
 }
 
 
 /* =========================================================
-   UPDATE PREVIEW
+   DRAWING
+========================================================= */
+
+function startDrawing(type) {
+
+  drawing = true;
+
+  currentPoints = [];
+
+  removePreview();
+
+  document.getElementById("drawingBar").style.display = "flex";
+
+  updatePointCounter();
+
+  document.getElementById("status").innerText =
+    type === "polygon"
+      ? "Click points to draw a polygon."
+      : type === "curve"
+        ? "Click control points for the curved line."
+        : "Click points to draw a line.";
+
+}
+
+
+function handleMapClick(e) {
+
+  if (!map) return;
+
+  if (!drawing) {
+
+    if (currentTool === "marker") {
+
+      createMarker(e.latlng);
+      return;
+    }
+
+    return;
+  }
+
+  /*
+     While drawing, each click adds exactly one point.
+  */
+
+  currentPoints.push(e.latlng);
+
+  updatePointCounter();
+
+  updatePreview();
+
+}
+
+
+function updatePointCounter() {
+
+  document.getElementById("pointCounter").innerText =
+    currentPoints.length +
+    (currentPoints.length === 1 ? " point" : " points");
+
+}
+
+
+/* =========================================================
+   PREVIEW
 ========================================================= */
 
 function updatePreview() {
 
-    if (previewLayer) {
+  removePreview();
 
-        map.removeLayer(
-            previewLayer
-        );
+  if (currentPoints.length === 0) {
+    return;
+  }
 
-        previewLayer = null;
+  if (currentTool === "polygon") {
 
-    }
+    previewLayer = L.polygon(
+      currentPoints,
+      {
+        color: "#1976d2",
+        weight: 3,
+        dashArray: "8 6",
+        fillColor: "#1976d2",
+        fillOpacity: .12,
+        interactive: false
+      }
+    ).addTo(map);
 
+    return;
+  }
 
-    if (!currentPoints.length) {
-        return;
-    }
+  if (currentTool === "line") {
 
+    previewLayer = L.polyline(
+      currentPoints,
+      {
+        color: "#1976d2",
+        weight: 3,
+        dashArray: "8 6",
+        interactive: false
+      }
+    ).addTo(map);
 
-    const color =
-        document.getElementById(
-            "colorPicker"
-        ).value;
+    return;
+  }
 
+  if (currentTool === "curve") {
 
-    const opacity =
-        Number(
-            document.getElementById(
-                "opacitySlider"
-            ).value
-        );
+    if (currentPoints.length === 1) {
 
-
-    const width =
-        Number(
-            document.getElementById(
-                "widthSlider"
-            ).value
-        );
-
-
-    const points =
-        currentPoints.map(
-            p => [
-                p.lat,
-                p.lng
-            ]
-        );
-
-
-    if (
-        currentTool === "polygon"
-    ) {
-
-        previewLayer =
-            L.polygon(
-                points,
-                {
-                    color,
-                    fillColor: color,
-                    fillOpacity: opacity,
-                    weight: width,
-                    dashArray: "6 5"
-                }
-            ).addTo(map);
-
-        return;
-
-    }
-
-
-    if (
-        currentTool === "line"
-    ) {
-
-        previewLayer =
-            L.polyline(
-                points,
-                {
-                    color,
-                    weight: width,
-                    dashArray: "6 5"
-                }
-            ).addTo(map);
-
-        return;
-
-    }
-
-
-    if (
-        currentTool === "curve"
-    ) {
-
-        previewLayer =
-            L.polyline(
-                makeCurve(points),
-                {
-                    color,
-                    weight: width,
-                    dashArray: "6 5"
-                }
-            ).addTo(map);
-
-    }
-
-}
-
-
-/* =========================================================
-   CURVE GENERATION
-========================================================= */
-
-function makeCurve(points) {
-
-    if (points.length < 2) {
-        return points;
-    }
-
-
-    if (points.length === 2) {
-        return points;
-    }
-
-
-    const result = [];
-
-
-    /*
-     * Catmull-Rom interpolation.
-     *
-     * The user's actual points remain the control
-     * points. The extra points are only generated
-     * for drawing the smooth curve.
-     */
-
-    for (
-        let i = 0;
-        i < points.length - 1;
-        i++
-    ) {
-
-        const p0 =
-            points[
-                Math.max(
-                    0,
-                    i - 1
-                )
-            ];
-
-        const p1 =
-            points[i];
-
-        const p2 =
-            points[i + 1];
-
-        const p3 =
-            points[
-                Math.min(
-                    points.length - 1,
-                    i + 2
-                )
-            ];
-
-
-        for (
-            let t = 0;
-            t < 1;
-            t += .04
-        ) {
-
-            const t2 =
-                t * t;
-
-            const t3 =
-                t2 * t;
-
-
-            const lat =
-                .5 *
-                (
-                    2*p1[0] +
-                    (-p0[0] + p2[0])*t +
-                    (2*p0[0] -
-                     5*p1[0] +
-                     4*p2[0] -
-                     p3[0])*t2 +
-                    (-p0[0] +
-                     3*p1[0] -
-                     3*p2[0] +
-                     p3[0])*t3
-                );
-
-
-            const lng =
-                .5 *
-                (
-                    2*p1[1] +
-                    (-p0[1] + p2[1])*t +
-                    (2*p0[1] -
-                     5*p1[1] +
-                     4*p2[1] -
-                     p3[1])*t2 +
-                    (-p0[1] +
-                     3*p1[1] -
-                     3*p2[1] +
-                     p3[1])*t3
-                );
-
-
-            result.push([
-                lat,
-                lng
-            ]);
-
+      previewLayer = L.circleMarker(
+        currentPoints[0],
+        {
+          radius: 4,
+          color: "#1976d2",
+          fillColor: "#1976d2",
+          fillOpacity: 1,
+          interactive: false
         }
+      ).addTo(map);
 
+      return;
     }
 
-
-    result.push(
-        points[
-            points.length - 1
-        ]
-    );
-
-
-    return result;
+    previewLayer = L.polyline(
+      makeCurve(currentPoints),
+      {
+        color: "#1976d2",
+        weight: 3,
+        dashArray: "8 6",
+        interactive: false
+      }
+    ).addTo(map);
+  }
 
 }
 
@@ -1535,278 +892,282 @@ function makeCurve(points) {
    FINISH DRAWING
 ========================================================= */
 
+document.getElementById("finishButton").onclick =
+  finishDrawing;
+
+
 function finishDrawing() {
 
-    if (!drawing) {
-        return;
-    }
+  if (!drawing) return;
+
+  if (currentPoints.length < 2) {
+
+    document.getElementById("status").innerText =
+      "Add at least two points first.";
+
+    return;
+  }
+
+  const points = currentPoints.map(p =>
+    L.latLng(p.lat, p.lng)
+  );
+
+  let object = null;
+
+  const style = {
+    color: "#ff0000",
+    weight: 4,
+    opacity: 1,
+    fillColor: "#ff0000",
+    fillOpacity: .25
+  };
 
 
-    if (previewLayer) {
+  /* -------------------------
+     POLYGON
+  ------------------------- */
 
-        map.removeLayer(
-            previewLayer
-        );
+  if (currentTool === "polygon") {
 
-        previewLayer = null;
+    object = L.polygon(
+      points,
+      style
+    ).addTo(map);
 
-    }
-
-
-    /*
-     * Minimum points.
-     */
-
-    if (
-        currentTool === "polygon" &&
-        currentPoints.length < 3
-    ) {
-
-        alert(
-            "A polygon needs at least 3 points."
-        );
-
-        updatePreview();
-
-        return;
-
-    }
-
-
-    if (
-        (
-            currentTool === "curve" ||
-            currentTool === "line"
-        ) &&
-        currentPoints.length < 2
-    ) {
-
-        alert(
-            "You need at least 2 points."
-        );
-
-        updatePreview();
-
-        return;
-
-    }
-
-
-    const color =
-        document.getElementById(
-            "colorPicker"
-        ).value;
-
-
-    const opacity =
-        Number(
-            document.getElementById(
-                "opacitySlider"
-            ).value
-        );
-
-
-    const width =
-        Number(
-            document.getElementById(
-                "widthSlider"
-            ).value
-        );
-
-
-    let object = null;
-
-
-    /*
-     * POLYGON
-     */
-
-    if (
-        currentTool === "polygon"
-    ) {
-
-        object =
-            L.polygon(
-                currentPoints.map(
-                    p => [
-                        p.lat,
-                        p.lng
-                    ]
-                ),
-                {
-                    color,
-                    fillColor: color,
-                    fillOpacity: opacity,
-                    weight: width
-                }
-            ).addTo(map);
-
-    }
-
-
-    /*
-     * STRAIGHT LINE
-     */
-
-    if (
-        currentTool === "line"
-    ) {
-
-        object =
-            L.polyline(
-                currentPoints.map(
-                    p => [
-                        p.lat,
-                        p.lng
-                    ]
-                ),
-                {
-                    color,
-                    weight: width
-                }
-            ).addTo(map);
-
-    }
-
-
-    /*
-     * CURVED LINE
-     */
-
-    if (
-        currentTool === "curve"
-    ) {
-
-        object =
-            L.polyline(
-                makeCurve(
-                    currentPoints.map(
-                        p => [
-                            p.lat,
-                            p.lng
-                        ]
-                    )
-                ),
-                {
-                    color,
-                    weight: width
-                }
-            ).addTo(map);
-
-    }
-
-
-    /*
-     * Store metadata.
-     */
-
-    object._sandboxType =
-        currentTool;
-
-
-    object._controlPoints =
-        currentPoints.map(
-            p => ({
-                lat: p.lat,
-                lng: p.lng
-            })
-        );
-
-
+    object._sandboxType = "polygon";
+    object._controlPoints = points.slice();
     object._style = {
-        color,
-        fillColor: color,
-        fillOpacity: opacity,
-        weight
+      color: style.color,
+      weight: style.weight,
+      opacity: style.opacity,
+      fillColor: style.fillColor,
+      fillOpacity: style.fillOpacity
     };
 
-
-    setupObject(
-        object
-    );
+  }
 
 
-    objects.push(
-        object
-    );
+  /* -------------------------
+     STRAIGHT LINE
+  ------------------------- */
+
+  if (currentTool === "line") {
+
+    object = L.polyline(
+      points,
+      {
+        color: "#ff0000",
+        weight: 4,
+        opacity: 1
+      }
+    ).addTo(map);
+
+    object._sandboxType = "line";
+    object._controlPoints = points.slice();
+
+    object._style = {
+      color: "#ff0000",
+      weight: 4,
+      opacity: 1
+    };
+
+  }
 
 
-    saveHistory();
+  /* -------------------------
+     CURVED LINE
+  ------------------------- */
+
+  if (currentTool === "curve") {
+
+    object = L.polyline(
+      makeCurve(points),
+      {
+        color: "#ff0000",
+        weight: 4,
+        opacity: 1
+      }
+    ).addTo(map);
+
+    object._sandboxType = "curve";
+    object._controlPoints = points.slice();
+
+    object._style = {
+      color: "#ff0000",
+      weight: 4,
+      opacity: 1
+    };
+
+  }
 
 
-    currentPoints = [];
+  if (!object) return;
 
-    drawing = false;
+  objects.push(object);
 
-    currentTool = "select";
+  /*
+     THIS IS THE IMPORTANT PART:
+     create a wide invisible hit target.
+  */
 
-    hideDrawBar();
+  createHitLayer(object);
+
+  setupObject(object);
+
+  saveHistory();
+
+  removePreview();
+
+  drawing = false;
+  currentPoints = [];
+
+  document.getElementById("drawingBar").style.display = "none";
+
+  currentTool = "select";
+
+  updateToolbar();
+
+  selectObject(object);
+
+  document.getElementById("status").innerText =
+    "Object finished. Click it again anytime to edit it.";
 
 }
 
 
 /* =========================================================
-   CANCEL
+   CANCEL DRAWING
 ========================================================= */
+
+document.getElementById("cancelButton").onclick =
+  cancelDrawing;
+
 
 function cancelDrawing() {
 
-    if (previewLayer) {
+  /*
+     CRITICAL:
+     Cancel ONLY removes the unfinished preview.
 
-        map.removeLayer(
-            previewLayer
-        );
+     It NEVER touches objects[].
+  */
 
-        previewLayer = null;
+  removePreview();
 
-    }
+  currentPoints = [];
 
+  drawing = false;
 
-    currentPoints = [];
+  document.getElementById("drawingBar").style.display =
+    "none";
 
-    drawing = false;
+  currentTool = "select";
 
-    currentTool = "select";
+  updateToolbar();
 
-    hideDrawBar();
+  document.getElementById("status").innerText =
+    "Drawing cancelled. Existing objects were kept.";
 
 }
 
 
 /* =========================================================
-   DRAW BAR
+   REMOVE PREVIEW
 ========================================================= */
 
-function showDrawBar() {
+function removePreview() {
 
-    document.getElementById(
-        "drawBar"
-    ).style.display = "flex";
+  if (previewLayer) {
 
-}
+    map.removeLayer(previewLayer);
 
-
-function hideDrawBar() {
-
-    document.getElementById(
-        "drawBar"
-    ).style.display = "none";
+    previewLayer = null;
+  }
 
 }
 
 
-function updatePointCounter() {
+/* =========================================================
+   CURVE GENERATION
+   Catmull-Rom interpolation
+========================================================= */
 
-    document.getElementById(
-        "pointCounter"
-    ).textContent =
-        currentPoints.length +
+function makeCurve(points) {
+
+  if (points.length < 2) {
+    return points.slice();
+  }
+
+  if (points.length === 2) {
+
+    const result = [];
+
+    for (let i = 0; i <= 20; i++) {
+
+      const t = i / 20;
+
+      result.push(
+        L.latLng(
+          points[0].lat +
+            (points[1].lat - points[0].lat) * t,
+
+          points[0].lng +
+            (points[1].lng - points[0].lng) * t
+        )
+      );
+
+    }
+
+    return result;
+  }
+
+
+  const result = [];
+
+  for (let i = 0; i < points.length - 1; i++) {
+
+    const p0 = points[i - 1] || points[i];
+    const p1 = points[i];
+    const p2 = points[i + 1];
+    const p3 =
+      points[i + 2] ||
+      points[i + 1];
+
+    for (let j = 0; j < 12; j++) {
+
+      const t = j / 12;
+      const t2 = t * t;
+      const t3 = t2 * t;
+
+      const lat =
+        0.5 *
         (
-            currentPoints.length === 1
-                ? " point"
-                : " points"
+          (2 * p1.lat) +
+          (-p0.lat + p2.lat) * t +
+          (2*p0.lat - 5*p1.lat + 4*p2.lat - p3.lat) * t2 +
+          (-p0.lat + 3*p1.lat - 3*p2.lat + p3.lat) * t3
         );
 
+      const lng =
+        0.5 *
+        (
+          (2 * p1.lng) +
+          (-p0.lng + p2.lng) * t +
+          (2*p0.lng - 5*p1.lng + 4*p2.lng - p3.lng) * t2 +
+          (-p0.lng + 3*p1.lng - 3*p2.lng + p3.lng) * t3
+        );
+
+      result.push(
+        L.latLng(lat, lng)
+      );
+    }
+  }
+
+  result.push(
+    points[points.length - 1]
+  );
+
+  return result;
 }
 
 
@@ -1816,66 +1177,191 @@ function updatePointCounter() {
 
 function setupObject(object) {
 
-    object.on(
-        "click",
-        function(e) {
+  object.on("click", function(e) {
 
-            L.DomEvent.stopPropagation();
+    L.DomEvent.stopPropagation(e);
 
+    if (currentTool === "delete") {
 
-            if (
-                currentTool === "delete"
-            ) {
+      deleteObject(object);
 
-                deleteObject(
-                    object
-                );
+      return;
+    }
 
-                return;
+    selectObject(object);
 
-            }
-
-
-            selectObject(
-                object
-            );
-
-        }
-    );
+  });
 
 }
 
 
 /* =========================================================
-   SELECT OBJECT
+   GOOGLE MY MAPS STYLE HIT TARGET
+========================================================= */
+
+function createHitLayer(object) {
+
+  /*
+     Remove an old hit layer first.
+  */
+
+  if (object._hitLayer) {
+
+    map.removeLayer(object._hitLayer);
+
+    object._hitLayer = null;
+  }
+
+
+  const type = object._sandboxType;
+
+
+  /* -------------------------
+     LINE / CURVE
+  ------------------------- */
+
+  if (type === "line" ||
+      type === "curve") {
+
+    const geometry =
+      type === "curve"
+        ? makeCurve(object._controlPoints)
+        : object._controlPoints;
+
+    /*
+       Invisible wide line.
+
+       18px minimum makes clicking much easier,
+       similar to Google My Maps.
+    */
+
+    const hitWeight =
+      Math.max(
+        18,
+        (object._style?.weight || 4) + 14
+      );
+
+    const hit = L.polyline(
+      geometry,
+      {
+        color: "#000000",
+        opacity: 0.001,
+        weight: hitWeight,
+        interactive: true,
+        bubblingMouseEvents: false
+      }
+    ).addTo(map);
+
+    hit._owner = object;
+
+    hit.on("click", function(e) {
+
+      L.DomEvent.stopPropagation(e);
+
+      const owner = hit._owner;
+
+      if (!owner) return;
+
+      if (currentTool === "delete") {
+
+        deleteObject(owner);
+
+      } else {
+
+        selectObject(owner);
+
+      }
+
+    });
+
+    object._hitLayer = hit;
+
+    return;
+  }
+
+
+  /* -------------------------
+     POLYGON
+  ------------------------- */
+
+  if (type === "polygon") {
+
+    const hit = L.polygon(
+      object._controlPoints,
+      {
+        color: "#000000",
+        opacity: 0.001,
+        weight: Math.max(
+          10,
+          (object._style?.weight || 3) + 8
+        ),
+        fillColor: "#000000",
+        fillOpacity: 0.001,
+        interactive: true,
+        bubblingMouseEvents: false
+      }
+    ).addTo(map);
+
+    hit._owner = object;
+
+    hit.on("click", function(e) {
+
+      L.DomEvent.stopPropagation(e);
+
+      const owner = hit._owner;
+
+      if (!owner) return;
+
+      if (currentTool === "delete") {
+
+        deleteObject(owner);
+
+      } else {
+
+        selectObject(owner);
+
+      }
+
+    });
+
+    object._hitLayer = hit;
+  }
+
+}
+
+
+/* =========================================================
+   SELECTION
 ========================================================= */
 
 function selectObject(object) {
 
-    clearSelection();
+  if (!object) return;
 
+  clearSelection();
 
-    selectedObject = object;
+  selectedObject = object;
 
+  /*
+     Put the visible object above its hit target.
+  */
 
-    /*
-     * Make selected object visually obvious.
-     */
+  if (object.bringToFront) {
+    object.bringToFront();
+  }
 
-    if (
-        object.setStyle
-    ) {
+  if (object.setStyle) {
 
-        object.setStyle({
-            dashArray: "8 5"
-        });
+    object.setStyle({
+      dashArray: "8 5"
+    });
 
-    }
+  }
 
+  createEditHandles(object);
 
-    createEditHandles(
-        object
-    );
+  document.getElementById("status").innerText =
+    "Object selected. Drag the points to edit it.";
 
 }
 
@@ -1886,294 +1372,166 @@ function selectObject(object) {
 
 function clearSelection() {
 
-    if (
-        selectedObject &&
-        selectedObject.setStyle
-    ) {
+  removeEditHandles();
 
-        selectedObject.setStyle({
+  if (selectedObject) {
+
+    if (selectedObject.setStyle) {
+
+      selectedObject.setStyle(
+        Object.assign(
+          {},
+          selectedObject._style || {},
+          {
             dashArray: null
-        });
+          }
+        )
+      );
 
     }
 
+  }
 
-    removeEditHandles();
-
-
-    selectedObject = null;
+  selectedObject = null;
 
 }
 
 
 /* =========================================================
-   CREATE EDIT HANDLES
+   EDIT HANDLES
 ========================================================= */
 
 function createEditHandles(object) {
 
-    removeEditHandles();
+  removeEditHandles();
+
+  if (!object._controlPoints) return;
+
+  const points = object._controlPoints;
 
 
-    /*
-     * Only lines/polygons have vertices.
-     */
+  /*
+     REAL VERTEX / CONTROL POINTS
+  */
 
-    if (
-        !object._controlPoints
+  points.forEach((point, index) => {
+
+    const marker = L.marker(
+      point,
+      {
+        draggable: true,
+        icon: L.divIcon({
+          className: "vertexHandle",
+          iconSize: [13,13],
+          iconAnchor: [6,6]
+        }),
+        zIndexOffset: 10000,
+        keyboard: false
+      }
+    ).addTo(map);
+
+    marker._vertexIndex = index;
+    marker._owner = object;
+
+    marker.on("drag", function(e) {
+
+      const latlng = e.target.getLatLng();
+
+      object._controlPoints[index] =
+        L.latLng(
+          latlng.lat,
+          latlng.lng
+        );
+
+      updateObjectGeometry(object);
+
+    });
+
+    marker.on("dragend", function() {
+
+      saveHistory();
+
+    });
+
+    editHandles.push(marker);
+
+  });
+
+
+  /*
+     MIDPOINT HANDLES
+
+     These allow new control points to be inserted,
+     similar to Google My Maps.
+  */
+
+  if (object._controlPoints.length >= 2) {
+
+    for (
+      let i = 0;
+      i < object._controlPoints.length - 1;
+      i++
     ) {
 
-        return;
+      const a = object._controlPoints[i];
+      const b = object._controlPoints[i + 1];
 
-    }
+      const midpoint =
+        L.latLng(
+          (a.lat + b.lat) / 2,
+          (a.lng + b.lng) / 2
+        );
 
-
-    const points =
-        object._controlPoints;
-
-
-    /*
-     * Actual vertex handles.
-     */
-
-    points.forEach(
-        function(point, index) {
-
-            const handle =
-                L.marker(
-                    [
-                        point.lat,
-                        point.lng
-                    ],
-                    {
-                        draggable: true,
-
-                        icon:
-                            L.divIcon({
-                                className:
-                                    "vertex-handle",
-
-                                html:
-                                    '<div class="vertex-dot"></div>',
-
-                                iconSize:
-                                    [13,13],
-
-                                iconAnchor:
-                                    [6.5,6.5]
-                            }),
-
-                        zIndexOffset: 5000
-                    }
-                ).addTo(map);
-
-
-            handle.on(
-                "drag",
-                function(e) {
-
-                    const p =
-                        e.target.getLatLng();
-
-
-                    object._controlPoints[
-                        index
-                    ] = {
-                        lat: p.lat,
-                        lng: p.lng
-                    };
-
-
-                    updateObjectGeometry(
-                        object
-                    );
-
-                }
-            );
-
-
-            handle.on(
-                "dragend",
-                function() {
-
-                    saveHistory();
-
-                }
-            );
-
-
-            vertexHandles.push(
-                handle
-            );
-
+      const marker = L.marker(
+        midpoint,
+        {
+          draggable: false,
+          icon: L.divIcon({
+            className: "midpointHandle",
+            iconSize: [9,9],
+            iconAnchor: [4,4]
+          }),
+          zIndexOffset: 9000,
+          keyboard: false
         }
-    );
+      ).addTo(map);
 
+      marker._insertIndex = i + 1;
+      marker._owner = object;
 
-    /*
-     * Add midpoint handles.
-     *
-     * Clicking one creates a new point.
-     */
+      marker.on("click", function(e) {
 
-    if (points.length >= 2) {
+        L.DomEvent.stopPropagation(e);
 
-        for (
-            let i = 0;
-            i < points.length - 1;
-            i++
-        ) {
+        const owner = marker._owner;
 
-            const a = points[i];
+        if (!owner) return;
 
-            const b =
-                points[i + 1];
+        const index = marker._insertIndex;
 
+        /*
+           Insert the midpoint as a real control point.
+        */
 
-            const midpoint = {
-
-                lat:
-                    (a.lat + b.lat) / 2,
-
-                lng:
-                    (a.lng + b.lng) / 2
-
-            };
-
-
-            const handle =
-                L.marker(
-                    [
-                        midpoint.lat,
-                        midpoint.lng
-                    ],
-                    {
-                        icon:
-                            L.divIcon({
-                                className:
-                                    "vertex-handle",
-
-                                html:
-                                    '<div class="midpoint-dot"></div>',
-
-                                iconSize:
-                                    [10,10],
-
-                                iconAnchor:
-                                    [5,5]
-                            }),
-
-                        zIndexOffset: 4999
-                    }
-                ).addTo(map);
-
-
-            handle.on(
-                "click",
-                function(e) {
-
-                    L.DomEvent.stopPropagation();
-
-
-                    /*
-                     * Insert a real point.
-                     */
-
-                    object._controlPoints
-                        .splice(
-                            i + 1,
-                            0,
-                            {
-                                lat:
-                                    midpoint.lat,
-                                lng:
-                                    midpoint.lng
-                            }
-                        );
-
-
-                    updateObjectGeometry(
-                        object
-                    );
-
-
-                    /*
-                     * Rebuild handles so the
-                     * new point becomes draggable.
-                     */
-
-                    createEditHandles(
-                        object
-                    );
-
-
-                    saveHistory();
-
-                }
-            );
-
-
-            midpointHandles.push(
-                handle
-            );
-
-        }
-
-    }
-
-}
-
-
-/* =========================================================
-   UPDATE OBJECT GEOMETRY
-========================================================= */
-
-function updateObjectGeometry(object) {
-
-    if (
-        !object._controlPoints
-    ) {
-        return;
-    }
-
-
-    const points =
-        object._controlPoints.map(
-            p => [
-                p.lat,
-                p.lng
-            ]
+        owner._controlPoints.splice(
+          index,
+          0,
+          midpoint
         );
 
+        updateObjectGeometry(owner);
 
-    /*
-     * Curved line.
-     */
+        createEditHandles(owner);
 
-    if (
-        object._sandboxType === "curve"
-    ) {
+        saveHistory();
 
-        object.setLatLngs(
-            makeCurve(
-                points
-            )
-        );
+      });
+
+      editHandles.push(marker);
 
     }
 
-
-    /*
-     * Polygon / normal line.
-     */
-
-    else {
-
-        object.setLatLngs(
-            points
-        );
-
-    }
+  }
 
 }
 
@@ -2184,85 +1542,82 @@ function updateObjectGeometry(object) {
 
 function removeEditHandles() {
 
-    vertexHandles.forEach(
-        handle => {
+  editHandles.forEach(marker => {
 
-            if (
-                map &&
-                map.hasLayer(handle)
-            ) {
+    if (map &&
+        map.hasLayer(marker)) {
 
-                map.removeLayer(
-                    handle
-                );
+      map.removeLayer(marker);
 
-            }
+    }
 
-        }
-    );
+  });
 
-
-    midpointHandles.forEach(
-        handle => {
-
-            if (
-                map &&
-                map.hasLayer(handle)
-            ) {
-
-                map.removeLayer(
-                    handle
-                );
-
-            }
-
-        }
-    );
-
-
-    vertexHandles = [];
-
-    midpointHandles = [];
+  editHandles = [];
 
 }
 
 
 /* =========================================================
-   DELETE
+   UPDATE GEOMETRY
 ========================================================= */
 
-function deleteObject(object) {
+function updateObjectGeometry(object) {
 
-    if (
-        !objects.includes(object)
-    ) {
+  if (!object) return;
 
-        return;
+  const points =
+    object._controlPoints || [];
+
+
+  if (object._sandboxType === "curve") {
+
+    const curve =
+      makeCurve(points);
+
+    object.setLatLngs(curve);
+
+    if (object._hitLayer) {
+
+      object._hitLayer.setLatLngs(curve);
 
     }
 
+  } else {
 
-    if (
-        selectedObject === object
-    ) {
+    object.setLatLngs(points);
 
-        clearSelection();
+    if (object._hitLayer) {
+
+      object._hitLayer.setLatLngs(points);
 
     }
 
+  }
 
-    map.removeLayer(
-        object
-    );
+  /*
+     Move vertex handles to their new locations.
+  */
 
+  editHandles.forEach(marker => {
 
-    objects =
-        objects.filter(
-            o => o !== object
-        );
+    if (
+      marker._owner === object &&
+      marker._vertexIndex !== undefined
+    ) {
 
+      const p =
+        object._controlPoints[
+          marker._vertexIndex
+        ];
 
-    saveHistory();
+      if (p) {
+        marker.setLatLng(p);
+      }
+
+    }
+
+  });
 
 }
 
@@ -2273,253 +1628,151 @@ function deleteObject(object) {
 
 function createMarker(latlng) {
 
-    const color =
-        document.getElementById(
-            "colorPicker"
-        ).value;
-
-
-    const marker =
-        L.circleMarker(
-            latlng,
-            {
-                radius: 8,
-
-                color: "white",
-
-                weight: 2,
-
-                fillColor: color,
-
-                fillOpacity: 1
-            }
-        ).addTo(map);
-
-
-    marker._sandboxType =
-        "marker";
-
-
-    marker._controlPoints = [
-        {
-            lat: latlng.lat,
-            lng: latlng.lng
-        }
-    ];
-
-
-    marker._style = {
-        color: "white",
-        fillColor: color,
-        fillOpacity: 1,
-        weight: 2
-    };
-
-
-    setupObject(
-        marker
-    );
-
-
-    objects.push(
-        marker
-    );
-
-
-    saveHistory();
-
-}
-
-
-/* =========================================================
-   TEXT
-========================================================= */
-
-function createText(latlng) {
-
-    const text =
-        prompt(
-            "Enter text:"
-        );
-
-
-    if (!text) {
-        return;
+  const marker = L.marker(
+    latlng,
+    {
+      draggable: false
     }
+  ).addTo(map);
 
+  marker._sandboxType = "marker";
+  marker._controlPoints = [
+    L.latLng(latlng.lat, latlng.lng)
+  ];
 
-    const marker =
-        L.marker(
-            latlng,
-            {
-                icon:
-                    L.divIcon({
-                        className:
-                            "map-text",
+  marker.on("click", function(e) {
 
-                        html:
-                            escapeHTML(
-                                text
-                            ),
+    L.DomEvent.stopPropagation(e);
 
-                        iconSize:
-                            null
-                    })
-            }
-        ).addTo(map);
+    if (currentTool === "delete") {
 
+      deleteObject(marker);
 
-    marker._sandboxType =
-        "text";
+    } else {
 
-
-    marker._text =
-        text;
-
-
-    marker._controlPoints = [
-        {
-            lat: latlng.lat,
-            lng: latlng.lng
-        }
-    ];
-
-
-    setupObject(
-        marker
-    );
-
-
-    objects.push(
-        marker
-    );
-
-
-    saveHistory();
-
-}
-
-
-/* =========================================================
-   ESCAPE HTML
-========================================================= */
-
-function escapeHTML(text) {
-
-    const div =
-        document.createElement(
-            "div"
-        );
-
-    div.textContent = text;
-
-    return div.innerHTML;
-
-}
-
-
-/* =========================================================
-   SETTINGS
-========================================================= */
-
-function toggleSettings() {
-
-    const panel =
-        document.getElementById(
-            "settingsPanel"
-        );
-
-
-    panel.style.display =
-        panel.style.display === "block"
-            ? "none"
-            : "block";
-
-}
-
-
-function applySettings() {
-
-    if (!selectedObject) {
-
-        alert(
-            "Click an object first."
-        );
-
-        return;
+      selectObject(marker);
 
     }
 
+  });
 
-    const color =
-        document.getElementById(
-            "colorPicker"
-        ).value;
+  objects.push(marker);
 
-
-    const opacity =
-        Number(
-            document.getElementById(
-                "opacitySlider"
-            ).value
-        );
-
-
-    const width =
-        Number(
-            document.getElementById(
-                "widthSlider"
-            ).value
-        );
-
-
-    selectedObject._style = {
-
-        color,
-
-        fillColor: color,
-
-        fillOpacity: opacity,
-
-        weight: width
-
-    };
-
-
-    if (
-        selectedObject.setStyle
-    ) {
-
-        selectedObject.setStyle(
-            selectedObject._style
-        );
-
-    }
-
-
-    saveHistory();
+  saveHistory();
 
 }
 
 
 /* =========================================================
-   LAYERS
+   DELETE
 ========================================================= */
 
-function toggleLayers() {
+function deleteObject(object) {
 
-    const panel =
-        document.getElementById(
-            "layersPanel"
-        );
+  if (!object) return;
 
+  removeEditHandles();
 
-    panel.style.display =
-        panel.style.display === "block"
-            ? "none"
-            : "block";
+  if (object._hitLayer &&
+      map.hasLayer(object._hitLayer)) {
+
+    map.removeLayer(
+      object._hitLayer
+    );
+
+  }
+
+  if (map.hasLayer(object)) {
+
+    map.removeLayer(object);
+
+  }
+
+  const index =
+    objects.indexOf(object);
+
+  if (index !== -1) {
+
+    objects.splice(index, 1);
+
+  }
+
+  if (selectedObject === object) {
+
+    selectedObject = null;
+
+  }
+
+  saveHistory();
+
+  document.getElementById("status").innerText =
+    "Object deleted.";
 
 }
+
+
+/* =========================================================
+   DELETE KEY
+========================================================= */
+
+document.addEventListener("keydown", function(e) {
+
+  if (
+    e.key === "Delete" &&
+    selectedObject &&
+    !drawing
+  ) {
+
+    e.preventDefault();
+
+    deleteObject(selectedObject);
+
+  }
+
+
+  if (e.key === "Escape") {
+
+    if (drawing) {
+
+      cancelDrawing();
+
+    } else {
+
+      clearSelection();
+
+    }
+
+  }
+
+
+  if (
+    (e.ctrlKey || e.metaKey) &&
+    e.key.toLowerCase() === "z"
+  ) {
+
+    e.preventDefault();
+
+    if (e.shiftKey) {
+      redo();
+    } else {
+      undo();
+    }
+
+  }
+
+
+  if (
+    (e.ctrlKey || e.metaKey) &&
+    e.key.toLowerCase() === "y"
+  ) {
+
+    e.preventDefault();
+
+    redo();
+
+  }
+
+});
 
 
 /* =========================================================
@@ -2528,37 +1781,59 @@ function toggleLayers() {
 
 function serializeObjects() {
 
-    return objects.map(
-        function(object) {
+  return objects.map(object => {
 
-            const data = {
-
-                type:
-                    object._sandboxType,
-
-                points:
-                    object._controlPoints
-                        ? object._controlPoints.map(
-                            p => ({
-                                lat: p.lat,
-                                lng: p.lng
-                            })
-                        )
-                        : [],
-
-                style:
-                    object._style || {},
-
-                text:
-                    object._text || ""
-
-            };
+    const data = {
+      type: object._sandboxType
+    };
 
 
-            return data;
+    if (object._sandboxType === "polygon") {
 
-        }
-    );
+      data.points =
+        object._controlPoints.map(p => [
+          p.lat,
+          p.lng
+        ]);
+
+      data.style =
+        Object.assign({}, object._style);
+
+    }
+
+
+    if (
+      object._sandboxType === "line" ||
+      object._sandboxType === "curve"
+    ) {
+
+      data.points =
+        object._controlPoints.map(p => [
+          p.lat,
+          p.lng
+        ]);
+
+      data.style =
+        Object.assign({}, object._style);
+
+    }
+
+
+    if (object._sandboxType === "marker") {
+
+      const p =
+        object.getLatLng();
+
+      data.points = [
+        [p.lat, p.lng]
+      ];
+
+    }
+
+
+    return data;
+
+  });
 
 }
 
@@ -2569,232 +1844,31 @@ function serializeObjects() {
 
 function saveHistory() {
 
-    clearTimeout(
-        historyTimer
-    );
+  clearTimeout(historyTimer);
 
+  historyTimer = setTimeout(function() {
 
-    /*
-     * Avoid recording dozens of states while
-     * dragging a vertex.
-     */
+    const state =
+      JSON.stringify(
+        serializeObjects()
+      );
 
-    historyTimer =
-        setTimeout(
-            function() {
+    const last =
+      history.length
+        ? history[history.length - 1]
+        : null;
 
-                undoHistory.push(
-                    JSON.stringify(
-                        serializeObjects()
-                    )
-                );
+    if (last === state) return;
 
+    history.push(state);
 
-                if (
-                    undoHistory.length > 60
-                ) {
+    if (history.length > 100) {
+      history.shift();
+    }
 
-                    undoHistory.shift();
+    redoHistory = [];
 
-                }
-
-
-                redoHistory = [];
-
-            },
-            100
-        );
-
-}
-
-
-/* =========================================================
-   RESTORE
-========================================================= */
-
-function restoreState(serialized) {
-
-    clearSelection();
-
-
-    objects.forEach(
-        object => {
-
-            if (
-                map.hasLayer(object)
-            ) {
-
-                map.removeLayer(
-                    object
-                );
-
-            }
-
-        }
-    );
-
-
-    objects = [];
-
-
-    const data =
-        JSON.parse(
-            serialized
-        );
-
-
-    data.forEach(
-        function(item) {
-
-            let object = null;
-
-
-            const points =
-                item.points.map(
-                    p => [
-                        p.lat,
-                        p.lng
-                    ]
-                );
-
-
-            /*
-             * POLYGON
-             */
-
-            if (
-                item.type === "polygon"
-            ) {
-
-                object =
-                    L.polygon(
-                        points,
-                        item.style
-                    ).addTo(map);
-
-            }
-
-
-            /*
-             * STRAIGHT LINE
-             */
-
-            else if (
-                item.type === "line"
-            ) {
-
-                object =
-                    L.polyline(
-                        points,
-                        item.style
-                    ).addTo(map);
-
-            }
-
-
-            /*
-             * CURVED LINE
-             */
-
-            else if (
-                item.type === "curve"
-            ) {
-
-                object =
-                    L.polyline(
-                        makeCurve(
-                            points
-                        ),
-                        item.style
-                    ).addTo(map);
-
-            }
-
-
-            /*
-             * MARKER
-             */
-
-            else if (
-                item.type === "marker"
-            ) {
-
-                object =
-                    L.circleMarker(
-                        points[0],
-                        item.style
-                    ).addTo(map);
-
-            }
-
-
-            /*
-             * TEXT
-             */
-
-            else if (
-                item.type === "text"
-            ) {
-
-                object =
-                    L.marker(
-                        points[0],
-                        {
-                            icon:
-                                L.divIcon({
-                                    className:
-                                        "map-text",
-
-                                    html:
-                                        escapeHTML(
-                                            item.text
-                                        ),
-
-                                    iconSize:
-                                        null
-                                })
-                        }
-                    ).addTo(map);
-
-            }
-
-
-            if (object) {
-
-                object._sandboxType =
-                    item.type;
-
-
-                object._controlPoints =
-                    item.points.map(
-                        p => ({
-                            lat: p.lat,
-                            lng: p.lng
-                        })
-                    );
-
-
-                object._style =
-                    item.style;
-
-
-                object._text =
-                    item.text || "";
-
-
-                setupObject(
-                    object
-                );
-
-
-                objects.push(
-                    object
-                );
-
-            }
-
-        }
-    );
+  }, 100);
 
 }
 
@@ -2803,35 +1877,34 @@ function restoreState(serialized) {
    UNDO
 ========================================================= */
 
+document.getElementById("undoButton").onclick =
+  undo;
+
+
 function undo() {
 
-    if (
-        undoHistory.length <= 1
-    ) {
+  clearTimeout(historyTimer);
 
-        return;
+  if (history.length <= 1) {
 
-    }
+    document.getElementById("status").innerText =
+      "Nothing to undo.";
 
+    return;
+  }
 
-    const current =
-        undoHistory.pop();
+  const current =
+    history.pop();
 
+  redoHistory.push(current);
 
-    redoHistory.push(
-        current
-    );
+  const previous =
+    history[history.length - 1];
 
+  restoreState(previous);
 
-    const previous =
-        undoHistory[
-            undoHistory.length - 1
-        ];
-
-
-    restoreState(
-        previous
-    );
+  document.getElementById("status").innerText =
+    "Undo.";
 
 }
 
@@ -2840,182 +1913,368 @@ function undo() {
    REDO
 ========================================================= */
 
+document.getElementById("redoButton").onclick =
+  redo;
+
+
 function redo() {
 
+  clearTimeout(historyTimer);
+
+  if (!redoHistory.length) {
+
+    document.getElementById("status").innerText =
+      "Nothing to redo.";
+
+    return;
+  }
+
+  const state =
+    redoHistory.pop();
+
+  history.push(state);
+
+  restoreState(state);
+
+  document.getElementById("status").innerText =
+    "Redo.";
+
+}
+
+
+/* =========================================================
+   RESTORE STATE
+========================================================= */
+
+function restoreState(state) {
+
+  clearSelection();
+
+  objects.forEach(object => {
+
     if (
-        !redoHistory.length
+      object._hitLayer &&
+      map.hasLayer(object._hitLayer)
     ) {
 
-        return;
+      map.removeLayer(
+        object._hitLayer
+      );
+
+    }
+
+    if (map.hasLayer(object)) {
+
+      map.removeLayer(object);
+
+    }
+
+  });
+
+  objects = [];
+
+  let data = [];
+
+  try {
+
+    data = JSON.parse(state);
+
+  } catch(e) {
+
+    return;
+
+  }
+
+
+  data.forEach(item => {
+
+    let object = null;
+
+    const points =
+      (item.points || []).map(p =>
+        L.latLng(p[0], p[1])
+      );
+
+
+    /* POLYGON */
+
+    if (item.type === "polygon") {
+
+      object = L.polygon(
+        points,
+        item.style || {
+          color: "#ff0000",
+          weight: 4,
+          fillColor: "#ff0000",
+          fillOpacity: .25
+        }
+      ).addTo(map);
 
     }
 
 
-    const state =
-        redoHistory.pop();
+    /* LINE */
+
+    if (item.type === "line") {
+
+      object = L.polyline(
+        points,
+        item.style || {
+          color: "#ff0000",
+          weight: 4
+        }
+      ).addTo(map);
+
+    }
 
 
-    undoHistory.push(
-        state
-    );
+    /* CURVE */
+
+    if (item.type === "curve") {
+
+      object = L.polyline(
+        makeCurve(points),
+        item.style || {
+          color: "#ff0000",
+          weight: 4
+        }
+      ).addTo(map);
+
+    }
 
 
-    restoreState(
-        state
-    );
+    /* MARKER */
+
+    if (item.type === "marker") {
+
+      if (!points.length) return;
+
+      object = L.marker(
+        points[0]
+      ).addTo(map);
+
+    }
+
+
+    if (!object) return;
+
+
+    object._sandboxType =
+      item.type;
+
+    object._controlPoints =
+      points.slice();
+
+    object._style =
+      Object.assign(
+        {},
+        item.style || {}
+      );
+
+
+    objects.push(object);
+
+    /*
+       Recreate the invisible hit target
+       when undo/redo restores the object.
+    */
+
+    if (
+      item.type === "polygon" ||
+      item.type === "line" ||
+      item.type === "curve"
+    ) {
+
+      createHitLayer(object);
+
+    }
+
+    setupObject(object);
+
+
+    if (item.type === "marker") {
+
+      object.on("click", function(e) {
+
+        L.DomEvent.stopPropagation(e);
+
+        if (currentTool === "delete") {
+
+          deleteObject(object);
+
+        } else {
+
+          selectObject(object);
+
+        }
+
+      });
+
+    }
+
+  });
 
 }
+
+
+/* =========================================================
+   LAYERS PANEL
+========================================================= */
+
+document.getElementById("layersButton").onclick =
+  function() {
+
+    const panel =
+      document.getElementById("sidePanel");
+
+    panel.style.display =
+      panel.style.display === "block"
+        ? "none"
+        : "block";
+
+  };
+
+
+document.getElementById("showObjects").onchange =
+  function() {
+
+    const show = this.checked;
+
+    objects.forEach(object => {
+
+      if (show) {
+
+        if (!map.hasLayer(object)) {
+
+          object.addTo(map);
+
+        }
+
+        if (
+          object._hitLayer &&
+          !map.hasLayer(object._hitLayer)
+        ) {
+
+          object._hitLayer.addTo(map);
+
+        }
+
+      } else {
+
+        if (map.hasLayer(object)) {
+
+          map.removeLayer(object);
+
+        }
+
+        if (
+          object._hitLayer &&
+          map.hasLayer(object._hitLayer)
+        ) {
+
+          map.removeLayer(
+            object._hitLayer
+          );
+
+        }
+
+      }
+
+    });
+
+  };
 
 
 /* =========================================================
    NEW MAP
 ========================================================= */
 
-function newMap() {
+document.getElementById("newMapButton").onclick =
+  function() {
 
     if (
-        !confirm(
-            "Start a new map?"
-        )
+      objects.length &&
+      !confirm(
+        "Start a new map? Your current drawings will be cleared."
+      )
     ) {
 
-        return;
+      return;
 
     }
 
+    location.reload();
 
-    if (map) {
-        map.remove();
-    }
-
-
-    map = null;
-
-    objects = [];
-
-    selectedObject = null;
-
-    currentPoints = [];
-
-    undoHistory = [];
-
-    redoHistory = [];
-
-    vertexHandles = [];
-
-    midpointHandles = [];
-
-    imageLayer = null;
+  };
 
 
-    document.getElementById(
-        "topBar"
-    ).style.display = "none";
+/* =========================================================
+   INITIAL HISTORY
+========================================================= */
 
+function initializeHistory() {
 
-    document.getElementById(
-        "layersPanel"
-    ).style.display = "none";
+  history = [
+    JSON.stringify([])
+  ];
 
-
-    document.getElementById(
-        "settingsPanel"
-    ).style.display = "none";
-
-
-    hideDrawBar();
-
-
-    document.getElementById(
-        "startScreen"
-    ).style.display = "flex";
+  redoHistory = [];
 
 }
 
 
 /* =========================================================
-   KEYBOARD SHORTCUTS
+   PATCH HISTORY AFTER MAP START
 ========================================================= */
 
-document.addEventListener(
-    "keydown",
-    function(e) {
-
-        /*
-         * Escape
-         */
-
-        if (
-            e.key === "Escape"
-        ) {
-
-            if (drawing) {
-
-                cancelDrawing();
-
-            } else {
-
-                clearSelection();
-
-            }
-
-        }
+const originalFinishMapInitialization =
+  finishMapInitialization;
 
 
-        /*
-         * Delete
-         */
+/*
+   Initialize an empty history once the map exists.
+*/
 
-        if (
-            e.key === "Delete"
-        ) {
+const historyInitObserver =
+  new MutationObserver(function() {
 
-            if (
-                selectedObject
-            ) {
+    if (map) {
 
-                deleteObject(
-                    selectedObject
-                );
+      if (!history.length) {
 
-            }
+        initializeHistory();
 
-        }
+      }
 
-
-        /*
-         * CTRL + Z
-         */
-
-        if (
-            (e.ctrlKey || e.metaKey) &&
-            e.key.toLowerCase() === "z"
-        ) {
-
-            e.preventDefault();
-
-            undo();
-
-        }
-
-
-        /*
-         * CTRL + Y
-         */
-
-        if (
-            (e.ctrlKey || e.metaKey) &&
-            e.key.toLowerCase() === "y"
-        ) {
-
-            e.preventDefault();
-
-            redo();
-
-        }
+      historyInitObserver.disconnect();
 
     }
+
+  });
+
+historyInitObserver.observe(
+  document.body,
+  {
+    childList: true,
+    subtree: true
+  }
 );
+
+
+/* =========================================================
+   IMPORTANT:
+   INITIAL HISTORY FALLBACK
+========================================================= */
+
+setTimeout(function() {
+
+  if (map && !history.length) {
+
+    initializeHistory();
+
+  }
+
+}, 1000);
 
 </script>
 
