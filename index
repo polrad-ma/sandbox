@@ -1,0 +1,1272 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>War Map Sandbox</title>
+
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+* {
+  box-sizing: border-box;
+}
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  overflow: hidden;
+}
+
+/* =========================
+   START SCREEN
+========================= */
+
+#startScreen {
+  position: fixed;
+  inset: 0;
+  background: #111;
+  color: white;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+#startScreen h1 {
+  font-size: 42px;
+  margin: 0 0 10px;
+}
+
+#startScreen p {
+  color: #aaa;
+  margin-bottom: 35px;
+}
+
+.startButtons {
+  display: flex;
+  gap: 20px;
+}
+
+.startButton {
+  width: 250px;
+  height: 150px;
+  border: 1px solid #444;
+  background: #1d1d1d;
+  color: white;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: 0.15s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.startButton:hover {
+  background: #292929;
+  border-color: #777;
+  transform: translateY(-2px);
+}
+
+.startButton .icon {
+  font-size: 42px;
+  margin-bottom: 15px;
+}
+
+.startButton strong {
+  font-size: 18px;
+}
+
+/* =========================
+   MAP
+========================= */
+
+#map {
+  position: absolute;
+  inset: 0;
+}
+
+/* =========================
+   TOP BAR
+========================= */
+
+#topBar {
+  position: fixed;
+  top: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 1000;
+
+  background: rgba(20,20,20,0.94);
+  border: 1px solid #444;
+  border-radius: 10px;
+
+  padding: 7px;
+
+  display: flex;
+  gap: 5px;
+
+  box-shadow: 0 4px 20px rgba(0,0,0,.35);
+}
+
+.toolButton {
+  border: 0;
+  background: #2a2a2a;
+  color: white;
+  padding: 9px 13px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.toolButton:hover {
+  background: #3b3b3b;
+}
+
+.toolButton.active {
+  background: #555;
+}
+
+/* =========================
+   LEFT SIDEBAR
+========================= */
+
+#sidebar {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 1000;
+
+  width: 220px;
+
+  background: rgba(20,20,20,.95);
+  color: white;
+
+  border: 1px solid #444;
+  border-radius: 10px;
+
+  padding: 12px;
+
+  box-shadow: 0 4px 20px rgba(0,0,0,.4);
+
+  display: none;
+}
+
+#sidebar h3 {
+  margin: 0 0 10px;
+  font-size: 15px;
+}
+
+.layerItem {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 0;
+  border-bottom: 1px solid #333;
+}
+
+.layerItem:last-child {
+  border-bottom: 0;
+}
+
+/* =========================
+   UPLOAD PANEL
+========================= */
+
+#uploadPanel {
+  position: fixed;
+  inset: 0;
+  z-index: 9000;
+
+  background: rgba(0,0,0,.75);
+
+  display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.uploadBox {
+  width: 440px;
+  background: #1c1c1c;
+  color: white;
+  border: 1px solid #444;
+  border-radius: 12px;
+  padding: 25px;
+}
+
+.uploadBox h2 {
+  margin-top: 0;
+}
+
+.uploadBox input {
+  width: 100%;
+  margin: 15px 0;
+}
+
+.uploadBox label {
+  display: block;
+  margin-top: 12px;
+  font-size: 13px;
+  color: #bbb;
+}
+
+.uploadBox button {
+  margin-top: 15px;
+}
+
+/* =========================
+   SETTINGS PANEL
+========================= */
+
+#settingsPanel {
+  position: fixed;
+  right: 12px;
+  top: 12px;
+  width: 250px;
+
+  background: rgba(20,20,20,.96);
+  color: white;
+
+  border: 1px solid #444;
+  border-radius: 10px;
+
+  padding: 15px;
+
+  z-index: 1000;
+
+  display: none;
+}
+
+#settingsPanel h3 {
+  margin-top: 0;
+}
+
+.settingRow {
+  margin: 12px 0;
+}
+
+.settingRow input,
+.settingRow select {
+  width: 100%;
+  margin-top: 5px;
+}
+
+/* =========================
+   CUSTOM OBJECTS
+========================= */
+
+.custom-marker {
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #ff3333;
+  border: 3px solid white;
+  box-shadow: 0 0 5px black;
+}
+
+.custom-text {
+  color: white;
+  font-weight: bold;
+  text-shadow:
+    1px 1px 2px black,
+    -1px -1px 2px black;
+  white-space: nowrap;
+  pointer-events: auto;
+}
+
+/* Hide Leaflet attribution a little less aggressively */
+.leaflet-control-attribution {
+  font-size: 10px;
+}
+</style>
+</head>
+
+<body>
+
+<!-- =========================
+     START SCREEN
+========================= -->
+
+<div id="startScreen">
+
+  <h1>War Map Sandbox</h1>
+
+  <p>Create and edit your own tactical map</p>
+
+  <div class="startButtons">
+
+    <button class="startButton" onclick="startOSM()">
+      <div class="icon">🌍</div>
+      <strong>OpenStreetMap</strong>
+      <small>Real-world map</small>
+    </button>
+
+    <button class="startButton" onclick="openUpload()">
+      <div class="icon">🖼️</div>
+      <strong>Upload Map</strong>
+      <small>Use your own map image</small>
+    </button>
+
+  </div>
+</div>
+
+
+<!-- =========================
+     UPLOAD
+========================= -->
+
+<div id="uploadPanel">
+
+  <div class="uploadBox">
+
+    <h2>Upload Map</h2>
+
+    <p>
+      Upload a PNG or JPG map. The image will become the
+      background of the sandbox.
+    </p>
+
+    <input
+      id="imageInput"
+      type="file"
+      accept="image/png,image/jpeg,image/webp"
+    >
+
+    <label>
+      Map quality
+    </label>
+
+    <select id="qualitySelect">
+      <option value="original">Original</option>
+      <option value="enhanced">Enhanced</option>
+      <option value="high">High-resolution upscale</option>
+    </select>
+
+    <br>
+
+    <button class="toolButton" onclick="loadUploadedMap()">
+      Open Map
+    </button>
+
+    <button class="toolButton" onclick="closeUpload()">
+      Cancel
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- =========================
+     MAP
+========================= -->
+
+<div id="map"></div>
+
+
+<!-- =========================
+     TOOLBAR
+========================= -->
+
+<div id="topBar" style="display:none">
+
+  <button class="toolButton" onclick="selectTool('select')">
+    Select
+  </button>
+
+  <button class="toolButton" onclick="selectTool('polygon')">
+    Polygon
+  </button>
+
+  <button class="toolButton" onclick="selectTool('curve')">
+    Curved Line
+  </button>
+
+  <button class="toolButton" onclick="selectTool('line')">
+    Line
+  </button>
+
+  <button class="toolButton" onclick="selectTool('marker')">
+    Marker
+  </button>
+
+  <button class="toolButton" onclick="selectTool('text')">
+    Text
+  </button>
+
+  <button class="toolButton" onclick="selectTool('delete')">
+    Delete
+  </button>
+
+  <button class="toolButton" onclick="undo()">
+    ↶
+  </button>
+
+  <button class="toolButton" onclick="redo()">
+    ↷
+  </button>
+
+  <button class="toolButton" onclick="toggleLayers()">
+    Layers
+  </button>
+
+  <button class="toolButton" onclick="toggleSettings()">
+    ⚙
+  </button>
+
+  <button class="toolButton" onclick="newMap()">
+    New
+  </button>
+
+</div>
+
+
+<!-- =========================
+     LAYERS
+========================= -->
+
+<div id="sidebar">
+
+  <h3>Layers</h3>
+
+  <div class="layerItem">
+    <input type="checkbox" checked>
+    <span>Map Background</span>
+  </div>
+
+  <div class="layerItem">
+    <input type="checkbox" checked>
+    <span>Territories</span>
+  </div>
+
+  <div class="layerItem">
+    <input type="checkbox" checked>
+    <span>Frontlines</span>
+  </div>
+
+  <div class="layerItem">
+    <input type="checkbox" checked>
+    <span>Markers</span>
+  </div>
+
+  <div class="layerItem">
+    <input type="checkbox" checked>
+    <span>Text</span>
+  </div>
+
+</div>
+
+
+<!-- =========================
+     SETTINGS
+========================= -->
+
+<div id="settingsPanel">
+
+  <h3>Object Settings</h3>
+
+  <div class="settingRow">
+    <label>Color</label>
+    <input id="colorPicker" type="color" value="#ff0000">
+  </div>
+
+  <div class="settingRow">
+    <label>Opacity</label>
+    <input
+      id="opacitySlider"
+      type="range"
+      min="0"
+      max="1"
+      step="0.05"
+      value="0.5"
+    >
+  </div>
+
+  <div class="settingRow">
+    <label>Line Width</label>
+    <input
+      id="widthSlider"
+      type="range"
+      min="1"
+      max="15"
+      value="3"
+    >
+  </div>
+
+  <button class="toolButton" onclick="applySettings()">
+    Apply
+  </button>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script>
+
+/* =====================================================
+   GLOBAL VARIABLES
+===================================================== */
+
+let map = null;
+
+let currentTool = "select";
+
+let drawing = false;
+let currentPoints = [];
+
+let objects = [];
+
+let undoStack = [];
+let redoStack = [];
+
+let selectedObject = null;
+
+let uploadedMap = false;
+
+
+/* =====================================================
+   START OSM
+===================================================== */
+
+function startOSM() {
+
+  document.getElementById("startScreen").style.display = "none";
+
+  initializeMap();
+
+  addOSMLayers();
+
+}
+
+
+/* =====================================================
+   INITIALIZE MAP
+===================================================== */
+
+function initializeMap() {
+
+  if (map) {
+    map.remove();
+  }
+
+  map = L.map("map", {
+    zoomControl: true,
+    attributionControl: true
+  }).setView([48.5, 37.5], 6);
+
+  document.getElementById("topBar").style.display = "flex";
+
+  map.on("click", handleMapClick);
+
+}
+
+
+/* =====================================================
+   OSM + SATELLITE
+===================================================== */
+
+let osmLayer;
+let satelliteLayer;
+
+function addOSMLayers() {
+
+  osmLayer = L.tileLayer(
+    "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+    {
+      maxZoom: 19,
+      attribution: "&copy; OpenStreetMap contributors"
+    }
+  );
+
+  satelliteLayer = L.tileLayer(
+    "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
+    {
+      maxZoom: 19,
+      attribution: "Esri"
+    }
+  );
+
+  osmLayer.addTo(map);
+
+  L.control.layers({
+    "OpenStreetMap": osmLayer,
+    "Satellite": satelliteLayer
+  }).addTo(map);
+
+}
+
+
+/* =====================================================
+   UPLOAD
+===================================================== */
+
+function openUpload() {
+
+  document.getElementById("uploadPanel").style.display = "flex";
+
+}
+
+function closeUpload() {
+
+  document.getElementById("uploadPanel").style.display = "none";
+
+}
+
+
+/* =====================================================
+   LOAD IMAGE
+===================================================== */
+
+function loadUploadedMap() {
+
+  const input = document.getElementById("imageInput");
+
+  if (!input.files.length) {
+
+    alert("Please select a map image.");
+
+    return;
+  }
+
+  const file = input.files[0];
+
+  const reader = new FileReader();
+
+  reader.onload = function(e) {
+
+    const img = new Image();
+
+    img.onload = function() {
+
+      initializeMap();
+
+      uploadedMap = true;
+
+      const quality =
+        document.getElementById("qualitySelect").value;
+
+      let scale = 1;
+
+      if (quality === "enhanced") {
+        scale = 2;
+      }
+
+      if (quality === "high") {
+        scale = 4;
+      }
+
+      /*
+       * Browser-side upscaling.
+       *
+       * This doesn't invent real geographical information,
+       * but produces a larger image that behaves much better
+       * when zoomed.
+       */
+
+      const canvas = document.createElement("canvas");
+
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+
+      const ctx = canvas.getContext("2d");
+
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+
+      ctx.drawImage(
+        img,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      const enhancedImage =
+        canvas.toDataURL("image/jpeg", 0.95);
+
+      const bounds = [
+        [0, 0],
+        [img.height, img.width]
+      ];
+
+      const imageLayer = L.imageOverlay(
+        enhancedImage,
+        bounds
+      ).addTo(map);
+
+      map.fitBounds(bounds);
+
+      document.getElementById("uploadPanel").style.display =
+        "none";
+
+      alert(
+        "Map loaded. You can now draw and edit objects on it."
+      );
+
+    };
+
+    img.src = e.target.result;
+
+  };
+
+  reader.readAsDataURL(file);
+
+}
+
+
+/* =====================================================
+   TOOL SELECTION
+===================================================== */
+
+function selectTool(tool) {
+
+  currentTool = tool;
+
+  drawing = false;
+
+  currentPoints = [];
+
+  document.querySelectorAll(".toolButton")
+    .forEach(btn => btn.classList.remove("active"));
+
+}
+
+
+/* =====================================================
+   MAP CLICK
+===================================================== */
+
+function handleMapClick(e) {
+
+  if (currentTool === "marker") {
+
+    createMarker(e.latlng);
+
+    return;
+  }
+
+  if (currentTool === "text") {
+
+    createText(e.latlng);
+
+    return;
+  }
+
+  if (currentTool === "delete") {
+
+    deleteNearest(e.latlng);
+
+    return;
+  }
+
+  if (currentTool === "polygon") {
+
+    drawPolygonPoint(e.latlng);
+
+    return;
+  }
+
+  if (currentTool === "curve") {
+
+    drawCurvePoint(e.latlng);
+
+    return;
+  }
+
+  if (currentTool === "line") {
+
+    drawLinePoint(e.latlng);
+
+    return;
+  }
+
+}
+
+
+/* =====================================================
+   POLYGON
+===================================================== */
+
+function drawPolygonPoint(latlng) {
+
+  currentPoints.push(latlng);
+
+  if (currentPoints.length >= 3) {
+
+    const preview =
+      L.polygon(currentPoints, {
+        color: document.getElementById("colorPicker").value,
+        fillOpacity:
+          document.getElementById("opacitySlider").value,
+        weight:
+          document.getElementById("widthSlider").value
+      }).addTo(map);
+
+    preview.on("click", function(e) {
+
+      L.DomEvent.stopPropagation();
+
+      selectObject(preview);
+
+    });
+
+    objects.push(preview);
+
+    saveState();
+
+    currentPoints = [];
+
+    currentTool = "select";
+  }
+
+}
+
+
+/* =====================================================
+   STRAIGHT LINE
+===================================================== */
+
+function drawLinePoint(latlng) {
+
+  currentPoints.push(latlng);
+
+  if (currentPoints.length === 2) {
+
+    const line =
+      L.polyline(currentPoints, {
+        color: document.getElementById("colorPicker").value,
+        weight:
+          document.getElementById("widthSlider").value
+      }).addTo(map);
+
+    line.on("click", function(e) {
+
+      L.DomEvent.stopPropagation();
+
+      selectObject(line);
+
+    });
+
+    objects.push(line);
+
+    saveState();
+
+    currentPoints = [];
+
+    currentTool = "select";
+  }
+
+}
+
+
+/* =====================================================
+   CURVED LINE
+===================================================== */
+
+function drawCurvePoint(latlng) {
+
+  currentPoints.push(latlng);
+
+  /*
+   * Three points create a simple curved-looking line.
+   */
+
+  if (currentPoints.length === 3) {
+
+    const p1 = currentPoints[0];
+    const p2 = currentPoints[1];
+    const p3 = currentPoints[2];
+
+    const curvePoints = [];
+
+    for (let i = 0; i <= 30; i++) {
+
+      const t = i / 30;
+
+      const lat =
+        (1-t)*(1-t)*p1.lat +
+        2*(1-t)*t*p2.lat +
+        t*t*p3.lat;
+
+      const lng =
+        (1-t)*(1-t)*p1.lng +
+        2*(1-t)*t*p2.lng +
+        t*t*p3.lng;
+
+      curvePoints.push([lat,lng]);
+    }
+
+    const curve =
+      L.polyline(curvePoints, {
+        color:
+          document.getElementById("colorPicker").value,
+        weight:
+          document.getElementById("widthSlider").value
+      }).addTo(map);
+
+    curve.on("click", function(e) {
+
+      L.DomEvent.stopPropagation();
+
+      selectObject(curve);
+
+    });
+
+    objects.push(curve);
+
+    saveState();
+
+    currentPoints = [];
+
+    currentTool = "select";
+  }
+
+}
+
+
+/* =====================================================
+   MARKER
+===================================================== */
+
+function createMarker(latlng) {
+
+  const marker =
+    L.marker(latlng).addTo(map);
+
+  marker.on("click", function(e) {
+
+    L.DomEvent.stopPropagation();
+
+    selectObject(marker);
+
+  });
+
+  objects.push(marker);
+
+  saveState();
+
+}
+
+
+/* =====================================================
+   TEXT
+===================================================== */
+
+function createText(latlng) {
+
+  const text =
+    prompt("Enter text:");
+
+  if (!text) return;
+
+  const marker =
+    L.marker(latlng, {
+      icon: L.divIcon({
+        className: "custom-text",
+        html: text,
+        iconSize: null
+      })
+    }).addTo(map);
+
+  marker.on("click", function(e) {
+
+    L.DomEvent.stopPropagation();
+
+    selectObject(marker);
+
+  });
+
+  objects.push(marker);
+
+  saveState();
+
+}
+
+
+/* =====================================================
+   SELECT
+===================================================== */
+
+function selectObject(object) {
+
+  selectedObject = object;
+
+  /*
+   * Enable vertex editing for polylines/polygons.
+   */
+
+  if (object.editing) {
+
+    object.editing.enable();
+
+  }
+
+}
+
+
+/* =====================================================
+   DELETE
+===================================================== */
+
+function deleteNearest(latlng) {
+
+  let closest = null;
+
+  let distance = Infinity;
+
+  objects.forEach(obj => {
+
+    if (!obj.getLatLng && !obj.getLatLngs) {
+      return;
+    }
+
+    let point;
+
+    if (obj.getLatLng) {
+      point = obj.getLatLng();
+    } else {
+      point = obj.getLatLngs()[0];
+      if (Array.isArray(point)) {
+        point = point[0];
+      }
+    }
+
+    const d =
+      map.distance(latlng, point);
+
+    if (d < distance) {
+
+      distance = d;
+
+      closest = obj;
+
+    }
+
+  });
+
+  if (closest && distance < 100000) {
+
+    map.removeLayer(closest);
+
+    objects =
+      objects.filter(o => o !== closest);
+
+    saveState();
+
+  }
+
+}
+
+
+/* =====================================================
+   SETTINGS
+===================================================== */
+
+function toggleSettings() {
+
+  const panel =
+    document.getElementById("settingsPanel");
+
+  panel.style.display =
+    panel.style.display === "block"
+      ? "none"
+      : "block";
+
+}
+
+function applySettings() {
+
+  if (!selectedObject) {
+
+    alert("Select an object first.");
+
+    return;
+  }
+
+  const color =
+    document.getElementById("colorPicker").value;
+
+  const opacity =
+    Number(
+      document.getElementById("opacitySlider").value
+    );
+
+  const width =
+    Number(
+      document.getElementById("widthSlider").value
+    );
+
+  if (selectedObject.setStyle) {
+
+    selectedObject.setStyle({
+
+      color: color,
+
+      fillColor: color,
+
+      fillOpacity: opacity,
+
+      weight: width
+
+    });
+
+  }
+
+}
+
+
+/* =====================================================
+   LAYERS
+===================================================== */
+
+function toggleLayers() {
+
+  const sidebar =
+    document.getElementById("sidebar");
+
+  sidebar.style.display =
+    sidebar.style.display === "block"
+      ? "none"
+      : "block";
+
+}
+
+
+/* =====================================================
+   UNDO / REDO
+===================================================== */
+
+function saveState() {
+
+  /*
+   * Basic state marker.
+   *
+   * This is intentionally kept lightweight in this prototype.
+   * A full version can serialize every object into JSON and
+   * restore exact vertex positions.
+   */
+
+  undoStack.push(
+    objects.slice()
+  );
+
+  redoStack = [];
+
+}
+
+function undo() {
+
+  if (undoStack.length < 2) return;
+
+  undoStack.pop();
+
+  const previous =
+    undoStack[undoStack.length - 1];
+
+  objects.forEach(obj => {
+
+    if (map.hasLayer(obj)) {
+      map.removeLayer(obj);
+    }
+
+  });
+
+  objects = [];
+
+  previous.forEach(obj => {
+
+    obj.addTo(map);
+
+    objects.push(obj);
+
+  });
+
+}
+
+function redo() {
+
+  /*
+   * Reserved for the full serialized history system.
+   */
+
+}
+
+
+/* =====================================================
+   NEW MAP
+===================================================== */
+
+function newMap() {
+
+  if (!confirm("Start a new map?")) {
+    return;
+  }
+
+  if (map) {
+    map.remove();
+  }
+
+  objects = [];
+
+  undoStack = [];
+
+  redoStack = [];
+
+  selectedObject = null;
+
+  uploadedMap = false;
+
+  document.getElementById("topBar").style.display =
+    "none";
+
+  document.getElementById("sidebar").style.display =
+    "none";
+
+  document.getElementById("settingsPanel").style.display =
+    "none";
+
+  document.getElementById("startScreen").style.display =
+    "flex";
+
+}
+
+
+/* =====================================================
+   KEYBOARD SHORTCUTS
+===================================================== */
+
+document.addEventListener("keydown", function(e) {
+
+  if (e.key === "Escape") {
+
+    currentPoints = [];
+
+    currentTool = "select";
+
+  }
+
+  if ((e.ctrlKey || e.metaKey) && e.key === "z") {
+
+    e.preventDefault();
+
+    undo();
+
+  }
+
+});
+
+</script>
+
+</body>
+</html>
+```
