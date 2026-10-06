@@ -11,11 +11,10 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;font-family:var(--font);color:var(--txt);background:var(--bg)}
 #map{position:absolute;inset:0;background:#e9e5dc;user-select:none;-webkit-user-select:none}
-#map.draw,#map.paint,#map.erase,#map.ua,#map.ru,#map.bua,#map.bru,#map.gmask{cursor:crosshair}
+#map.draw,#map.paint,#map.erase,#map.ua,#map.ru,#map.gmask{cursor:crosshair}
 #map.pan{cursor:grab}
 .leaflet-overlay-pane path:not(.leaflet-interactive){pointer-events:none}
 
-/* Головне меню */
 #menu{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;
 background:#0b1118;overflow:hidden}
 #menu .card{background:var(--bg);padding:40px 44px;border-radius:6px;max-width:440px;margin:16px;text-align:center;box-shadow:0 20px 60px #0008}
@@ -35,7 +34,6 @@ background:linear-gradient(90deg,#000e 0%,#000a 14%,#0004 32%,#0000 45%,#0000 55
 .leaflet-control-layers-list{max-height:72vh;overflow:auto}
 #drop{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:#000a;color:#fff;font-size:26px;font-weight:700;pointer-events:none}
 
-/* Панель керування */
 #panel{position:absolute;z-index:1000;top:12px;left:12px;width:262px;max-height:calc(100% - 24px);overflow:auto;
 background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;box-shadow:0 8px 24px #0006}
 .grp{margin-bottom:12px}
@@ -61,30 +59,11 @@ font-weight:700;font-size:14px;padding:9px 16px;border-radius:4px;opacity:0;poin
 #toast.show{opacity:1}
 [hidden]{display:none!important}
 
-/* Прапори на мапі */
 .flag{position:relative;width:30px;height:34px}
 .flag:before{content:"";position:absolute;left:2px;top:0;width:3px;height:34px;background:#222;border-radius:2px}
 .flag i{position:absolute;left:5px;top:1px;width:24px;height:16px;border:1px solid #222;box-shadow:0 1px 3px #0007}
 .flag.ua i{background:linear-gradient(#0057b7 50%,#ffd700 50%)}
 .flag.ru i{background:linear-gradient(#fff 33.3%,#0039a6 33.3% 66.6%,#d52b1e 66.6%)}
-.bg{width:46px;height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:700 12px/1 "Trebuchet MS","Segoe UI",sans-serif;
-border:2px solid;border-radius:3px;box-shadow:0 1px 4px #0009;cursor:grab;user-select:none;-webkit-user-select:none;white-space:nowrap}
-.bg:active{cursor:grabbing}
-.bgi{color:#fff;display:flex;line-height:0}
-.bgi svg{display:block;width:28px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
-.bgi img{display:block;width:30px;height:18px;object-fit:contain}
-.bgt{line-height:1}
-.bic{display:flex;line-height:0;color:#fff;background:#0006;border-radius:3px;padding:2px 3px}
-.bic svg{width:22px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
-.bg.ua{background:#0057b7;border-color:#ffd700;color:#fff}
-.bg.ru{background:#b71c1c;border-color:#fff;color:#fff}
-#bq{width:100%;font:inherit;font-size:13px;padding:6px 8px;margin-bottom:6px;border-radius:4px;border:1px solid var(--line);background:var(--btn);color:var(--txt)}
-#blist{max-height:230px;overflow:auto;display:flex;flex-direction:column;gap:4px}
-#blist .t{justify-content:flex-start;text-align:left;padding:5px 7px;line-height:1.25}
-#blist .bd{flex:none;min-width:38px;text-align:center;font-weight:700;font-size:11px;padding:3px 4px;border-radius:3px;border:1px solid}
-#blist .bd.ua{background:#0057b7;border-color:#ffd700;color:#fff}
-#blist .bd.ru{background:#b71c1c;border-color:#fff;color:#fff}
-#blist .nm{font-size:12px}@media(max-width:560px){#panel{width:calc(100% - 24px)}#hint{bottom:8px}}
 #map{touch-action:none}
 #map.ruler{cursor:crosshair}
 button.t:disabled{opacity:.4;cursor:default}
@@ -148,8 +127,6 @@ button.t:disabled{opacity:.4;cursor:default}
       <button class="t" data-mode="erase"><span data-i="m_erase"></span></button>
       <button class="t" data-mode="ua"><span class="mini ua"></span><span data-i="m_ua"></span></button>
       <button class="t" data-mode="ru"><span class="mini ru"></span><span data-i="m_ru"></span></button>
-      <button class="t" data-mode="bua"><span class="mini ua"></span><span data-i="m_bua"></span></button>
-      <button class="t" data-mode="bru"><span class="mini ru"></span><span data-i="m_bru"></span></button>
       <button class="t" data-mode="ruler"><span data-i="m_ruler"></span></button>
       <button class="t" data-mode="gmask"><span data-i="m_gmask"></span></button>
       <button class="t" data-mode="del"><span data-i="m_del"></span></button>
@@ -165,7 +142,6 @@ button.t:disabled{opacity:.4;cursor:default}
   <div class="grp"><b data-i="buf"></b>
     <label class="chk"><input type="checkbox" id="bufOn" checked> <span><span data-i="bufOn"></span>: <span id="bufV"></span></span></label>
     <input type="range" id="bufW" min="0.5" max="10" step="0.5" value="2">
-    <div class="row" style="margin-top:6px"><button class="t" id="bufNow" data-i="bufNow"></button></div>
   </div>
   <div class="grp" id="drawBox" hidden><b data-i="curshape"></b>
     <div class="row">
@@ -190,10 +166,6 @@ button.t:disabled{opacity:.4;cursor:default}
       <button class="t" id="gcancel" data-i="cancel"></button>
     </div>
   </div>
-  <div class="grp" id="brigBox" hidden><b><span data-i="brigade"></span>: <span id="bsel"></span></b>
-    <input type="search" id="bq" data-ph="bq" autocomplete="off">
-    <div id="blist"></div>
-  </div>
   <div class="grp row">
     <button class="t" id="save" data-i="save"></button>
     <button class="t" id="load" data-i="load"></button>
@@ -215,19 +187,14 @@ const ST = { free: { color: '#29b6f6' }, occ: { color: '#e53935' }, fight: { col
 let mode = 'draw', status = 'free';
 const COARSE = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
 let zones = [];       // {status, f, layer}
-let greys = [];       // {w (km thickness), geom (mask Feature), f (resulting feature), layer}
+let greys = [];       // {w, geom (mask), f (result), layer}
 let flags = [];
-let brigs = [];
-const selBrig = { ua: null, ru: null };
-let pts = [], tmp = null, tmpM = [], ghost = null, eGhost = null;
-let gPts = [], gTmp = null, gTmpM = [];   // малювання сірої маски
-
 const $ = id => document.getElementById(id);
 
 // ---------- Мови та теми ----------
 const D = {
 title:['Лінія фронту','Front Line','Линия фронта'],
-menuTxt:['Малюй зони на карті, перефарбовуй ділянки в межах існуючих полігонів, став прапори вздовж лінії фронту й розставляй бригади.','Draw zones on the map, repaint areas inside existing polygons, plant flags along the front line and place brigades.','Рисуй зоны на карте, перекрашивай участки в пределах существующих полигонов, ставь флаги вдоль линии фронта и расставляй бригады.'],
+menuTxt:['Малюй зони на карті, перефарбовуй ділянки в межах існуючих полігонів, став прапори вздовж лінії фронту та задавай сірі зони вручну.','Draw zones on the map, repaint areas inside existing polygons, plant flags along the front line and set grey zones by hand.','Рисуй зоны на карте, перекрашивай участки в пределах существующих полигонов, ставь флаги вдоль линии фронта и задавай серые зоны вручную.'],
 start:['Почати грати','Start playing','Начать играть'], newgame:['Нова гра','New game','Новая игра'],
 resume:['▶ Продовжити','▶ Continue','▶ Продолжить'],
 loadsave:['📂 Завантажити збереження','📂 Load a save','📂 Загрузить сохранение'],
@@ -240,7 +207,6 @@ mode:['Режим','Mode','Режим'],
 m_pan:['✋ Рух карти','✋ Pan map','✋ Движение карты'], m_draw:['✏️ Малювати фігуру','✏️ Draw shape','✏️ Рисовать фигуру'],
 m_paint:['🖌️ Покраска','🖌️ Paint','🖌️ Покраска'], m_erase:['🧽 Ластик','🧽 Eraser','🧽 Ластик'],
 m_ua:['Прапор УА','UA flag','Флаг УКР'], m_ru:['Прапор РФ','RU flag','Флаг РФ'],
-m_bua:['Бригади УА','UA brigades','Бригады УКР'], m_bru:['Бригади РФ','RU brigades','Бригады РФ'],
 m_ruler:['📏 Лінійка','📏 Ruler','📏 Линейка'], m_del:['🗑️ Видалити значок','🗑️ Delete marker','🗑️ Удалить значок'],
 m_gmask:['🎚 Задати сіру зону','🎚 Set grey zone','🎚 Задать серую зону'],
 zonecol:['Зона / колір','Zone / colour','Зона / цвет'],
@@ -250,14 +216,11 @@ stepback:['Крок назад','Step back','Шаг назад'], cancel:['Ск�
 anim:['🎞 Анімація просування','🎞 Advance animation','🎞 Анимация продвижения'],
 brush:['Пензель','Brush','Кисть'], brush_r:['радіус {0} км','radius {0} km','радиус {0} км'], brush_all:['вся зона','whole zone','вся зона'],
 eraser:['Ластик','Eraser','Ластик'], eonly:['Стирати лише вибраний колір зони','Erase only the selected zone colour','Стирать только выбранный цвет зоны'],
-brigade:['Бригада','Brigade','Бригада'], bq:['Пошук або своя назва…','Search or type your own name…','Поиск или своё название…'],
 save:['💾 Зберегти у файл','💾 Save to file','💾 Сохранить в файл'], load:['📂 Завантажити з файлу','📂 Load from file','📂 Загрузить из файла'],
 clear:['Очистити все','Clear all','Очистить всё'],
-flags:['Прапори','Flags','Флаги'], brigs:['Бригади','Brigades','Бригады'], sUA:['УА','UA','УКР'], sRU:['РФ','RU','РФ'],
+flags:['Прапори','Flags','Флаги'],
 km:['км','km','км'], m:['м','m','м'], km2:['км²','km²','км²'], sec:['с','s','с'],
 dropT:['Відпусти файл збереження','Drop the save file','Отпусти файл сохранения'],
-none:['не обрано','none selected','не выбрано'], nf:['Нічого не знайдено','Nothing found','Ничего не найдено'],
-own:['➕ Своя: ','➕ Custom: ','➕ Своя: '],
 t_esri:['Esri не завантажився, перемикаю на OpenStreetMap','Esri failed to load, switching to OpenStreetMap','Esri не загрузился, переключаю на OpenStreetMap'],
 t_layer:['Шар «{0}» не завантажується — обери інший у меню шарів','Layer "{0}" fails to load, pick another in the layers menu','Слой «{0}» не загружается — выбери другой в меню слоёв'],
 t_noas:['Автозбереження недоступне (браузер блокує або немає місця)','Autosave unavailable (blocked by the browser or no space)','Автосохранение недоступно (браузер блокирует или нет места)'],
@@ -270,9 +233,6 @@ t_same:['Ця ділянка вже має такий статус','This area a
 t_cut:['Не вдалося обрізати форму','Could not clip the shape','Не удалось обрезать форму'],
 t_fua:['Прапор УА — у звільненій зоні або біля її межі','UA flag: inside a liberated zone or near its edge','Флаг УКР — в освобождённой зоне или у её границы'],
 t_fru:['Прапор РФ — в окупованій зоні або біля її межі','RU flag: inside an occupied zone or near its edge','Флаг РФ — в оккупированной зоне или у её границы'],
-t_pick:['Спершу обери бригаду зі списку','Pick a brigade from the list first','Сначала выбери бригаду из списка'],
-t_bua:['Бригади УА — лише на звільненій території','UA brigades: liberated territory only','Бригады УКР — только на освобождённой территории'],
-t_bru:['Бригади РФ — лише на окупованій території','RU brigades: occupied territory only','Бригады РФ — только на оккупированной территории'],
 t_saved:['Збережено: {0}','Saved: {0}','Сохранено: {0}'],
 t_dl:['Файл збережено (папка «Завантаження»)','File saved (Downloads folder)','Файл сохранён (папка «Загрузки»)'],
 t_nosave:['Не вдалося зберегти файл','Could not save the file','Не удалось сохранить файл'],
@@ -289,11 +249,8 @@ loading:['Завантаження…','Loading…','Загрузка…'],
 credit:['Дані лінії фронту: DeepStateMap.Live (через GitHub-дзеркало cyterat/deepstate-map-data). Потрібен інтернет.','Front line data: DeepStateMap.Live (via the cyterat/deepstate-map-data GitHub mirror). Internet required.','Данные линии фронта: DeepStateMap.Live (через GitHub-зеркало cyterat/deepstate-map-data). Нужен интернет.'],
 t_front:['Лінію фронту завантажено {0}','Front line loaded {0}','Линия фронта загружена {0}'],
 t_frontfail:['Не вдалося завантажити лінію фронту — почато з порожньої карти','Could not load the front line, starting with an empty map','Не удалось загрузить линию фронта — начата пустая карта'],
-buf:['Сіра зона між фронтами','Grey zone between fronts','Серая зона между фронтами'],
-bufOn:['Авто-смуга боїв','Auto combat strip','Авто-полоса боёв'],
-bufNow:['Побудувати зараз','Build now','Построить сейчас'],
-t_bufok:['Сіру зону побудовано','Grey zone built','Серая зона построена'],
-t_bufno:['Немає місць, де звільнена й окупована зони межують','No place where liberated and occupied zones meet','Нет мест, где освобождённая и оккупированная зоны граничат'],
+buf:['Сіра зона (маска)','Grey zone (mask)','Серая зона (маска)'],
+bufOn:['Увімкнено','Enabled','Включено'],
 t_g3:['Маска сірої зони — щонайменше 3 точки','Grey-zone mask needs at least 3 points','Маска серой зоны — минимум 3 точки'],
 t_gdone:['Сіру зону оновлено','Grey zone updated','Серая зона обновлена'],
 t_gnone:['Під маскою немає окупованої території','No occupied territory under the mask','Под маской нет оккупированной территории'],
@@ -302,12 +259,10 @@ h_erase:['Затисни й води: ластик стирає шматочок
 h_paint:['Клікни або затисни й води: колір змінюється лише в межах зони під курсором. Суміжні ділянки одного кольору зливаються. Рух карти: Shift + перетягування або середня кнопка миші.','Click, or hold and drag: the colour changes only within the zone under the cursor. Adjacent areas of the same colour merge. Pan the map: Shift + drag or middle mouse button.','Кликни или зажми и води: цвет меняется только в пределах зоны под курсором. Смежные участки одного цвета сливаются. Движение карты: Shift + перетаскивание или средняя кнопка мыши.'],
 h_pan:['Тягни карту мишею. Колесо — масштаб.','Drag the map with the mouse. Wheel to zoom.','Тяни карту мышью. Колесо — масштаб.'],
 h_ruler:['Клікни першу точку, потім другу — побачиш відстань по прямій. Наступний клік починає нове вимірювання. Esc — прибрати.','Click the first point, then the second to see the straight-line distance. The next click starts a new measurement. Esc clears it.','Кликни первую точку, затем вторую — увидишь расстояние по прямой. Следующий клик начинает новое измерение. Esc — убрать.'],
-h_del:['Клікни (торкнись) по прапору чи бригаді, щоб видалити. ПКМ теж видаляє.','Click (tap) a flag or brigade to delete it. Right-click also deletes.','Кликни (коснись) флага или бригады, чтобы удалить. ПКМ тоже удаляет.'],
+h_del:['Клікни (торкнись) по прапору або сірій масці, щоб видалити. ПКМ теж видаляє.','Click (tap) a flag or a grey mask to delete it. Right-click also deletes.','Кликни (коснись) флага или серой маски, чтобы удалить. ПКМ тоже удаляет.'],
 h_ua:['Став прапор УА у звільненій зоні або біля її межі. ПКМ по прапору — видалити.','Place a UA flag in a liberated zone or near its edge. Right-click a flag to delete it.','Ставь флаг УКР в освобождённой зоне или у её границы. ПКМ по флагу — удалить.'],
 h_ru:['Став прапор РФ в окупованій зоні або біля її межі. ПКМ по прапору — видалити.','Place a RU flag in an occupied zone or near its edge. Right-click a flag to delete it.','Ставь флаг РФ в оккупированной зоне или у её границы. ПКМ по флагу — удалить.'],
-h_bua:['Обери бригаду зі списку й клікни по звільненій території. Тягни значок, щоб перемістити (поза звільненою територією він повернеться назад). ПКМ — видалити. Свою назву можна ввести в пошуку.','Pick a brigade from the list and click on liberated territory. Drag the badge to move it (outside liberated territory it snaps back). Right-click deletes. You can type your own name in the search box.','Выбери бригаду из списка и кликни по освобождённой территории. Тяни значок, чтобы переместить (вне освобождённой территории он вернётся обратно). ПКМ — удалить. Своё название можно ввести в поиске.'],
-h_bru:['Обери бригаду зі списку й клікни по окупованій території. Тягни значок, щоб перемістити (поза окупованою територією він повернеться назад). ПКМ — видалити. Свою назву можна ввести в пошуку.','Pick a brigade from the list and click on occupied territory. Drag the badge to move it (outside occupied territory it snaps back). Right-click deletes. You can type your own name in the search box.','Выбери бригаду из списка и кликни по оккупированной территории. Тяни значок, чтобы переместить (вне оккупированной территории он вернётся обратно). ПКМ — удалить. Своё название можно ввести в поиске.'],
-h_gmask:['Обведи область, де має з\u2019явитися сіра смуга вздовж кордону окупованої території. Товщина — повзунком. Коли потім перемальовуєш окуповану зону, смуга всередині маски сама підлаштується (товщина тієї маски). ПКМ або «Видалити значок» — прибрати маску.','Draw the area where a grey strip should hug the occupied border. Thickness is taken from the slider. When you later redraw occupied territory, the strip inside this mask re-snaps automatically (with the mask\u2019s own thickness). Right-click or the delete tool removes a mask.','Обведи область, где должна появиться серая полоса вдоль границы оккупированной территории. Толщина — ползунком. Когда потом перерисовываешь оккупированную зону, полоса внутри маски сама подстроится (толщина этой маски). ПКМ или «Удалить значок» — убрать маску.'],
+h_gmask:['Обведи область, де має з\u2019явитися сіра смуга вздовж кордону окупованої території. Товщина — повзунком. Коли потім перемальовуєш або розширюєш окуповану зону, смуга всередині маски сама підлаштується (товщина тієї маски). ПКМ або «Видалити значок» — прибрати маску.','Draw the area where a grey strip should hug the occupied border. Thickness is taken from the slider. When you later redraw or expand occupied territory, the strip inside this mask re-snaps automatically (with the mask\u2019s own thickness). Right-click or the delete tool removes a mask.','Обведи область, где должна появиться серая полоса вдоль границы оккупированной территории. Толщина — ползунком. Когда потом перерисовываешь или расширяешь оккупированную зону, полоса внутри маски сама подстроится (толщина этой маски). ПКМ или «Удалить значок» — убрать маску.'],
 ht_draw:['Один палець: тап — точка, ведення — вільна лінія (замкнеться при відпусканні). Два пальці — рух і масштаб карти.','One finger: tap adds a point, dragging draws a free line (closes on release). Two fingers pan and zoom the map.','Один палец: тап — точка, ведение — свободная линия (замкнётся при отпускании). Два пальца — движение и масштаб карты.'],
 ht_paint:['Торкнись або веди пальцем — колір змінюється лише в межах зони. Два пальці — рух і масштаб карти.','Touch or drag: the colour changes only within the zone. Two fingers pan and zoom the map.','Коснись или веди пальцем — цвет меняется только в пределах зоны. Два пальца — движение и масштаб карты.'],
 ht_erase:['Веди пальцем — ластик стирає зону під ним. Два пальці — рух і масштаб карти.','Drag a finger: the eraser removes the zone under it. Two fingers pan and zoom the map.','Веди пальцем — ластик стирает зону под ним. Два пальца — движение и масштаб карты.'],
@@ -321,11 +276,9 @@ if (!(cfg.lang in LIDX)) cfg.lang = 'en';
 function saveCfg() { try { localStorage.setItem(SET_KEY, JSON.stringify(cfg)); } catch (e) {} }
 const t = (k, ...a) => { const e = D[k]; let s = e ? e[LIDX[cfg.lang]] : k; a.forEach((v, i) => { s = s.split('{' + i + '}').join(v); }); return s; };
 const decSep = () => cfg.lang === 'en' ? '.' : ',';
-// Назви шарів карти (внутрішній ключ — англійська)
 const LN = [['Terrain','Місцевість','Рельеф местности'],['Shaded relief','Тіньовий рельєф','Теневой рельеф'],['French style','Французький стиль','Французский стиль'],['German style','Німецький стиль','Немецкий стиль'],['Topographic','Топографічна','Топографическая'],['Physical','Фізична карта','Физическая карта'],['Hillshade','Тіні рельєфу','Тени рельефа'],['Railways','Залізниці','Железные дороги'],['Sea marks','Морські знаки','Морские знаки'],['Bike roads','Велодороги','Велодороги'],['Relief','Рельєф','Рельеф'],['Map','Схема','Схема'],['Light','Світла','Светлая'],['Dark','Темна','Тёмная'],['Oceans','Океани','Океаны'],['Satellite','Супутник','Спутник'],['Labels','Підписи','Подписи'],['Roads','Дороги','Дороги']];
 const LNre = new RegExp(LN.map(x => x[0]).join('|'), 'g');
 const ln = s => LNre ? s.replace(LNre, w => LN.find(x => x[0] === w)[LIDX[cfg.lang]]) : s;
-// Теми: [id, група (f — тематична, p — однотонна), 'uk|en|ru', 'bg panel line txt mut acc accT btn btnh btnon', шрифт]
 const THEMES = [
 ['nightops','f','Нічна варта|Night Ops|Ночной дозор','#0b140d #101d12 #24402a #d6f5d9 #7fa886 #5dff7a #04140a #16281a #1d3623 #23422b'],
 ['cyber','f','Кіберпанк|Cyberpunk|Киберпанк','#120a24 #1a1033 #43276e #f1e6ff #a28dc9 #ff2e97 #1a0614 #261548 #321d5c #3d2270'],
@@ -401,13 +354,12 @@ function applyLayers(d) {
 map.createPane('zones').style.zIndex = 399;
 map.createPane('zanim').style.zIndex = 399;
 map.getPane('zanim').style.display = 'none';
-map.createPane('greys').style.zIndex = 398;              // сірі маски лежать під зонами
-map.createPane('gmview').style.zIndex = 397;             // і під своїм підсвічуванням під час малювання
+map.createPane('greys').style.zIndex = 398;              // сіра маска (результат) — під зонами
+map.createPane('gmview').style.zIndex = 397;
 const zoneLayer = L.layerGroup().addTo(map);
 const greyLayer = L.layerGroup().addTo(map);
 const gViewLayer = L.layerGroup().addTo(map);
 const flagLayer = L.layerGroup().addTo(map);
-const brigLayer = L.layerGroup().addTo(map);
 
 // ---------- Допоміжні ----------
 function toast(t) {
@@ -415,8 +367,8 @@ function toast(t) {
   clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200);
 }
 const zStyle = s => ({ color: ST[s].color, weight: 2, opacity: 1, fillColor: ST[s].color, fillOpacity: 0.4, lineJoin: 'miter', lineCap: 'butt' });
-const gStyle = () => ({ color: ST.fight.color, weight: 1, dashArray: '3 3', opacity: 0.7, fillColor: ST.fight.color, fillOpacity: 0.15, interactive: false });
-const gvStyle = () => ({ color: ST.fight.color, weight: 2, opacity: 0.9, dashArray: '6 4', fillColor: ST.fight.color, fillOpacity: 0.28, interactive: false });
+// сіра смуга виглядає як «Йдуть бої» зі звичайної зони — товста лінія + 40% заливка
+const gStyle = () => ({ color: ST.fight.color, weight: 2, opacity: 1, fillColor: ST.fight.color, fillOpacity: 0.4, lineJoin: 'miter', lineCap: 'butt' });
 
 function addZone(s, geometry) {
   const f = { type: 'Feature', properties: {}, geometry };
@@ -464,19 +416,16 @@ function renderStats() {
   zones.forEach(z => { try { sum[z.status] += turf.area(z.f) / 1e6; } catch (e) {} });
   $('stats').innerHTML = Object.keys(ST).map(k =>
     t('st_' + k) + ': <i>' + Math.round(sum[k]).toLocaleString(LOC[cfg.lang]) + ' ' + t('km2') + '</i>').join('<br>') +
-    '<br>' + t('flags') + ': <i>' + flags.length + '</i>' +
-    '<br>' + t('brigs') + ': ' + t('sUA') + ' <i>' + brigs.filter(b => b.side === 'ua').length + '</i> · ' + t('sRU') + ' <i>' + brigs.filter(b => b.side === 'ru').length + '</i>';
-  if (!$('brigBox').hidden) renderBrig();
+    '<br>' + t('flags') + ': <i>' + flags.length + '</i>';
 }
 
 // ---------- Історія та автозбереження ----------
-const HMAX = 60, AS_KEY = 'frontline-map-autosave-v2';
+const HMAX = 60, AS_KEY = 'frontline-map-autosave-v3';
 let hist = [], hi = -1, restoring = false, started = false, asT = null, asWarned = false;
 const snap = () => JSON.stringify({
   z: zones.map(z => [z.status, z.f.geometry]),
   g: greys.map(g => [g.w, g.geom.geometry, g.f ? g.f.geometry : null]),
-  f: flags.map(f => [f.side, f.lat, f.lng]),
-  b: brigs.map(b => [b.side, b.label, b.name, b.lat, b.lng])
+  f: flags.map(f => [f.side, f.lat, f.lng])
 });
 function updHist() { $('hundo').disabled = hi <= 0; $('hredo').disabled = hi >= hist.length - 1; }
 function commit() {
@@ -499,7 +448,6 @@ function restore(str) {
     d.z.forEach(z => addZone(z[0], z[1]));
     (d.g || []).forEach(g => addGreyRaw(g[0], { type: 'Feature', properties: {}, geometry: g[1] }, g[2] ? { type: 'Feature', properties: {}, geometry: g[2] } : null));
     d.f.forEach(f => addFlag(f[0], f[1], f[2]));
-    d.b.forEach(b => addBrig(b[0], b[1], b[2], b[3], b[4]));
   } finally { restoring = false; }
   stats(); scheduleSave();
 }
@@ -509,7 +457,7 @@ function saveAuto(force) {
   if (!started) return;
   try {
     const d = buildSave();
-    if (!d.zones.length && !d.flags.length && !d.brigades.length && !d.greys.length) localStorage.removeItem(AS_KEY);
+    if (!d.zones.length && !d.flags.length && !d.greys.length) localStorage.removeItem(AS_KEY);
     else localStorage.setItem(AS_KEY, JSON.stringify(d));
   } catch (err) { if (!asWarned) { asWarned = true; toast(t('t_noas')); } }
 }
@@ -544,15 +492,13 @@ function setMode(m) {
   if (mode === 'ruler' && m !== 'ruler') rClear();
   mode = m;
   document.querySelectorAll('#modes .t').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
-  ['draw','paint','erase','ua','ru','bua','bru','pan','ruler','gmask','del'].forEach(c => $('map').classList.toggle(c, c === m));
+  ['draw','paint','erase','ua','ru','pan','ruler','gmask','del'].forEach(c => $('map').classList.toggle(c, c === m));
   $('drawBox').hidden = m !== 'draw';
   $('brushBox').hidden = m !== 'paint';
   $('eraseBox').hidden = m !== 'erase';
   $('gmaskBox').hidden = m !== 'gmask';
   updHint();
   clearGhost();
-  $('brigBox').hidden = m !== 'bua' && m !== 'bru';
-  if (m === 'bua' || m === 'bru') { $('bq').value = ''; renderBrig(); }
   setPan(false);
 }
 function setStatus(s) {
@@ -665,7 +611,7 @@ function startShape(j) {
   if (idle) base = zones.map(z => ({ status: z.status, f: z.f }));
   const A = $('anOn').checked ? prepAnim(j.st, geom, j.first) : null;
   const z = addZone(j.st, geom); carve(z); mergeSame(z);
-  if (j.st === 'occ') refreshGreysNear(geom);   // перемалювання окупованої зони освіжає сірі маски, яких вона торкається
+  if (j.st === 'occ') refreshGreys();       // перемальовування будь-якої окупованої зони оновлює всі маски
   stats();
   const mk = (g, extra) => {
     const parts = [{ st: j.st, g }];
@@ -820,14 +766,17 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'Backspace') { if (mode === 'draw') { pts.pop(); redrawTmp(); } else { gPts.pop(); redrawGreyTmp(); } }
 });
 
-// ---------- Сіра маска: нова логіка ----------
+// ---------- Сіра маска ----------
 // Користувач малює полігон-маску. Усередині маски сіра смуга прилипає до зовнішнього боку окупованої території.
-// Маска запам'ятовує свою товщину w. Коли occ перемальовується — маски, яких торкається нова фігура, перебудовуються.
-// Решта маск лишається як була (у т.ч. зі старою товщиною).
+// Маска запам'ятовує свою товщину w. Коли occ перемальовується — маски перебудовуються.
+function occUnion() {
+  let O = null;
+  for (const z of zones) if (z.status === 'occ') { O = O ? turf.union(O, z.f) : z.f; if (!O) return null; }
+  return O;
+}
 function greyBuild(maskF, wKm) {
   try {
-    let O = null;
-    for (const z of zones) if (z.status === 'occ') { O = O ? turf.union(O, z.f) : z.f; if (!O) return null; }
+    const O = occUnion();
     if (!O) return null;
     const maskClipped = turf.intersect(maskF, O);
     if (!maskClipped) return null;
@@ -862,50 +811,23 @@ function setGreyGeom(rec, f) {
 }
 function delGrey(rec) { greyLayer.removeLayer(rec.layer); greys = greys.filter(x => x !== rec); }
 
-// прибираємо з карти будь-яке перекриття між новою сірою смугою і зонами: сіра має прилипати лише до ЗОВНІШНЬОЇ сторони occ
-function carveGreyFromZones(rec) {
-  if (!rec.f) return;
-  try {
-    // не робимо нічого з occ — сіра смуга побудована як різниця з occ, тож перекриття немає
-    // але відрізаємо від інших статусів (free/fight), щоб не було накладань
-    for (const z of [...zones]) {
-      if (z.status === 'occ') continue;
-      if (!turf.booleanIntersects(z.f, rec.f)) continue;
-      const d = turf.difference(z.f, rec.f);
-      const st = z.status;
-      delZone(z);
-      if (d) addZone(st, d.geometry);
-    }
-  } catch (err) { console.error(err); }
-}
-// перебудова масок, яких торкнулася нова геометрія occ
-function refreshGreysNear(occGeom) {
+// Перебудовує всі маски, які мають шанс бути поруч із окупованою територією.
+// Простіше й надійніше: перебудувати кожну маску, яка перетинається з об'єднанням occ АБО з результатом.
+function refreshGreys() {
   if (!greys.length) return;
-  const newF = { type: 'Feature', properties: {}, geometry: occGeom };
-  try {
-    for (const g of greys) {
-      let touched = false;
-      try { touched = turf.booleanIntersects(g.geom, newF) || (g.f ? turf.booleanIntersects(g.f, newF) : false); } catch (e) { touched = false; }
-      if (!touched) continue;
+  const O = occUnion();
+  if (!O) return;
+  for (const g of greys) {
+    try {
+      if (!turf.booleanIntersects(g.geom, O)) {
+        // маска не торкається oкупованої зони — результат має бути порожнім
+        if (g.f) setGreyGeom(g, null);
+        continue;
+      }
       const f = greyBuild(g.geom, g.w);
       setGreyGeom(g, f);
-      if (f) carveGreyFromZones(g);
-    }
-  } catch (err) { console.error(err); }
-}
-// Коли гумка стирає occ — перебудувати маски, що торкаються стертого місця
-function refreshGreysAfterErase(changedArea) {
-  if (!greys.length || !changedArea) return;
-  try {
-    for (const g of greys) {
-      let touched = false;
-      try { touched = turf.booleanIntersects(g.geom, changedArea); } catch (e) { touched = false; }
-      if (!touched) continue;
-      const f = greyBuild(g.geom, g.w);
-      setGreyGeom(g, f);
-      if (f) carveGreyFromZones(g);
-    }
-  } catch (err) { console.error(err); }
+    } catch (err) { console.error(err); }
+  }
 }
 
 // ---------- Малювання сірої маски ----------
@@ -929,16 +851,12 @@ function finishGrey() {
   cancelGreyDraw();
   const w = +$('bufW').value / 2;
   const maskF = { type: 'Feature', properties: {}, geometry: geom };
-  // чи маска взагалі торкається окупованої території?
   let hits = false;
-  for (const z of zones) { if (z.status === 'occ' && turf.booleanIntersects(maskF, z.f)) { hits = true; break; } }
+  const O = occUnion();
+  if (O) { try { hits = turf.booleanIntersects(maskF, O); } catch (e) { hits = false; } }
   const rec = addGrey(w, maskF);
-  if (rec.f) {
-    carveGreyFromZones(rec);
-    toast(t('t_gdone'));
-  } else {
-    if (!hits) toast(t('t_gnone'));
-  }
+  if (rec.f) toast(t('t_gdone'));
+  else if (!hits) toast(t('t_gnone'));
   stats();
 }
 $('gfin').onclick = finishGrey;
@@ -988,7 +906,7 @@ function eraseAt(px) {
   }
   ring.push(ring[0]);
   const circ = turf.polygon([ring]);
-  let changed = false, occChanged = null;
+  let changed = false, occTouched = false;
   for (const z of [...zones]) {
     if (only && z.status !== status) continue;
     try {
@@ -997,10 +915,10 @@ function eraseAt(px) {
       delZone(z);
       if (left) addZone(st, left.geometry);
       changed = true;
-      if (z.status === 'occ') occChanged = occChanged ? (turf.union(occChanged, circ) || occChanged) : circ;
+      if (z.status === 'occ') occTouched = true;
     } catch (err) { console.error(err); }
   }
-  if (changed && occChanged) refreshGreysAfterErase(occChanged);
+  if (occTouched) refreshGreys();
   return changed;
 }
 function eraseTo(px) {
@@ -1044,162 +962,6 @@ function flagAt(ll, side) {
   if (best && bd <= limit) return addFlag(side, best[1], best[0]), stats();
   toast(side === 'ua' ? t('t_fua') : t('t_fru'));
 }
-
-// ---------- Бригади ----------
-const BRIG = {
-  ua: [
-    ['14', '14 ОМБр — імені князя Романа Великого'], ['24', '24 ОМБр — імені короля Данила'],
-    ['28', '28 ОМБр — імені Лицарів Зимового походу'], ['30', '30 ОМБр — імені князя Костянтина Острозького'],
-    ['33', '33 ОМБр — 33-тя окрема механізована бригада'], ['47', '47 ОМБр «Магура»'],
-    ['53', '53 ОМБр — імені князя Володимира Мономаха'], ['54', '54 ОМБр — імені гетьмана Івана Мазепи'],
-    ['56', '56 ОМПБр — 56-та окрема мотопіхотна бригада'], ['57', '57 ОМПБр — імені кошового отамана Костя Гордієнка'],
-    ['58', '58 ОМПБр — імені гетьмана Івана Виговського'], ['59', '59 ОМПБр — імені Якова Гандзюка'],
-    ['60', '60 ОМБр — 60-та окрема механізована бригада'], ['62', '62 ОМБр — 62-га окрема механізована бригада'],
-    ['63', '63 ОМБр — 63-тя окрема механізована бригада'], ['65', '65 ОМБр — 65-та окрема механізована бригада'],
-    ['66', '66 ОМБр — 66-та окрема механізована бригада'], ['67', '67 ОМБр — 67-ма окрема механізована бригада'],
-    ['68', '68 ОЄБр — імені Олекси Довбуша (єгерська)'], ['71', '71 ОЄБр — 71-ша окрема єгерська бригада'],
-    ['72', '72 ОМБр — імені Чорних Запорожців'], ['92', '92 ОШБр — імені кошового отамана Івана Сірка'],
-    ['93', '93 ОМБр «Холодний Яр»'], ['100', '100 ОМБр — 100-ма окрема механізована бригада'],
-    ['110', '110 ОМБр — 110-та окрема механізована бригада'], ['115', '115 ОМБр — 115-та окрема механізована бригада'],
-    ['116', '116 ОМБр — 116-та окрема механізована бригада'], ['118', '118 ОМБр — 118-ма окрема механізована бригада'],
-    ['1 ТБр', '1 ОТБр — 1-ша окрема танкова бригада'], ['4 ТБр', '4 ОТБр — 4-та окрема танкова бригада'],
-    ['17 ТБр', '17 ОТБр — 17-та окрема танкова бригада'],
-    ['25', '25 ОПДБр — 25-та окрема повітрянодесантна бригада'], ['46', '46 ОАеМБр — 46-та окрема аеромобільна бригада'],
-    ['77', '77 ОАеМБр — 77-ма окрема аеромобільна бригада'], ['78', '78 ОДШП — 78-й окремий десантно-штурмовий полк'],
-    ['79', '79 ОДШБр — 79-та окрема десантно-штурмова бригада'], ['80', '80 ОДШБр — 80-та окрема десантно-штурмова бригада'],
-    ['81', '81 ОАеМБр — 81-ша окрема аеромобільна бригада'], ['82', '82 ОДШБр — 82-га окрема десантно-штурмова бригада'],
-    ['95', '95 ОДШБр — 95-та окрема десантно-штурмова бригада'],
-    ['35', '35 ОБрМП — 35-та окрема бригада морської піхоти'], ['36', '36 ОБрМП — 36-та окрема бригада морської піхоти'],
-    ['37', '37 ОБрМП — 37-ма окрема бригада морської піхоти'], ['38', '38 ОБрМП — 38-ма окрема бригада морської піхоти'],
-    ['3 ШБр', '3 ОШБр — 3-тя окрема штурмова бригада'], ['5 ШБр', '5 ОШБр — 5-та окрема штурмова бригада'],
-    ['10', '10 ОГШБр «Едельвейс» — гірсько-штурмова'], ['128', '128 ОГШБр — Закарпатська гірсько-штурмова'],
-    ['26 АБр', '26 ОАБр — 26-та окрема артилерійська бригада'], ['40 АБр', '40 ОАБр — 40-ва окрема артилерійська бригада'],
-    ['43 АБр', '43 ОМАБр — 43-тя окрема важка артилерійська бригада'], ['44 АБр', '44 ОАБр — 44-та окрема артилерійська бригада'],
-    ['45 АБр', '45 ОАБр — 45-та окрема артилерійська бригада'], ['55 АБр', '55 ОАБр «Запорізька Січ»'],
-    ['Азов', '12 бригада спеціального призначення «Азов» (НГУ)'], ['Хартія', '13 бригада НГУ «Хартія»'],
-    ['Калина', '14 бригада НГУ «Червона Калина»'], ['Кара-Даг', '15 бригада НГУ «Кара-Даг»'],
-    ['Рубіж', '4 бригада оперативного призначення НГУ «Рубіж»'], ['Омега', 'Омега — спецпризначення НГУ'],
-    ['Скеля', '3 полк спеціального призначення «Скеля»'], ['Бохдан', '1 президентська бригада імені гетьмана Богдана Хмельницького'],
-    ['Лють', 'Штурмова бригада «Лють» (ДПСУ)'], ['Кракен', 'Окремий загін спеціального призначення «Кракен»'],
-    ['ГУР', 'ГУР МОУ — Головне управління розвідки'], ['ССО', 'Сили спеціальних операцій ЗСУ']
-  ],
-  ru: [
-    ['1 ГвТА', '1-ша гвардійська танкова армія'], ['2 МСД', '2-га гвардійська мотострілецька дивізія «Таманська»'],
-    ['3 МСД', '3-тя мотострілецька дивізія'], ['4 ТД', '4-та гвардійська танкова дивізія «Кантемирівська»'],
-    ['47 ТД', '47-ма гвардійська танкова дивізія'], ['20 МСД', '20-та гвардійська мотострілецька дивізія'],
-    ['144 МСД', '144-та гвардійська мотострілецька дивізія'], ['150 МСД', '150-та мотострілецька дивізія'],
-    ['7 ДШД', '7-ма гвардійська десантно-штурмова дивізія'], ['76 ДШД', '76-та гвардійська десантно-штурмова дивізія'],
-    ['98 ВДД', '98-ма гвардійська повітрянодесантна дивізія'], ['106 ВДД', '106-та гвардійська повітрянодесантна дивізія'],
-    ['11 ДШБр', '11-та окрема гвардійська десантно-штурмова бригада'], ['31 ДШБр', '31-ша окрема гвардійська десантно-штурмова бригада'],
-    ['56 ДШБр', '56-та окрема гвардійська десантно-штурмова бригада'], ['83 ДШБр', '83-тя окрема гвардійська десантно-штурмова бригада'],
-    ['5 ТБр', '5-та окрема гвардійська танкова бригада'],
-    ['15 МСБр', '15-та окрема мотострілецька бригада'], ['21 МСБр', '21-ша окрема мотострілецька бригада'],
-    ['25 МСБр', '25-та окрема мотострілецька бригада'], ['27 МСБр', '27-ма окрема гвардійська мотострілецька бригада'],
-    ['33 МСБр', '33-тя окрема гірська мотострілецька бригада'], ['34 МСБр', '34-та окрема гірська мотострілецька бригада'],
-    ['37 МСБр', '37-ма окрема гвардійська мотострілецька бригада'], ['55 МСБр', '55-та окрема гірська мотострілецька бригада'],
-    ['57 МСБр', '57-ма окрема гвардійська мотострілецька бригада'], ['64 МСБр', '64-та окрема гвардійська мотострілецька бригада'],
-    ['74 МСБр', '74-та окрема гвардійська мотострілецька бригада'], ['79 МСБр', '79-та окрема гвардійська мотострілецька бригада'],
-    ['138 МСБр', '138-ма окрема гвардійська мотострілецька бригада'], ['200 МСБр', '200-та окрема мотострілецька бригада'],
-    ['205 МСБр', '205-та окрема мотострілецька бригада'],
-    ['40 МП', '40-ва окрема бригада морської піхоти'], ['61 МП', '61-ша окрема бригада морської піхоти'],
-    ['155 МП', '155-та окрема бригада морської піхоти'], ['336 МП', '336-ма окрема бригада морської піхоти'],
-    ['810 МП', '810-та окрема бригада морської піхоти'],
-    ['2 СпП', '2-га окрема бригада спеціального призначення'], ['3 СпП', '3-тя окрема бригада спеціального призначення'],
-    ['10 СпП', '10-та окрема бригада спеціального призначення'], ['14 СпП', '14-та окрема бригада спеціального призначення'],
-    ['16 СпП', '16-та окрема бригада спеціального призначення'], ['22 СпП', '22-га окрема бригада спеціального призначення'],
-    ['24 СпП', '24-та окрема бригада спеціального призначення'], ['45 СпП', '45-та окрема бригада спеціального призначення ВДВ'],
-    ['346 СпП', '346-та окрема бригада спеціального призначення'], ['Ахмат', 'Спецпризначення «Ахмат»'],
-    ['1 АК', '1-й армійський корпус (ДНР)'], ['2 АК', '2-й армійський корпус (ЛНР)'],
-    ['Сомалі', 'Батальйон «Сомалі»'], ['Спарта', 'Батальйон «Спарта»'], ['Восток', 'Батальйон «Восток»'], ['П\'ятнашка', 'Батальйон «П\'ятнашка»']
-  ]
-};
-const brigSide = () => mode === 'bua' ? 'ua' : 'ru';
-const needZone = side => side === 'ua' ? 'free' : 'occ';
-function inZone(ll, st) {
-  const pt = turf.point([ll.lng, ll.lat]);
-  try { return zones.some(z => z.status === st && turf.booleanPointInPolygon(pt, z.f)); } catch (e) { return false; }
-}
-const badZoneMsg = side => side === 'ua' ? t('t_bua') : t('t_bru');
-const BRIG_IMG = {};
-function brigType(label, name) {
-  const s = label + ' ' + name;
-  if (/СпП|спеціал|ССО|ГУР|Омега|Скеля|Кракен|Ахмат/.test(s)) return 'spec';
-  if (/морськ\S* піхот|\bМП\b|ОБрМП/.test(s)) return 'mar';
-  if (/ДШ|ПДБр|ВДД|десант|аеромоб|АеМБр/.test(s)) return 'air';
-  if (/ГШБр|гірськ/.test(s)) return 'mtn';
-  if (/ТБр|ТД|ГвТА|танков/.test(s)) return 'tank';
-  if (/АБр|артилер/.test(s)) return 'art';
-  if (/МБр|МСБр|МСД|МПБр|мотопіх|механіз|мотостріл/.test(s)) return 'mech';
-  return 'inf';
-}
-const X_ = '<path d="M3 1.5l18 13M21 1.5L3 14.5"/>';
-const SYM = {
-  inf:  X_,
-  mech: X_ + '<ellipse cx="12" cy="8" rx="6" ry="3.6"/>',
-  tank: '<ellipse cx="12" cy="8" rx="8.5" ry="4.8"/><path d="M6 8h12"/>',
-  air:  '<path d="M3 7.5A9 6.5 0 0 1 21 7.5M3 7.5L12 15M21 7.5L12 15M12 1v14"/>',
-  mar:  '<circle cx="12" cy="3.2" r="1.7"/><path d="M12 5v9.5M7.5 8h9M5 10.5c0 3 3 4 7 4s7-1 7-4"/>',
-  art:  '<circle cx="12" cy="8" r="4.2" fill="currentColor"/>',
-  mtn:  '<path d="M2 15L9.5 3l3.2 5.2L16 5l6 10z"/>',
-  spec: '<path fill="currentColor" d="M12 1.1L13.8 6.1 19.1 6.3 14.9 9.6 16.4 14.7 12 11.7 7.6 14.7 9.1 9.6 4.9 6.3 10.2 6.1z"/>'
-};
-const brigSvg = (label, name) => '<svg viewBox="0 0 24 16">' + SYM[brigType(label, name)] + '</svg>';
-function addBrig(side, label, name, lat, lng) {
-  const el = document.createElement('div'); el.className = 'bg ' + side;
-  const ic = document.createElement('span'); ic.className = 'bgi';
-  const img = BRIG_IMG[side + ':' + label];
-  ic.innerHTML = img ? '<img alt="" src="' + encodeURI(img) + '">' : brigSvg(label, name);
-  const tx = document.createElement('span'); tx.className = 'bgt'; tx.textContent = label;
-  if (label.length > 4) tx.style.fontSize = label.length > 5 ? '9px' : '10px';
-  el.append(ic, tx);
-  const m = L.marker([lat, lng], {
-    draggable: true, keyboard: false, zIndexOffset: 500,
-    icon: L.divIcon({ className: '', html: el, iconSize: [46, 38], iconAnchor: [23, 19] })
-  }).addTo(brigLayer);
-  const tip = document.createElement('div'); tip.textContent = name;
-  m.bindTooltip(tip, { direction: 'top', offset: [0, -16] });
-  const rec = { side, label, name, lat, lng, m };
-  m.on('dragend', () => {
-    const q = m.getLatLng();
-    if (inZone(q, needZone(side))) { rec.lat = q.lat; rec.lng = q.lng; }
-    else { m.setLatLng([rec.lat, rec.lng]); toast(badZoneMsg(side)); }
-    stats();
-  });
-  const del = () => { brigLayer.removeLayer(m); brigs = brigs.filter(x => x !== rec); stats(); };
-  m.on('contextmenu', del);
-  m.on('click', () => { if (mode === 'del') del(); });
-  brigs.push(rec);
-  return rec;
-}
-function placeBrig(ll) {
-  const side = brigSide(), b = selBrig[side];
-  if (!b) return toast(t('t_pick'));
-  if (!inZone(ll, needZone(side))) return toast(badZoneMsg(side));
-  addBrig(side, b.label, b.name, ll.lat, ll.lng); stats(); renderBrig();
-}
-function renderBrig() {
-  const side = brigSide(), raw = $('bq').value.trim(), q = raw.toLowerCase(), box = $('blist'), cur = selBrig[side];
-  const keep = box.scrollTop;
-  box.textContent = '';
-  const item = (label, name, extra) => {
-    const b = document.createElement('button');
-    const on = cur && cur.label === label && cur.name === name;
-    const placed = brigs.some(r => r.side === side && r.label === label && r.name === name);
-    b.className = 't' + (on ? ' on' : '');
-    const bd = document.createElement('span'); bd.className = 'bd ' + side; bd.textContent = label;
-    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = (extra || '') + name + (placed ? ' ✓' : '');
-    const ic = document.createElement('span'); ic.className = 'bic'; ic.innerHTML = brigSvg(label, name);
-    b.append(ic, bd, nm);
-    b.onclick = () => { selBrig[side] = { label, name }; renderBrig(); };
-    box.appendChild(b);
-  };
-  if (raw) item(raw.slice(0, 6), raw, t('own'));
-  BRIG[side].filter(b => !q || (b[0] + ' ' + b[1]).toLowerCase().includes(q)).forEach(b => item(b[0], b[1]));
-  if (!box.children.length) box.textContent = t('nf');
-  $('bsel').textContent = cur ? cur.label : t('none');
-  box.scrollTop = keep;
-}
-$('bq').oninput = renderBrig;
 
 // ---------- Кліки по карті ----------
 let panFrom = null;
@@ -1278,7 +1040,6 @@ map.on('mousemove', e => {
 });
 window.addEventListener('mouseup', ptrUp);
 
-// Сенсор
 let tState = null;
 const tMode = () => mode === 'draw' || mode === 'paint' || mode === 'erase' || mode === 'gmask';
 const mapEl = map.getContainer();
@@ -1334,7 +1095,6 @@ function finishGreyFree() {
   }
   finishGrey();
 }
-
 function handleClick(cp, ll) {
   if (mode === 'draw') {
     if (pts.length > 2 && map.latLngToContainerPoint(pts[0]).distanceTo(cp) < 12) return finish();
@@ -1343,7 +1103,6 @@ function handleClick(cp, ll) {
     if (gPts.length > 2 && map.latLngToContainerPoint(gPts[0]).distanceTo(cp) < 12) return finishGrey();
     gPts.push(ll); redrawGreyTmp();
   } else if (mode === 'ua' || mode === 'ru') flagAt(ll, mode);
-  else if (mode === 'bua' || mode === 'bru') placeBrig(ll);
   else if (mode === 'ruler') rulerClick(ll);
 }
 map.on('click', e => {
@@ -1363,7 +1122,6 @@ function clearData() {
   zones.slice().forEach(delZone);
   greys.slice().forEach(delGrey);
   flags.forEach(f => flagLayer.removeLayer(f.m)); flags = [];
-  brigs.forEach(b => brigLayer.removeLayer(b.m)); brigs = [];
 }
 function clearAll() { clearData(); stats(); }
 function applySave(d) {
@@ -1371,7 +1129,6 @@ function applySave(d) {
   d.zs.forEach(z => addZone(z.s, z.g));
   (d.gs || []).forEach(g => addGreyRaw(g.w, g.mask, g.f ? { type: 'Feature', properties: {}, geometry: g.f } : null));
   d.fs.forEach(f => addFlag(f.side, f.lat, f.lng));
-  d.bs.forEach(b => addBrig(b.side, b.label, b.name, b.lat, b.lng));
   if (d.view) map.setView([d.view.c.lat, d.view.c.lng], d.view.z);
   applyLayers(d.layers);
   stats();
@@ -1382,7 +1139,6 @@ function buildSave() {
     zones: zones.map(z => ({ s: z.status, g: z.f.geometry })),
     greys: greys.map(g => ({ w: g.w, mask: g.geom.geometry, f: g.f ? g.f.geometry : null })),
     flags: flags.map(f => ({ side: f.side, lat: f.lat, lng: f.lng })),
-    brigades: brigs.map(b => ({ side: b.side, label: b.label, name: b.name, lat: b.lat, lng: b.lng })),
     layers: curLayers(),
     view: { c: { lat: map.getCenter().lat, lng: map.getCenter().lng }, z: map.getZoom() }
   };
@@ -1412,9 +1168,8 @@ function parseSave(txt) {
   const zs = d.zones.filter(z => z && ST[z.s] && z.g && (z.g.type === 'Polygon' || z.g.type === 'MultiPolygon') && Array.isArray(z.g.coordinates));
   const gs = (Array.isArray(d.greys) ? d.greys : []).filter(g => g && typeof g.w === 'number' && g.mask && (g.mask.type === 'Polygon' || g.mask.type === 'MultiPolygon') && Array.isArray(g.mask.coordinates));
   const fs = d.flags.filter(f => f && (f.side === 'ua' || f.side === 'ru') && isFinite(f.lat) && isFinite(f.lng));
-  const bs = (Array.isArray(d.brigades) ? d.brigades : []).filter(b => b && (b.side === 'ua' || b.side === 'ru') && typeof b.label === 'string' && isFinite(b.lat) && isFinite(b.lng)).map(b => ({ ...b, name: typeof b.name === 'string' ? b.name : b.label }));
   const v = d.view, view = v && v.c && isFinite(v.c.lat) && isFinite(v.c.lng) && isFinite(v.z) ? v : null;
-  return { zs, gs, fs, bs, view, layers: d.layers };
+  return { zs, gs, fs, view, layers: d.layers };
 }
 async function loadFile(file) {
   if (!file) return;
@@ -1468,7 +1223,7 @@ function readAuto() {
   try {
     const t = localStorage.getItem(AS_KEY); if (!t) return null;
     const p = parseSave(t); p.at = JSON.parse(t).savedAt;
-    return (p.zs.length || p.fs.length || p.bs.length || p.gs.length) ? p : null;
+    return (p.zs.length || p.fs.length || p.gs.length) ? p : null;
   } catch (err) { return null; }
 }
 const auto0 = readAuto();
@@ -1479,7 +1234,6 @@ if (auto0) {
 }
 function updBuf() { $('bufV').textContent = (+$('bufW').value).toFixed(1).replace('.', decSep()) + ' ' + t('km'); }
 $('bufW').oninput = updBuf;
-$('bufNow').onclick = () => { flushAnim(); toast(t('t_bufno')); };   // стара автосмуга більше не потрібна — є маска
 function updAn() { $('anv').textContent = (+$('anT').value).toFixed(1).replace('.', decSep()) + ' ' + t('sec'); }
 $('anT').oninput = updAn; updAn();
 function applyTheme() {
