@@ -14,13 +14,10 @@ html,body{margin:0;height:100%;font-family:var(--font);color:var(--txt);backgrou
 #map.draw,#map.paint,#map.erase,#map.ua,#map.ru,#map.gmask{cursor:crosshair}
 #map.pan{cursor:grab}
 .leaflet-overlay-pane path:not(.leaflet-interactive){pointer-events:none}
-
-#menu{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;
-background:#0b1118;overflow:hidden}
+#menu{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:#0b1118;overflow:hidden}
 #menu .card{background:var(--bg);padding:40px 44px;border-radius:6px;max-width:440px;margin:16px;text-align:center;box-shadow:0 20px 60px #0008}
 #menuBg{position:absolute;inset:0;z-index:0;pointer-events:none;background:#0b1118}
-#menuShade{position:absolute;inset:0;z-index:1;pointer-events:none;
-background:linear-gradient(90deg,#000e 0%,#000a 14%,#0004 32%,#0000 45%,#0000 55%,#0004 68%,#000a 86%,#000e 100%),radial-gradient(ellipse at center,#0000 35%,#0007 100%),#0003}
+#menuShade{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#000e 0%,#000a 14%,#0004 32%,#0000 45%,#0000 55%,#0004 68%,#000a 86%,#000e 100%),radial-gradient(ellipse at center,#0000 35%,#0007 100%),#0003}
 #menu .card{position:relative;z-index:2;border:1px solid var(--line)}
 #mapsel{justify-content:center;margin:0 0 16px}
 #credit{font-size:11px;color:var(--mut);margin-top:12px;line-height:1.4}
@@ -33,14 +30,11 @@ background:linear-gradient(90deg,#000e 0%,#000a 14%,#0004 32%,#0000 45%,#0000 55
 .chk input{accent-color:var(--acc)}
 .leaflet-control-layers-list{max-height:72vh;overflow:auto}
 #drop{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:#000a;color:#fff;font-size:26px;font-weight:700;pointer-events:none}
-
-#panel{position:absolute;z-index:1000;top:12px;left:12px;width:262px;max-height:calc(100% - 24px);overflow:auto;
-background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;box-shadow:0 8px 24px #0006}
+#panel{position:absolute;z-index:1000;top:12px;left:12px;width:262px;max-height:calc(100% - 24px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;box-shadow:0 8px 24px #0006}
 .grp{margin-bottom:12px}
 .grp>b{display:block;font-size:13px;color:var(--mut);margin-bottom:6px;font-weight:600}
 .row{display:flex;flex-wrap:wrap;gap:6px}
-button.t{font:inherit;font-size:13px;padding:7px 9px;border-radius:4px;border:1px solid var(--line);
-background:var(--btn);color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:6px}
+button.t{font:inherit;font-size:13px;padding:7px 9px;border-radius:4px;border:1px solid var(--line);background:var(--btn);color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:6px}
 button.t:hover{background:var(--btnh)}
 button.t.on{border-color:var(--acc);background:var(--btnon);box-shadow:inset 0 0 0 1px var(--acc)}
 button.t:focus-visible,.big:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
@@ -52,13 +46,10 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 #stats{font-size:12px;color:var(--mut);border-top:1px solid var(--line);padding-top:8px;line-height:1.6}
 #stats i{font-style:normal;color:var(--txt)}
 .danger{border-color:#7a3030}
-#hint{position:absolute;z-index:1000;bottom:12px;left:50%;transform:translateX(-50%);background:var(--panel);
-border:1px solid var(--line);border-radius:4px;padding:8px 14px;font-size:13px;max-width:92%;text-align:center}
-#toast{position:absolute;z-index:1500;top:14px;left:50%;transform:translateX(-50%);background:var(--acc);color:var(--accT);
-font-weight:700;font-size:14px;padding:9px 16px;border-radius:4px;opacity:0;pointer-events:none;transition:opacity .2s}
+#hint{position:absolute;z-index:1000;bottom:12px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:8px 14px;font-size:13px;max-width:92%;text-align:center}
+#toast{position:absolute;z-index:1500;top:14px;left:50%;transform:translateX(-50%);background:var(--acc);color:var(--accT);font-weight:700;font-size:14px;padding:9px 16px;border-radius:4px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.show{opacity:1}
 [hidden]{display:none!important}
-
 .flag{position:relative;width:30px;height:34px}
 .flag:before{content:"";position:absolute;left:2px;top:0;width:3px;height:34px;background:#222;border-radius:2px}
 .flag i{position:absolute;left:5px;top:1px;width:24px;height:16px;border:1px solid #222;box-shadow:0 1px 3px #0007}
@@ -87,7 +78,6 @@ button.t:disabled{opacity:.4;cursor:default}
 </style>
 </head>
 <body>
-
 <div id="menu">
   <div id="menuBg"></div><div id="menuShade"></div>
   <div class="card">
@@ -186,12 +176,9 @@ button.t:disabled{opacity:.4;cursor:default}
 const ST = { free: { color: '#29b6f6' }, occ: { color: '#e53935' }, fight: { color: '#9e9e9e' } };
 let mode = 'draw', status = 'free';
 const COARSE = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
-let zones = [];       // {status, f, layer, autoGrey?}
-let greys = [];       // {w, geom (mask), layer} — masks from the Set-grey-zone tool
-let flags = [];
+let zones = [], greys = [], flags = [];
 let pts = [], tmp = null, ghost = null, eGhost = null;
 let gPts = [], gTmp = null;
-
 const $ = id => document.getElementById(id);
 
 // ---------- Languages & themes ----------
@@ -305,30 +292,30 @@ const ES = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
 const esriL = (svc, nz, o) => L.tileLayer(ES + svc + '/MapServer/tile/{z}/{y}/{x}', Object.assign({ maxZoom: 19, maxNativeZoom: nz, attribution: 'Tiles © Esri' }, o));
 const osmL = (url, nz, o) => L.tileLayer(url, Object.assign({ maxZoom: 19, maxNativeZoom: nz, attribution: '© OpenStreetMap' }, o));
 const BASES = [
-  ['esri',      'Esri · Map',                  esriL('World_Street_Map', 18)],
-  ['osm',       'OpenStreetMap',               osmL('https://tile.openstreetmap.org/{z}/{x}/{y}.png', 19)],
-  ['osmfr',     'OSM · French style',          osmL('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', 19, { subdomains: 'abc' })],
-  ['osmde',     'OSM · German style',          osmL('https://tile.openstreetmap.de/{z}/{x}/{y}.png', 18)],
-  ['hot',       'OSM · Humanitarian',          osmL('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', 19, { subdomains: 'abc', attribution: '© OpenStreetMap, HOT' })],
-  ['cyclo',     'CyclOSM · Bike roads',        osmL('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 19, { subdomains: 'abc', attribution: '© OpenStreetMap, CyclOSM' })],
-  ['topo',      'OpenTopoMap · Relief',        osmL('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 17, { subdomains: 'abc', attribution: '© OpenStreetMap, SRTM, OpenTopoMap' })],
-  ['esriLight', 'Esri · Light',                esriL('Canvas/World_Light_Gray_Base', 16)],
-  ['esriDark',  'Esri · Dark',                 esriL('Canvas/World_Dark_Gray_Base', 16)],
-  ['esriTopo',  'Esri · Topographic',          esriL('World_Topo_Map', 18)],
-  ['esriNat',   'Esri · National Geographic',  esriL('NatGeo_World_Map', 16)],
-  ['esriTerr',  'Esri · Terrain',              esriL('World_Terrain_Base', 13)],
-  ['esriShade', 'Esri · Shaded relief',        esriL('World_Shaded_Relief', 13)],
-  ['esriPhys',  'Esri · Physical',             esriL('World_Physical_Map', 8)],
-  ['esriOcean', 'Esri · Oceans',               esriL('Ocean/World_Ocean_Base', 13)],
-  ['sat',       'Esri · Satellite',            esriL('World_Imagery', 18)],
-  ['eox',       'Sentinel-2 · Satellite (EOX)',L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 19, maxNativeZoom: 13, attribution: 'Sentinel-2 cloudless © EOX (Copernicus)' })]
+  ['esri','Esri · Map',esriL('World_Street_Map', 18)],
+  ['osm','OpenStreetMap',osmL('https://tile.openstreetmap.org/{z}/{x}/{y}.png', 19)],
+  ['osmfr','OSM · French style',osmL('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', 19, { subdomains: 'abc' })],
+  ['osmde','OSM · German style',osmL('https://tile.openstreetmap.de/{z}/{x}/{y}.png', 18)],
+  ['hot','OSM · Humanitarian',osmL('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', 19, { subdomains: 'abc', attribution: '© OpenStreetMap, HOT' })],
+  ['cyclo','CyclOSM · Bike roads',osmL('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 19, { subdomains: 'abc', attribution: '© OpenStreetMap, CyclOSM' })],
+  ['topo','OpenTopoMap · Relief',osmL('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 17, { subdomains: 'abc', attribution: '© OpenStreetMap, SRTM, OpenTopoMap' })],
+  ['esriLight','Esri · Light',esriL('Canvas/World_Light_Gray_Base', 16)],
+  ['esriDark','Esri · Dark',esriL('Canvas/World_Dark_Gray_Base', 16)],
+  ['esriTopo','Esri · Topographic',esriL('World_Topo_Map', 18)],
+  ['esriNat','Esri · National Geographic',esriL('NatGeo_World_Map', 16)],
+  ['esriTerr','Esri · Terrain',esriL('World_Terrain_Base', 13)],
+  ['esriShade','Esri · Shaded relief',esriL('World_Shaded_Relief', 13)],
+  ['esriPhys','Esri · Physical',esriL('World_Physical_Map', 8)],
+  ['esriOcean','Esri · Oceans',esriL('Ocean/World_Ocean_Base', 13)],
+  ['sat','Esri · Satellite',esriL('World_Imagery', 18)],
+  ['eox','Sentinel-2 · Satellite (EOX)',L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 19, maxNativeZoom: 13, attribution: 'Sentinel-2 cloudless © EOX (Copernicus)' })]
 ];
 const OVERS = [
-  ['labels', 'Labels (Esri)',                 esriL('Reference/World_Boundaries_and_Places', 18, { zIndex: 10 })],
-  ['roads',  'Roads (Esri)',                  esriL('Reference/World_Transportation', 18, { zIndex: 10 })],
-  ['hill',   'Hillshade (Esri)',              esriL('Elevation/World_Hillshade', 15, { zIndex: 10, opacity: 0.6 })],
-  ['rail',   'Railways (OpenRailwayMap)',     osmL('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', 19, { subdomains: 'abc', zIndex: 10, attribution: '© OpenRailwayMap' })],
-  ['sea',    'Sea marks (OpenSeaMap)',        osmL('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', 18, { zIndex: 10, attribution: '© OpenSeaMap' })]
+  ['labels','Labels (Esri)',esriL('Reference/World_Boundaries_and_Places', 18, { zIndex: 10 })],
+  ['roads','Roads (Esri)',esriL('Reference/World_Transportation', 18, { zIndex: 10 })],
+  ['hill','Hillshade (Esri)',esriL('Elevation/World_Hillshade', 15, { zIndex: 10, opacity: 0.6 })],
+  ['rail','Railways (OpenRailwayMap)',osmL('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', 19, { subdomains: 'abc', zIndex: 10, attribution: '© OpenRailwayMap' })],
+  ['sea','Sea marks (OpenSeaMap)',osmL('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', 18, { zIndex: 10, attribution: '© OpenSeaMap' })]
 ];
 BASES[0][2].addTo(map);
 let layersCtl = null;
@@ -368,7 +355,6 @@ function toast(t) {
   clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200);
 }
 const zStyle = s => ({ color: ST[s].color, weight: 2, opacity: 1, fillColor: ST[s].color, fillOpacity: 0.4, lineJoin: 'miter', lineCap: 'butt' });
-
 function addZone(s, geometry, autoGrey) {
   const f = { type: 'Feature', properties: {}, geometry };
   const z = { status: s, f, autoGrey: !!autoGrey };
@@ -398,19 +384,14 @@ function mergeSame(z) {
 }
 function refreshZone(z) { z.layer.clearLayers(); z.layer.addData(z.f); }
 function delZone(z) { zoneLayer.removeLayer(z.layer); zones = zones.filter(x => x !== z); }
-
 function addFlag(side, lat, lng) {
-  const m = L.marker([lat, lng], {
-    icon: L.divIcon({ className: '', iconSize: [30, 34], iconAnchor: [4, 32],
-      html: '<div class="flag ' + side + '"><i></i></div>' })
-  }).addTo(flagLayer);
+  const m = L.marker([lat, lng], { icon: L.divIcon({ className: '', iconSize: [30, 34], iconAnchor: [4, 32], html: '<div class="flag ' + side + '"><i></i></div>' }) }).addTo(flagLayer);
   const rec = { side, lat, lng, m };
   const del = () => { flagLayer.removeLayer(m); flags = flags.filter(x => x !== rec); stats(); };
   m.on('contextmenu', del);
   m.on('click', () => { if (mode === 'del') del(); });
   flags.push(rec);
 }
-
 function stats() { renderStats(); afterChange(); }
 function renderStats() {
   const sum = { free: 0, occ: 0, fight: 0 };
@@ -421,7 +402,7 @@ function renderStats() {
 }
 
 // ---------- History & autosave ----------
-const HMAX = 60, AS_KEY = 'frontline-map-autosave-v7';
+const HMAX = 60, AS_KEY = 'frontline-map-autosave-v8';
 let hist = [], hi = -1, restoring = false, started = false, asT = null, asWarned = false;
 const snap = () => JSON.stringify({
   z: zones.map(z => [z.status, z.f.geometry, z.autoGrey ? 1 : 0]),
@@ -611,8 +592,7 @@ function startShape(j) {
   if (idle) base = zones.map(z => ({ status: z.status, f: z.f }));
   const A = $('anOn').checked ? prepAnim(j.st, geom, j.first) : null;
   const z = addZone(j.st, geom); carve(z); mergeSame(z);
-  if (j.st === 'free') makeContactGrey();      // grey band along the contact with occupied
-  if (j.st === 'occ') refreshGreys();          // keep mask bands aligned with the occupied border
+  if (j.st === 'free' || j.st === 'occ') rebuildAutoGreys();
   stats();
   const mk = (g, extra) => {
     const parts = [{ st: j.st, g }];
@@ -759,9 +739,9 @@ $('fin').onclick = finish;
 $('undo').onclick = () => { pts.pop(); redrawTmp(); };
 $('cancel').onclick = cancelDraw;
 
-// ---------- Contact grey: band along free↔occ frontier ----------
-// Rebuilds a grey strip that lies ONLY along the shared frontier of free and occ zones.
-// The strip is symmetrical: half inside free, half inside occ, total width = slider value.
+// ============================================================
+// Auto-grey system: mask bands + contact strip, rebuilt together
+// ============================================================
 function freeUnion() {
   let F = null;
   for (const z of zones) if (z.status === 'free') { F = F ? turf.union(F, z.f) : z.f; if (!F) return null; }
@@ -772,34 +752,7 @@ function occUnion() {
   for (const z of zones) if (z.status === 'occ' && !z.autoGrey) { O = O ? turf.union(O, z.f) : z.f; if (!O) return null; }
   return O;
 }
-function contactGreyBuild() {
-  try {
-    const F = freeUnion(), O = occUnion();
-    if (!F || !O) return null;
-    // shared territory is just the intersection of F and O, but since carve() keeps them disjoint,
-    // the "frontier" is where a small buffer of F and a small buffer of O overlap.
-    const w = +$('bufW').value / 2;
-    if (!(w > 0)) return null;
-    // frontier ring: pixels within w km of both F and O
-    const bF = turf.buffer(F, w, { units: 'kilometers', steps: 8 });
-    const bO = turf.buffer(O, w, { units: 'kilometers', steps: 8 });
-    if (!bF || !bO) return null;
-    const contact = turf.intersect(bF, bO);
-    if (!contact || turf.area(contact) < 1000) return null;
-    return contact;
-  } catch (err) { console.error(err); return null; }
-}
-// Remove all auto-contact fight zones, rebuild a single one from the current free/occ sets,
-// then carve + mergeSame so it visually merges with any hand-drawn fight zone it touches.
-function makeContactGrey() {
-  zones.filter(z => z.autoGrey).forEach(delZone);
-  const contact = contactGreyBuild();
-  if (!contact) return;
-  const z = addZone('fight', contact.geometry, true);
-  carve(z); mergeSame(z);
-}
-
-// ---------- Grey mask (Set grey zone tool, hugs the occupied border inside a mask) ----------
+// Strip that hugs the outer edge of the occupied border inside a mask.
 function greyBuild(maskF, wKm, O) {
   try {
     if (!O) return null;
@@ -814,6 +767,19 @@ function greyBuild(maskF, wKm, O) {
     return cl;
   } catch (err) { console.error(err); return null; }
 }
+// Strip along the shared free↔occ frontier: where a buffer of F and a buffer of O overlap.
+function contactGreyBuild(wKm, F, O) {
+  try {
+    if (!F || !O) return null;
+    if (!(wKm > 0)) return null;
+    const bF = turf.buffer(F, wKm, { units: 'kilometers', steps: 8 });
+    const bO = turf.buffer(O, wKm, { units: 'kilometers', steps: 8 });
+    if (!bF || !bO) return null;
+    const contact = turf.intersect(bF, bO);
+    if (!contact || turf.area(contact) < 1000) return null;
+    return contact;
+  } catch (err) { console.error(err); return null; }
+}
 function addGreyRaw(w, maskF) {
   const rec = { w, geom: maskF };
   rec.layer = L.geoJSON(maskF, { style: () => ({ color: ST.fight.color, weight: 0, opacity: 0, fillOpacity: 0 }), interactive: true }).addTo(zoneLayer);
@@ -825,35 +791,34 @@ function addGreyRaw(w, maskF) {
 function delGrey(rec) {
   zoneLayer.removeLayer(rec.layer);
   greys = greys.filter(x => x !== rec);
-  // mask deletion also re-derives the auto layers so removing a mask removes its band
+  rebuildAutoGreys();
+}
+// THE single source of truth: wipes every autoGrey zone, then rebuilds mask bands AND
+// the contact strip into one pool, adds them as one fight zone, carves + merges.
+function rebuildAutoGreys() {
   zones.filter(z => z.autoGrey).forEach(delZone);
-  const O = occUnion();
+  const O = occUnion(), F = freeUnion();
+  const w = +$('bufW').value / 2;
+  const parts = [];
   if (O && greys.length) {
-    let pool = null;
     for (const g of greys) {
       const b = greyBuild(g.geom, g.w, O);
-      if (!b) continue;
-      pool = pool ? (turf.union(pool, b) || pool) : b;
+      if (b) parts.push(b);
     }
-    if (pool) { const z = addZone('fight', pool.geometry, true); carve(z); mergeSame(z); }
   }
-  makeContactGrey();
-}
-// Called when occ changes: rebuilds mask bands, then re-derives contact grey.
-function refreshGreys() {
-  const O = occUnion();
-  zones.filter(z => z.autoGrey).forEach(delZone);
-  if (O && greys.length) {
-    let pool = null;
-    for (const g of greys) {
-      const b = greyBuild(g.geom, g.w, O);
-      if (!b) continue;
-      pool = pool ? (turf.union(pool, b) || pool) : b;
-    }
-    if (pool) { const z = addZone('fight', pool.geometry, true); carve(z); mergeSame(z); }
+  const cg = contactGreyBuild(w, F, O);
+  if (cg) parts.push(cg);
+  if (!parts.length) return;
+  let pool = parts[0];
+  for (let i = 1; i < parts.length; i++) {
+    const u = turf.union(pool, parts[i]);
+    if (u) pool = u;
   }
-  makeContactGrey();
+  const z = addZone('fight', pool.geometry, true);
+  carve(z); mergeSame(z);
 }
+// kept for legacy call sites
+function refreshGreys() { rebuildAutoGreys(); }
 
 // ---------- Grey-mask drawing (freehand) ----------
 function redrawGreyTmp() {
@@ -878,7 +843,7 @@ function finishGrey() {
   const O = occUnion();
   if (O) { try { hits = turf.booleanIntersects(maskF, O); } catch (e) { hits = false; } }
   addGreyRaw(w, maskF);
-  refreshGreys();
+  rebuildAutoGreys();
   const last = greys[greys.length - 1];
   const b = last ? greyBuild(last.geom, last.w, occUnion()) : null;
   if (b) toast(t('t_gdone'));
@@ -889,7 +854,7 @@ $('gfin').onclick = finishGrey;
 $('gundo').onclick = () => { gPts.pop(); redrawGreyTmp(); };
 $('gcancel').onclick = cancelGreyDraw;
 
-// ---------- Paint (any zone, any colour) ----------
+// ---------- Paint ----------
 function paintAt(ll, quiet) {
   flushAnim();
   const pt = turf.point([ll.lng, ll.lat]);
@@ -900,7 +865,7 @@ function paintAt(ll, quiet) {
   if (r === 0) {
     const old = z.status;
     z.status = status; z.autoGrey = false; refreshZone(z); mergeSame(z);
-    if (old === 'free' || old === 'occ' || status === 'free' || status === 'occ') { refreshGreys(); }
+    if (old === 'free' || old === 'occ' || status === 'free' || status === 'occ') rebuildAutoGreys();
     return stats();
   }
   try {
@@ -912,7 +877,7 @@ function paintAt(ll, quiet) {
     delZone(z);
     if (rest) addZone(old, rest.geometry, false);
     mergeSame(addZone(status, inside.geometry));
-    if (old === 'free' || old === 'occ' || status === 'free' || status === 'occ') { refreshGreys(); }
+    if (old === 'free' || old === 'occ' || status === 'free' || status === 'occ') rebuildAutoGreys();
   } catch (err) { console.error(err); toast(t('t_cut')); }
   stats();
 }
@@ -950,7 +915,7 @@ function eraseAt(px) {
       if (!ag && (st === 'occ' || st === 'free')) touched = true;
     } catch (err) { console.error(err); }
   }
-  if (touched) refreshGreys();
+  if (touched) rebuildAutoGreys();
   return changed;
 }
 function eraseTo(px) {
@@ -995,14 +960,12 @@ function flagAt(ll, side) {
   toast(side === 'ua' ? t('t_fua') : t('t_fru'));
 }
 
-// ---------- Pointer input (freehand only) ----------
+// ---------- Pointer input ----------
 let panFrom = null;
 function setPan() { if (mode === 'draw' || mode === 'paint' || mode === 'erase' || mode === 'gmask') map.dragging.disable(); else map.dragging.enable(); }
-
 let drawing = false, painting = false, erasing = false, gdrawing = false;
 let lastPaintPx = null, lastErasePx = null, lastDrag = 0;
 const mpp = ll => 40075016.686 * Math.cos(ll.lat * Math.PI / 180) / Math.pow(2, map.getZoom() + 8);
-
 function ptrDown(cp, ll) {
   if (mode === 'draw') { drawing = true; pts.push(ll); redrawTmp(); }
   else if (mode === 'gmask') { gdrawing = true; gPts.push(ll); redrawGreyTmp(); }
@@ -1055,7 +1018,6 @@ map.on('mousemove', e => {
 });
 window.addEventListener('mouseup', ptrUp);
 
-// Touch (freehand)
 let tState = null;
 const tMode = () => mode === 'draw' || mode === 'paint' || mode === 'erase' || mode === 'gmask';
 const mapEl = map.getContainer();
@@ -1114,7 +1076,6 @@ map.on('click', e => {
   if (mode === 'ua' || mode === 'ru') flagAt(e.latlng, mode);
   else if (mode === 'ruler') rulerClick(e.latlng);
 });
-
 document.addEventListener('keydown', e => {
   if ($('panel').hidden || !$('set').hidden) return;
   if ((mode === 'draw' || mode === 'gmask') && e.key === 'Escape') { mode === 'draw' ? cancelDraw() : cancelGreyDraw(); }
@@ -1139,6 +1100,7 @@ function applySave(d) {
   d.fs.forEach(f => addFlag(f.side, f.lat, f.lng));
   if (d.view) map.setView([d.view.c.lat, d.view.c.lng], d.view.z);
   applyLayers(d.layers);
+  rebuildAutoGreys();
   stats();
 }
 function buildSave() {
@@ -1233,7 +1195,7 @@ if (auto0) {
   $('menuResume').onclick = () => { startGame(); applySave(auto0); resetHist(); toast(t('t_restored')); };
 }
 function updBuf() { $('bufV').textContent = (+$('bufW').value).toFixed(1).replace('.', decSep()) + ' ' + t('km'); }
-$('bufW').oninput = () => { updBuf(); flushAnim(); refreshGreys(); stats(); };
+$('bufW').oninput = () => { updBuf(); flushAnim(); rebuildAutoGreys(); stats(); };
 function updAn() { $('anv').textContent = (+$('anT').value).toFixed(1).replace('.', decSep()) + ' ' + t('sec'); }
 $('anT').oninput = updAn; updAn();
 
