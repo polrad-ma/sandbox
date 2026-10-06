@@ -186,8 +186,8 @@ button.t:disabled{opacity:.4;cursor:default}
 const ST = { free: { color: '#29b6f6' }, occ: { color: '#e53935' }, fight: { color: '#9e9e9e' } };
 let mode = 'draw', status = 'free';
 const COARSE = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
-let zones = [];       // {status, f, layer}
-let greys = [];       // {w, geom (mask), f (result), layer}
+let zones = [];       // {status, f, layer, autoGrey?}  autoGrey=true means this fight zone came from a mask
+let greys = [];       // {w, geom (mask), layer} — mask is only a source, not a displayed zone
 let flags = [];
 let pts = [], tmp = null, tmpM = [], ghost = null, eGhost = null;
 let gPts = [], gTmp = null, gTmpM = [];
@@ -265,7 +265,7 @@ h_ruler:['Клікни першу точку, потім другу — поба
 h_del:['Клікни (торкнись) по прапору або сірій масці, щоб видалити. ПКМ теж видаляє.','Click (tap) a flag or a grey mask to delete it. Right-click also deletes.','Кликни (коснись) флага или серой маски, чтобы удалить. ПКМ тоже удаляет.'],
 h_ua:['Став прапор УА у звільненій зоні або біля її межі. ПКМ по прапору — видалити.','Place a UA flag in a liberated zone or near its edge. Right-click a flag to delete it.','Ставь флаг УКР в освобождённой зоне или у её границы. ПКМ по флагу — удалить.'],
 h_ru:['Став прапор РФ в окупованій зоні або біля її межі. ПКМ по прапору — видалити.','Place a RU flag in an occupied zone or near its edge. Right-click a flag to delete it.','Ставь флаг РФ в оккупированной зоне или у её границы. ПКМ по флагу — удалить.'],
-h_gmask:['Обведи область, де має з\u2019явитися сіра смуга вздовж кордону окупованої території. Товщина — повзунком. Коли потім перемальовуєш або розширюєш окуповану зону, смуга всередині маски сама підлаштується (товщина тієї маски). ПКМ або «Видалити значок» — прибрати маску.','Draw the area where a grey strip should hug the occupied border. Thickness is taken from the slider. When you later redraw or expand occupied territory, the strip inside this mask re-snaps automatically (with the mask\u2019s own thickness). Right-click or the delete tool removes a mask.','Обведи область, где должна появиться серая полоса вдоль границы оккупированной территории. Толщина — ползунком. Когда потом перерисовываешь или расширяешь оккупированную зону, полоса внутри маски сама подстроится (толщина этой маски). ПКМ или «Удалить значок» — убрать маску.'],
+h_gmask:['Обведи область, де має з\u2019явитися сіра смуга вздовж кордону окупованої території. Товщина — повзунком. Смуга зливається з будь-якою сірою зоною, якої торкається. ПКМ або «Видалити значок» — прибрати маску.','Draw the area where a grey strip should hug the occupied border. Thickness is taken from the slider. The strip merges with any grey zone it touches. Right-click or the delete tool removes a mask.','Обведи область, где должна появиться серая полоса вдоль границы оккупированной территории. Толщина — ползунком. Полоса сливается с любой серой зоной, которой касается. ПКМ или «Удалить значок» — убрать маску.'],
 ht_draw:['Один палець: тап — точка, ведення — вільна лінія (замкнеться при відпусканні). Два пальці — рух і масштаб карти.','One finger: tap adds a point, dragging draws a free line (closes on release). Two fingers pan and zoom the map.','Один палец: тап — точка, ведение — свободная линия (замкнётся при отпускании). Два пальца — движение и масштаб карты.'],
 ht_paint:['Торкнись або веди пальцем — колір змінюється лише в межах зони. Два пальці — рух і масштаб карти.','Touch or drag: the colour changes only within the zone. Two fingers pan and zoom the map.','Коснись или веди пальцем — цвет меняется только в пределах зоны. Два пальца — движение и масштаб карты.'],
 ht_erase:['Веди пальцем — ластик стирає зону під ним. Два пальці — рух і масштаб карти.','Drag a finger: the eraser removes the zone under it. Two fingers pan and zoom the map.','Веди пальцем — ластик стирает зону под ним. Два пальца — движение и масштаб карты.'],
@@ -359,9 +359,7 @@ function applyLayers(d) {
 map.createPane('zones').style.zIndex = 399;
 map.createPane('zanim').style.zIndex = 399;
 map.getPane('zanim').style.display = 'none';
-map.createPane('greys').style.zIndex = 398;
 const zoneLayer = L.layerGroup().addTo(map);
-const greyLayer = L.layerGroup().addTo(map);
 const flagLayer = L.layerGroup().addTo(map);
 
 // ---------- Helpers ----------
@@ -370,11 +368,10 @@ function toast(t) {
   clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200);
 }
 const zStyle = s => ({ color: ST[s].color, weight: 2, opacity: 1, fillColor: ST[s].color, fillOpacity: 0.4, lineJoin: 'miter', lineCap: 'butt' });
-const gStyle = () => ({ color: ST.fight.color, weight: 2, opacity: 1, fillColor: ST.fight.color, fillOpacity: 0.4, lineJoin: 'miter', lineCap: 'butt' });
 
-function addZone(s, geometry) {
+function addZone(s, geometry, autoGrey) {
   const f = { type: 'Feature', properties: {}, geometry };
-  const z = { status: s, f };
+  const z = { status: s, f, autoGrey: !!autoGrey };
   z.layer = L.geoJSON(f, { style: () => zStyle(z.status), interactive: false, pane: 'zones' }).addTo(zoneLayer);
   zones.push(z);
   return z;
@@ -385,12 +382,14 @@ function mergeSame(z) {
     while (found) {
       found = false;
       for (const o of zones) {
-        if (o === cur || o.status !== cur.status || !turf.booleanIntersects(cur.f, o.f)) continue;
+        if (o === cur || o.status !== cur.status) continue;
+        if (cur.autoGrey && o.autoGrey) continue;         // two auto-greys only merge if they physically intersect
+        if (!turf.booleanIntersects(cur.f, o.f)) continue;
         const u = turf.union(cur.f, o.f);
         if (!u) continue;
-        const st = cur.status;
+        const st = cur.status, ag = cur.autoGrey && o.autoGrey;
         delZone(cur); delZone(o);
-        cur = addZone(st, u.geometry);
+        cur = addZone(st, u.geometry, ag);
         found = true; break;
       }
     }
@@ -425,8 +424,8 @@ function renderStats() {
 const HMAX = 60, AS_KEY = 'frontline-map-autosave-v4';
 let hist = [], hi = -1, restoring = false, started = false, asT = null, asWarned = false;
 const snap = () => JSON.stringify({
-  z: zones.map(z => [z.status, z.f.geometry]),
-  g: greys.map(g => [g.w, g.geom.geometry, g.f ? g.f.geometry : null]),
+  z: zones.map(z => [z.status, z.f.geometry, z.autoGrey ? 1 : 0]),
+  g: greys.map(g => [g.w, g.geom.geometry]),
   f: flags.map(f => [f.side, f.lat, f.lng])
 });
 function updHist() { $('hundo').disabled = hi <= 0; $('hredo').disabled = hi >= hist.length - 1; }
@@ -447,8 +446,8 @@ function restore(str) {
   restoring = true;
   try {
     clearData();
-    d.z.forEach(z => addZone(z[0], z[1]));
-    (d.g || []).forEach(g => addGreyRaw(g[0], { type: 'Feature', properties: {}, geometry: g[1] }, g[2] ? { type: 'Feature', properties: {}, geometry: g[2] } : null));
+    d.z.forEach(z => addZone(z[0], z[1], z[2]));
+    (d.g || []).forEach(g => addGreyRaw(g[0], { type: 'Feature', properties: {}, geometry: g[1] }));
     d.f.forEach(f => addFlag(f[0], f[1], f[2]));
   } finally { restoring = false; }
   stats(); scheduleSave();
@@ -753,7 +752,7 @@ function carve(z) {
       if (o === z || o.status === z.status || !turf.intersect(o.f, z.f)) continue;
       const d = turf.difference(o.f, z.f), st = o.status;
       delZone(o);
-      if (d) addZone(st, d.geometry);
+      if (d) addZone(st, d.geometry, o.autoGrey);
     }
   } catch (err) { console.error(err); }
 }
@@ -762,17 +761,16 @@ $('undo').onclick = () => { pts.pop(); redrawTmp(); };
 $('cancel').onclick = cancelDraw;
 
 // ---------- Grey mask ----------
-// The result strip is added as a normal 'fight' zone (via addZone), which means it goes through the
-// same carve+mergeSame pipeline as any other zone. That is what makes it visibly merge with any
-// hand-drawn fight zone it touches: they become one polygon, no seam.
+// A mask doesn't own a displayed zone. On every change, ALL masks are re-evaluated: their bands are
+// collected, then the resulting set of auto-grey fight zones is replaced wholesale. Because auto-grey
+// zones go through mergeSame() with regular fight zones, they visibly merge with hand-drawn ones.
 function occUnion() {
   let O = null;
   for (const z of zones) if (z.status === 'occ') { O = O ? turf.union(O, z.f) : z.f; if (!O) return null; }
   return O;
 }
-function greyBuild(maskF, wKm) {
+function greyBuild(maskF, wKm, O) {
   try {
-    const O = occUnion();
     if (!O) return null;
     const maskClipped = turf.intersect(maskF, O);
     if (!maskClipped) return null;
@@ -785,73 +783,43 @@ function greyBuild(maskF, wKm) {
     return clipped;
   } catch (err) { console.error(err); return null; }
 }
-// Add the grey band as a proper 'fight' zone so mergeSame()/carve() work on it.
-// Keep a mask record so it can be rebuilt when occ changes.
-function setGreyBand(rec, f) {
-  if (rec.zone) { delZone(rec.zone); rec.zone = null; }
-  if (!f) { rec.f = null; return; }
-  // Punch the band out of every existing non-fight zone first (fight zones will merge below)
-  try {
-    for (const o of [...zones]) {
-      if (o.status === 'fight') continue;
-      if (!turf.booleanIntersects(o.f, f)) continue;
-      const d = turf.difference(o.f, f), st = o.status;
-      delZone(o);
-      if (d) addZone(st, d.geometry);
-    }
-  } catch (err) { console.error(err); }
-  const z = addZone('fight', f.geometry);
-  rec.zone = z;
-  rec.f = z.f;                       // may have grown after mergeSame — keep the merged shape
-  mergeSame(z);
-}
-function addGreyRaw(w, maskF, f) {
-  const rec = { w, geom: maskF, f: null, zone: null };
-  // invisible hit-target so clicking the band with the delete tool removes this mask
-  rec.layer = L.geoJSON(null, { style: gStyle, interactive: true, pane: 'greys' }).addTo(greyLayer);
-  const refreshHit = () => {
-    rec.layer.clearLayers();
-    if (rec.f) rec.layer.addData(rec.f);
-    else rec.layer.addData(maskF);   // fall back to the mask outline if no band yet
-  };
+function addGreyRaw(w, maskF) {
+  const rec = { w, geom: maskF };
+  // invisible hit-target so right-click / delete tool can remove the mask
+  rec.layer = L.geoJSON(maskF, { style: () => ({ color: ST.fight.color, weight: 0, opacity: 0, fillOpacity: 0 }), interactive: true }).addTo(zoneLayer);
   rec.layer.on('click', e => {
     if (mode === 'del') { L.DomEvent.stopPropagation(e); delGrey(rec); stats(); }
   });
   rec.layer.on('contextmenu', e => { L.DomEvent.stopPropagation(e); delGrey(rec); stats(); });
   greys.push(rec);
-  setGreyBand(rec, f);
-  refreshHit();
-  rec.refreshHit = refreshHit;
   return rec;
 }
-function addGrey(w, maskF) {
-  const f = greyBuild(maskF, w);
-  return addGreyRaw(w, maskF, f);
-}
 function delGrey(rec) {
-  if (rec.zone) delZone(rec.zone);
-  greyLayer.removeLayer(rec.layer);
+  zoneLayer.removeLayer(rec.layer);
   greys = greys.filter(x => x !== rec);
+  rebuildAutoGreys();                 // the mask's contribution is removed from the pool
 }
-
-// Rebuild the band for a mask; uses setGreyBand so it merges with any fight zone it touches.
-function setGreyGeom(rec, f) {
-  setGreyBand(rec, f);
-  if (rec.refreshHit) rec.refreshHit();
-}
-// Rebuild every mask that touches the current occ union.
-function refreshGreys() {
-  if (!greys.length) return;
+// The core: wipe every auto-grey fight zone, recompute the union of all mask bands, and add it back.
+// mergeSame() then folds the result into any hand-drawn fight zones it touches.
+function rebuildAutoGreys() {
   const O = occUnion();
-  if (!O) { for (const g of greys) setGreyGeom(g, null); return; }
+  // remove all auto-grey zones; keep track of whether any hand-drawn fight zone remains
+  zones.filter(z => z.autoGrey).forEach(delZone);
+  if (!O) return;
+  // build every mask's band and union them
+  let pool = null;
   for (const g of greys) {
-    try {
-      if (!turf.booleanIntersects(g.geom, O)) { if (g.f) setGreyGeom(g, null); continue; }
-      const f = greyBuild(g.geom, g.w);
-      setGreyGeom(g, f);
-    } catch (err) { console.error(err); }
+    const b = greyBuild(g.geom, g.w, O);
+    if (!b) continue;
+    pool = pool ? (turf.union(pool, b) || pool) : b;
   }
+  if (!pool) return;
+  // add as a single auto-grey zone; carve + mergeSame handle clipping and merging with hand-drawn fight zones
+  const z = addZone('fight', pool.geometry, true);
+  carve(z); mergeSame(z);
 }
+// legacy name kept so the rest of the code (refreshGreys) still works
+function refreshGreys() { rebuildAutoGreys(); }
 
 // ---------- Grey-mask drawing ----------
 function redrawGreyTmp(light) {
@@ -877,9 +845,15 @@ function finishGrey() {
   let hits = false;
   const O = occUnion();
   if (O) { try { hits = turf.booleanIntersects(maskF, O); } catch (e) { hits = false; } }
-  const rec = addGrey(w, maskF);
-  if (rec.f) toast(t('t_gdone'));
-  else if (!hits) toast(t('t_gnone'));
+  addGreyRaw(w, maskF);
+  rebuildAutoGreys();
+  if (greys.length && greys[greys.length - 1]) {
+    const last = greys[greys.length - 1];
+    // did this mask contribute anything?
+    const b = greyBuild(last.geom, last.w, O);
+    if (b) toast(t('t_gdone'));
+    else if (!hits) toast(t('t_gnone'));
+  }
   stats();
 }
 $('gfin').onclick = finishGrey;
@@ -894,15 +868,15 @@ function paintAt(ll, quiet) {
   if (!z) return quiet ? 0 : toast(t('t_inz'));
   if (z.status === status) return quiet ? 0 : toast(t('t_same'));
   const r = +$('brush').value;
-  if (r === 0) { z.status = status; refreshZone(z); mergeSame(z); return stats(); }
+  if (r === 0) { z.status = status; z.autoGrey = false; refreshZone(z); mergeSame(z); return stats(); }
   try {
     const circ = turf.circle(pt, r, { steps: 64, units: 'kilometers' });
     const inside = turf.intersect(z.f, circ);
     if (!inside) return;
     const rest = turf.difference(z.f, circ);
-    const old = z.status;
+    const old = z.status, ag = z.autoGrey;
     delZone(z);
-    if (rest) addZone(old, rest.geometry);
+    if (rest) addZone(old, rest.geometry, ag);
     mergeSame(addZone(status, inside.geometry));
   } catch (err) { console.error(err); toast(t('t_cut')); }
   stats();
@@ -934,9 +908,9 @@ function eraseAt(px) {
     if (only && z.status !== status) continue;
     try {
       if (!turf.booleanIntersects(z.f, circ)) continue;
-      const left = turf.difference(z.f, circ), st = z.status;
+      const left = turf.difference(z.f, circ), st = z.status, ag = z.autoGrey;
       delZone(z);
-      if (left) addZone(st, left.geometry);
+      if (left) addZone(st, left.geometry, ag);
       changed = true;
       if (st === 'occ') occTouched = true;
     } catch (err) { console.error(err); }
@@ -1155,14 +1129,15 @@ function clearData() {
   cancelDraw();
   cancelGreyDraw();
   zones.slice().forEach(delZone);
-  greys.slice().forEach(delGrey);
+  greys.slice().forEach(rec => { zoneLayer.removeLayer(rec.layer); });
+  greys = [];
   flags.forEach(f => flagLayer.removeLayer(f.m)); flags = [];
 }
 function clearAll() { clearData(); stats(); }
 function applySave(d) {
   clearData();
-  d.zs.forEach(z => addZone(z.s, z.g));
-  (d.gs || []).forEach(g => addGreyRaw(g.w, g.mask, g.f ? { type: 'Feature', properties: {}, geometry: g.f } : null));
+  d.zs.forEach(z => addZone(z.s, z.g, z.autoGrey));
+  (d.gs || []).forEach(g => addGreyRaw(g.w, g.mask));
   d.fs.forEach(f => addFlag(f.side, f.lat, f.lng));
   if (d.view) map.setView([d.view.c.lat, d.view.c.lng], d.view.z);
   applyLayers(d.layers);
@@ -1170,9 +1145,9 @@ function applySave(d) {
 }
 function buildSave() {
   return {
-    app: 'frontline-map', v: 3, savedAt: new Date().toISOString(),
-    zones: zones.map(z => ({ s: z.status, g: z.f.geometry })),
-    greys: greys.map(g => ({ w: g.w, mask: g.geom.geometry, f: g.f ? g.f.geometry : null })),
+    app: 'frontline-map', v: 4, savedAt: new Date().toISOString(),
+    zones: zones.map(z => ({ s: z.status, g: z.f.geometry, autoGrey: z.autoGrey ? 1 : 0 })),
+    greys: greys.map(g => ({ w: g.w, mask: g.geom.geometry })),
     flags: flags.map(f => ({ side: f.side, lat: f.lat, lng: f.lng })),
     layers: curLayers(),
     view: { c: { lat: map.getCenter().lat, lng: map.getCenter().lng }, z: map.getZoom() }
@@ -1200,7 +1175,8 @@ async function saveFile() {
 function parseSave(txt) {
   const d = JSON.parse(txt);
   if (!d || !Array.isArray(d.zones) || !Array.isArray(d.flags)) throw new Error('format');
-  const zs = d.zones.filter(z => z && ST[z.s] && z.g && (z.g.type === 'Polygon' || z.g.type === 'MultiPolygon') && Array.isArray(z.g.coordinates));
+  const zs = d.zones.filter(z => z && ST[z.s] && z.g && (z.g.type === 'Polygon' || z.g.type === 'MultiPolygon') && Array.isArray(z.g.coordinates))
+    .map(z => ({ s: z.s, g: z.g, autoGrey: z.autoGrey ? 1 : 0 }));
   const gs = (Array.isArray(d.greys) ? d.greys : []).filter(g => g && typeof g.w === 'number' && g.mask && (g.mask.type === 'Polygon' || g.mask.type === 'MultiPolygon') && Array.isArray(g.mask.coordinates));
   const fs = d.flags.filter(f => f && (f.side === 'ua' || f.side === 'ru') && isFinite(f.lat) && isFinite(f.lng));
   const v = d.view, view = v && v.c && isFinite(v.c.lat) && isFinite(v.c.lng) && isFinite(v.z) ? v : null;
