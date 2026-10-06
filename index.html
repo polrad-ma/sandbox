@@ -738,19 +738,31 @@ function animFrame(now) {
   if (now - aLast >= 40) { aLast = now; if (renderAnim(now)) return endAnim(); }
   aRaf = requestAnimationFrame(animFrame);
 }
-// Обрізає геометрію по окупованих і сірих зонах: все, що поза ними (порожня карта, звільнені зони), відкидається
+// Clips the shape to occupied + grey zones: anything outside them (empty map, liberated land) is dropped.
+// Each zone is clipped separately so one bad geometry cannot make the whole check fail.
 function clipToEnemy(geom) {
-  try {
-    let area = null;
-    for (const o of zones) {
-      if (o.status !== 'occ' && o.status !== 'fight') continue;
-      area = area ? turf.union(area, o.f) : o.f;
-      if (!area) return null;
+  const g = { type: 'Feature', properties: {}, geometry: geom };
+  const bb = turf.bbox(g), pieces = [];
+  for (const o of zones) {
+    if (o.status !== 'occ' && o.status !== 'fight') continue;
+    const ob = turf.bbox(o.f);
+    if (ob[0] > bb[2] || ob[2] < bb[0] || ob[1] > bb[3] || ob[3] < bb[1]) continue;   // far away - skip
+    let r = null;
+    try { r = turf.intersect(g, o.f); }
+    catch (err) {                                                                        // invalid/degenerate geometry: repair and retry
+      try { r = turf.intersect(turf.buffer(g, 0), turf.buffer(o.f, 0)); } catch (e2) { console.error(e2); }
     }
-    if (!area) return null;
-    const r = turf.intersect({ type: 'Feature', properties: {}, geometry: geom }, area);
-    return r ? r.geometry : null;
-  } catch (err) { console.error(err); return null; }
+    if (r) pieces.push(r);
+  }
+  if (!pieces.length) return null;
+  let res = pieces[0];
+  for (let i = 1; i < pieces.length; i++) {
+    try { const u = turf.union(res, pieces[i]); if (u) { res = u; continue; } } catch (err) { console.error(err); }
+    const cs = [];                                                                       // union failed: keep the pieces as a multipolygon
+    pieces.forEach(p => turf.flatten(p).features.forEach(f => cs.push(f.geometry.coordinates)));
+    return turf.multiPolygon(cs).geometry;
+  }
+  return res.geometry;
 }
 // Нова фігура вирізає свою площу із зон іншого статусу — перекриттів і подвійного підрахунку немає
 function carve(z) {
