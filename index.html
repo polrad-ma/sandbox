@@ -182,20 +182,23 @@ button.t:disabled{opacity:.4;cursor:default}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 <script>
-// ---------- Дані та налаштування ----------
+// ---------- Data & settings ----------
 const ST = { free: { color: '#29b6f6' }, occ: { color: '#e53935' }, fight: { color: '#9e9e9e' } };
 let mode = 'draw', status = 'free';
 const COARSE = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
 let zones = [];       // {status, f, layer}
 let greys = [];       // {w, geom (mask), f (result), layer}
 let flags = [];
+let pts = [], tmp = null, tmpM = [], ghost = null, eGhost = null;
+let gPts = [], gTmp = null, gTmpM = [];
+
 const $ = id => document.getElementById(id);
 
-// ---------- Мови та теми ----------
+// ---------- Languages & themes ----------
 const D = {
 title:['Лінія фронту','Front Line','Линия фронта'],
 menuTxt:['Малюй зони на карті, перефарбовуй ділянки в межах існуючих полігонів, став прапори вздовж лінії фронту та задавай сірі зони вручну.','Draw zones on the map, repaint areas inside existing polygons, plant flags along the front line and set grey zones by hand.','Рисуй зоны на карте, перекрашивай участки в пределах существующих полигонов, ставь флаги вдоль линии фронта и задавай серые зоны вручную.'],
-start:['Почати грати','Start playing','Начать играть'], newgame:['Нова гра','New game','Новая игра'],
+start:['Почати гру','Start playing','Начать игру'], newgame:['Нова гра','New game','Новая игра'],
 resume:['▶ Продовжити','▶ Continue','▶ Продолжить'],
 loadsave:['📂 Завантажити збереження','📂 Load a save','📂 Загрузить сохранение'],
 settings:['⚙️ Налаштування','⚙️ Settings','⚙️ Настройки'], settingsT:['Налаштування','Settings','Настройки'],
@@ -276,9 +279,11 @@ if (!(cfg.lang in LIDX)) cfg.lang = 'en';
 function saveCfg() { try { localStorage.setItem(SET_KEY, JSON.stringify(cfg)); } catch (e) {} }
 const t = (k, ...a) => { const e = D[k]; let s = e ? e[LIDX[cfg.lang]] : k; a.forEach((v, i) => { s = s.split('{' + i + '}').join(v); }); return s; };
 const decSep = () => cfg.lang === 'en' ? '.' : ',';
+
 const LN = [['Terrain','Місцевість','Рельеф местности'],['Shaded relief','Тіньовий рельєф','Теневой рельеф'],['French style','Французький стиль','Французский стиль'],['German style','Німецький стиль','Немецкий стиль'],['Topographic','Топографічна','Топографическая'],['Physical','Фізична карта','Физическая карта'],['Hillshade','Тіні рельєфу','Тени рельефа'],['Railways','Залізниці','Железные дороги'],['Sea marks','Морські знаки','Морские знаки'],['Bike roads','Велодороги','Велодороги'],['Relief','Рельєф','Рельеф'],['Map','Схема','Схема'],['Light','Світла','Светлая'],['Dark','Темна','Тёмная'],['Oceans','Океани','Океаны'],['Satellite','Супутник','Спутник'],['Labels','Підписи','Подписи'],['Roads','Дороги','Дороги']];
 const LNre = new RegExp(LN.map(x => x[0]).join('|'), 'g');
 const ln = s => LNre ? s.replace(LNre, w => LN.find(x => x[0] === w)[LIDX[cfg.lang]]) : s;
+
 const THEMES = [
 ['nightops','f','Нічна варта|Night Ops|Ночной дозор','#0b140d #101d12 #24402a #d6f5d9 #7fa886 #5dff7a #04140a #16281a #1d3623 #23422b'],
 ['cyber','f','Кіберпанк|Cyberpunk|Киберпанк','#120a24 #1a1033 #43276e #f1e6ff #a28dc9 #ff2e97 #1a0614 #261548 #321d5c #3d2270'],
@@ -293,7 +298,7 @@ const THEMES = [
 ];
 const TKEYS = ['bg','panel','line','txt','mut','acc','accT','btn','btnh','btnon'], DEF_FONT = '"Trebuchet MS","Segoe UI",system-ui,sans-serif';
 
-// ---------- Карта ----------
+// ---------- Map ----------
 const map = L.map('map', { doubleClickZoom: false, zoomControl: false, boxZoom: false, maxZoom: 19 }).setView([48.6, 32.2], 6);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 const ES = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
@@ -354,20 +359,17 @@ function applyLayers(d) {
 map.createPane('zones').style.zIndex = 399;
 map.createPane('zanim').style.zIndex = 399;
 map.getPane('zanim').style.display = 'none';
-map.createPane('greys').style.zIndex = 398;              // сіра маска (результат) — під зонами
-map.createPane('gmview').style.zIndex = 397;
+map.createPane('greys').style.zIndex = 398;
 const zoneLayer = L.layerGroup().addTo(map);
 const greyLayer = L.layerGroup().addTo(map);
-const gViewLayer = L.layerGroup().addTo(map);
 const flagLayer = L.layerGroup().addTo(map);
 
-// ---------- Допоміжні ----------
+// ---------- Helpers ----------
 function toast(t) {
   const el = $('toast'); el.textContent = t; el.classList.add('show');
   clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200);
 }
 const zStyle = s => ({ color: ST[s].color, weight: 2, opacity: 1, fillColor: ST[s].color, fillOpacity: 0.4, lineJoin: 'miter', lineCap: 'butt' });
-// сіра смуга виглядає як «Йдуть бої» зі звичайної зони — товста лінія + 40% заливка
 const gStyle = () => ({ color: ST.fight.color, weight: 2, opacity: 1, fillColor: ST.fight.color, fillOpacity: 0.4, lineJoin: 'miter', lineCap: 'butt' });
 
 function addZone(s, geometry) {
@@ -419,8 +421,8 @@ function renderStats() {
     '<br>' + t('flags') + ': <i>' + flags.length + '</i>';
 }
 
-// ---------- Історія та автозбереження ----------
-const HMAX = 60, AS_KEY = 'frontline-map-autosave-v3';
+// ---------- History & autosave ----------
+const HMAX = 60, AS_KEY = 'frontline-map-autosave-v4';
 let hist = [], hi = -1, restoring = false, started = false, asT = null, asWarned = false;
 const snap = () => JSON.stringify({
   z: zones.map(z => [z.status, z.f.geometry]),
@@ -429,9 +431,9 @@ const snap = () => JSON.stringify({
 });
 function updHist() { $('hundo').disabled = hi <= 0; $('hredo').disabled = hi >= hist.length - 1; }
 function commit() {
-  const t = snap();
-  if (hi >= 0 && hist[hi] === t) return;
-  hist.length = hi + 1; hist.push(t);
+  const s = snap();
+  if (hi >= 0 && hist[hi] === s) return;
+  hist.length = hi + 1; hist.push(s);
   if (hist.length > HMAX) hist.shift();
   hi = hist.length - 1; updHist();
 }
@@ -453,7 +455,7 @@ function restore(str) {
 }
 function doUndo() { flushAnim(); if (hi <= 0) return toast(t('t_nou')); hi--; restore(hist[hi]); updHist(); toast(t('t_u')); }
 function doRedo() { flushAnim(); if (hi >= hist.length - 1) return toast(t('t_nor')); hi++; restore(hist[hi]); updHist(); toast(t('t_r')); }
-function saveAuto(force) {
+function saveAuto() {
   if (!started) return;
   try {
     const d = buildSave();
@@ -462,10 +464,10 @@ function saveAuto(force) {
   } catch (err) { if (!asWarned) { asWarned = true; toast(t('t_noas')); } }
 }
 function scheduleSave() { clearTimeout(asT); asT = setTimeout(saveAuto, 600); }
-window.addEventListener('pagehide', () => saveAuto(true));
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAuto(true); });
+window.addEventListener('pagehide', () => saveAuto());
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAuto(); });
 
-// ---------- Лінійка ----------
+// ---------- Ruler ----------
 const rulerLayer = L.layerGroup().addTo(map);
 let rA = null, rLine = null, rLab = null, rDone = false;
 const fmtKm = km => km < 1 ? Math.round(km * 1000) + ' ' + t('m') : km.toFixed(km < 10 ? 2 : 1).replace('.', decSep()) + ' ' + t('km');
@@ -485,7 +487,7 @@ function rulerClick(ll) {
   rDraw(ll); rDot(ll); rDone = true;
 }
 
-// ---------- Режими та інтерфейс ----------
+// ---------- Modes & UI ----------
 function setMode(m) {
   if (mode === 'draw' && m !== 'draw') cancelDraw();
   if (mode === 'gmask' && m !== 'gmask') cancelGreyDraw();
@@ -499,7 +501,7 @@ function setMode(m) {
   $('gmaskBox').hidden = m !== 'gmask';
   updHint();
   clearGhost();
-  setPan(false);
+  setPan();
 }
 function setStatus(s) {
   status = s;
@@ -514,7 +516,8 @@ function startGame() {
   started = true;
   map.invalidateSize(); setMode('draw'); setStatus('free'); updBrush(); updErase(); resetHist(); stats();
 }
-// ---------- Реальна лінія фронту ----------
+
+// ---------- Real front line ----------
 const FRONT_TOL = 0.002;
 async function loadFront() {
   const RAW = 'https://raw.githubusercontent.com/cyterat/deepstate-map-data/main/data/';
@@ -576,7 +579,7 @@ $('brush').oninput = updBrush;
 function updErase() { $('ev').textContent = $('esize').value + ' px'; }
 $('esize').oninput = updErase;
 
-// ---------- Малювання полігонів ----------
+// ---------- Polygon drawing ----------
 function redrawTmp(light) {
   if (tmp) map.removeLayer(tmp);
   tmpM.forEach(m => map.removeLayer(m)); tmpM = []; tmp = null;
@@ -599,7 +602,7 @@ function finish() {
   startShape(job);
 }
 
-// ---------- Анімація просування ----------
+// ---------- Advance animation ----------
 let anims = [], base = null, aRaf = 0, aLast = 0, aStatic = null, aDyn = null, aDynZ = [];
 function startShape(j) {
   let geom = j.geom;
@@ -611,7 +614,7 @@ function startShape(j) {
   if (idle) base = zones.map(z => ({ status: z.status, f: z.f }));
   const A = $('anOn').checked ? prepAnim(j.st, geom, j.first) : null;
   const z = addZone(j.st, geom); carve(z); mergeSame(z);
-  if (j.st === 'occ') refreshGreys();       // перемальовування будь-якої окупованої зони оновлює всі маски
+  if (j.st === 'occ') refreshGreys();
   stats();
   const mk = (g, extra) => {
     const parts = [{ st: j.st, g }];
@@ -757,18 +760,8 @@ function carve(z) {
 $('fin').onclick = finish;
 $('undo').onclick = () => { pts.pop(); redrawTmp(); };
 $('cancel').onclick = cancelDraw;
-document.addEventListener('keydown', e => {
-  if ((mode !== 'draw' && mode !== 'gmask') || $('panel').hidden || !$('set').hidden) return;
-  const tg = e.target;
-  if (tg && (tg.tagName === 'TEXTAREA' || (tg.tagName === 'INPUT' && /^(text|search)$/.test(tg.type)) || (e.key === 'Enter' && tg.tagName === 'BUTTON'))) return;
-  if (e.key === 'Enter') mode === 'draw' ? finish() : finishGrey();
-  else if (e.key === 'Escape') mode === 'draw' ? cancelDraw() : cancelGreyDraw();
-  else if (e.key === 'Backspace') { if (mode === 'draw') { pts.pop(); redrawTmp(); } else { gPts.pop(); redrawGreyTmp(); } }
-});
 
-// ---------- Сіра маска ----------
-// Користувач малює полігон-маску. Усередині маски сіра смуга прилипає до зовнішнього боку окупованої території.
-// Маска запам'ятовує свою товщину w. Коли occ перемальовується — маски перебудовуються.
+// ---------- Grey mask ----------
 function occUnion() {
   let O = null;
   for (const z of zones) if (z.status === 'occ') { O = O ? turf.union(O, z.f) : z.f; if (!O) return null; }
@@ -801,8 +794,7 @@ function addGreyRaw(w, maskF, f) {
 }
 function addGrey(w, maskF) {
   const f = greyBuild(maskF, w);
-  const rec = addGreyRaw(w, maskF, f);
-  return rec;
+  return addGreyRaw(w, maskF, f);
 }
 function setGreyGeom(rec, f) {
   rec.f = f;
@@ -811,26 +803,20 @@ function setGreyGeom(rec, f) {
 }
 function delGrey(rec) { greyLayer.removeLayer(rec.layer); greys = greys.filter(x => x !== rec); }
 
-// Перебудовує всі маски, які мають шанс бути поруч із окупованою територією.
-// Простіше й надійніше: перебудувати кожну маску, яка перетинається з об'єднанням occ АБО з результатом.
 function refreshGreys() {
   if (!greys.length) return;
   const O = occUnion();
-  if (!O) return;
+  if (!O) { for (const g of greys) setGreyGeom(g, null); return; }
   for (const g of greys) {
     try {
-      if (!turf.booleanIntersects(g.geom, O)) {
-        // маска не торкається oкупованої зони — результат має бути порожнім
-        if (g.f) setGreyGeom(g, null);
-        continue;
-      }
+      if (!turf.booleanIntersects(g.geom, O)) { if (g.f) setGreyGeom(g, null); continue; }
       const f = greyBuild(g.geom, g.w);
       setGreyGeom(g, f);
     } catch (err) { console.error(err); }
   }
 }
 
-// ---------- Малювання сірої маски ----------
+// ---------- Grey-mask drawing ----------
 function redrawGreyTmp(light) {
   if (gTmp) map.removeLayer(gTmp);
   gTmpM.forEach(m => map.removeLayer(m)); gTmpM = []; gTmp = null;
@@ -863,7 +849,7 @@ $('gfin').onclick = finishGrey;
 $('gundo').onclick = () => { gPts.pop(); redrawGreyTmp(); };
 $('gcancel').onclick = cancelGreyDraw;
 
-// ---------- Покраска ----------
+// ---------- Paint ----------
 function paintAt(ll, quiet) {
   flushAnim();
   const pt = turf.point([ll.lng, ll.lat]);
@@ -894,7 +880,7 @@ map.on('mousemove', e => {
 });
 map.on('mouseout', clearGhost);
 
-// ---------- Ластик ----------
+// ---------- Eraser ----------
 function eraseAt(px) {
   flushAnim();
   const d = +$('esize').value, r = d / 2, only = $('eonly').checked;
@@ -915,7 +901,7 @@ function eraseAt(px) {
       delZone(z);
       if (left) addZone(st, left.geometry);
       changed = true;
-      if (z.status === 'occ') occTouched = true;
+      if (st === 'occ') occTouched = true;
     } catch (err) { console.error(err); }
   }
   if (occTouched) refreshGreys();
@@ -941,7 +927,7 @@ map.on('mousemove', e => {
   eGhost.setLatLng(e.latlng).setRadius(rad);
 });
 
-// ---------- Прапори ----------
+// ---------- Flags ----------
 function flagAt(ll, side) {
   const need = side === 'ua' ? 'free' : 'occ';
   const mpp = 40075016.686 * Math.cos(ll.lat * Math.PI / 180) / Math.pow(2, map.getZoom() + 8);
@@ -963,7 +949,7 @@ function flagAt(ll, side) {
   toast(side === 'ua' ? t('t_fua') : t('t_fru'));
 }
 
-// ---------- Кліки по карті ----------
+// ---------- Pointer input ----------
 let panFrom = null;
 function setPan() { if (mode === 'draw' || mode === 'paint' || mode === 'erase' || mode === 'gmask') map.dragging.disable(); else map.dragging.enable(); }
 
@@ -1010,7 +996,7 @@ function ptrMove(cp, ll) {
 }
 function ptrUp() {
   const had = drawing || painting || erasing || gdrawing;
-  if (painting) { renderStats(); }
+  if (painting) renderStats();
   if (drawing && freehand) { lastDrag = Date.now(); finishFree(); }
   if (gdrawing && gfree) { lastDrag = Date.now(); finishGreyFree(); }
   drawing = freehand = painting = erasing = gdrawing = gfree = false; panFrom = null;
@@ -1040,6 +1026,7 @@ map.on('mousemove', e => {
 });
 window.addEventListener('mouseup', ptrUp);
 
+// Touch
 let tState = null;
 const tMode = () => mode === 'draw' || mode === 'paint' || mode === 'erase' || mode === 'gmask';
 const mapEl = map.getContainer();
@@ -1071,6 +1058,7 @@ function tEnd(e) {
 }
 mapEl.addEventListener('touchend', tEnd, { passive: false });
 mapEl.addEventListener('touchcancel', tEnd, { passive: false });
+
 function finishFree() {
   if (pts.length < 3) return cancelDraw();
   if (pts.length >= 4) {
@@ -1095,6 +1083,7 @@ function finishGreyFree() {
   }
   finishGrey();
 }
+
 function handleClick(cp, ll) {
   if (mode === 'draw') {
     if (pts.length > 2 && map.latLngToContainerPoint(pts[0]).distanceTo(cp) < 12) return finish();
@@ -1114,7 +1103,16 @@ map.on('dblclick', () => {
   else if (mode === 'gmask' && gPts.length > 3) { gPts.pop(); finishGrey(); }
 });
 
-// ---------- Збереження / завантаження ----------
+document.addEventListener('keydown', e => {
+  if ((mode !== 'draw' && mode !== 'gmask') || $('panel').hidden || !$('set').hidden) return;
+  const tg = e.target;
+  if (tg && (tg.tagName === 'TEXTAREA' || (tg.tagName === 'INPUT' && /^(text|search)$/.test(tg.type)) || (e.key === 'Enter' && tg.tagName === 'BUTTON'))) return;
+  if (e.key === 'Enter') mode === 'draw' ? finish() : finishGrey();
+  else if (e.key === 'Escape') mode === 'draw' ? cancelDraw() : cancelGreyDraw();
+  else if (e.key === 'Backspace') { if (mode === 'draw') { pts.pop(); redrawTmp(); } else { gPts.pop(); redrawGreyTmp(); } }
+});
+
+// ---------- Save / load ----------
 function clearData() {
   flushAnim();
   cancelDraw();
@@ -1175,14 +1173,10 @@ async function loadFile(file) {
   if (!file) return;
   let d;
   try { d = parseSave(await file.text()); } catch (e) { return toast(t('t_notsave')); }
-  if (zones.length || flags.length || greys.length) {
-    if (!confirm(t('c_load'))) return;
-  }
+  if (zones.length || flags.length || greys.length) { if (!confirm(t('c_load'))) return; }
   if (!$('menu').hidden) startGame();
-  try {
-    applySave(d);
-    toast(t('t_loaded', file.name));
-  } catch (e) { console.error(e); toast(t('t_bad')); }
+  try { applySave(d); toast(t('t_loaded', file.name)); }
+  catch (e) { console.error(e); toast(t('t_bad')); }
 }
 $('save').onclick = saveFile;
 const pickFile = () => { $('file').value = ''; $('file').click(); };
@@ -1201,7 +1195,7 @@ window.addEventListener('drop', e => {
 });
 $('clear').onclick = () => { if (confirm(t('c_clear'))) clearAll(); };
 
-// ---------- Історія / клавіші / панель ----------
+// ---------- History buttons & shortcuts ----------
 $('hundo').onclick = doUndo; $('hredo').onclick = doRedo;
 $('ptoggle').onclick = () => { const c = $('panel').classList.toggle('collapsed'); $('ptoggle').textContent = c ? '▴' : '▾'; };
 document.addEventListener('keydown', e => {
@@ -1218,11 +1212,11 @@ document.addEventListener('keydown', e => {
   } else if (e.code === 'KeyY' || (e.code === 'KeyZ' && e.shiftKey)) { e.preventDefault(); doRedo(); }
 });
 
-// ---------- Автозбереження ----------
+// ---------- Autosave restore ----------
 function readAuto() {
   try {
-    const t = localStorage.getItem(AS_KEY); if (!t) return null;
-    const p = parseSave(t); p.at = JSON.parse(t).savedAt;
+    const raw = localStorage.getItem(AS_KEY); if (!raw) return null;
+    const p = parseSave(raw); p.at = JSON.parse(raw).savedAt;
     return (p.zs.length || p.fs.length || p.gs.length) ? p : null;
   } catch (err) { return null; }
 }
@@ -1236,25 +1230,27 @@ function updBuf() { $('bufV').textContent = (+$('bufW').value).toFixed(1).replac
 $('bufW').oninput = updBuf;
 function updAn() { $('anv').textContent = (+$('anT').value).toFixed(1).replace('.', decSep()) + ' ' + t('sec'); }
 $('anT').oninput = updAn; updAn();
+
+// ---------- Settings & theme ----------
 function applyTheme() {
   const th = THEMES.find(x => x[0] === cfg.theme) || THEMES.find(x => x[0] === 'blue'), v = th[3].split(' '), st = document.documentElement.style;
   TKEYS.forEach((k, i) => st.setProperty('--' + k, v[i]));
   st.setProperty('--font', th[4] || DEF_FONT);
 }
 function renderSettings() {
-  const mk = (cls, label, on, fn, sw) => {
+  const mk = (label, on, fn, sw) => {
     const b = document.createElement('button'); b.className = 't' + (on ? ' on' : '');
     if (sw) { const s = document.createElement('span'); s.className = 'swp'; s.style.background = 'linear-gradient(135deg,' + sw[0] + ' 50%,' + sw[1] + ' 50%)'; b.appendChild(s); }
     b.appendChild(document.createTextNode(label)); b.onclick = fn; return b;
   };
   const L = $('langs'); L.textContent = '';
   [['uk', 'Українська'], ['en', 'English'], ['ru', 'Русский']].forEach(([c, n]) =>
-    L.appendChild(mk('', n, cfg.lang === c, () => { cfg.lang = c; saveCfg(); applyLang(); })));
+    L.appendChild(mk(n, cfg.lang === c, () => { cfg.lang = c; saveCfg(); applyLang(); })));
   [[$('thF'), 'f'], [$('thP'), 'p']].forEach(([box, g]) => {
     box.textContent = '';
     THEMES.filter(x => x[1] === g).forEach(x => {
       const v = x[3].split(' ');
-      box.appendChild(mk('', x[2].split('|')[LIDX[cfg.lang]], cfg.theme === x[0], () => { cfg.theme = x[0]; saveCfg(); applyTheme(); renderSettings(); }, [v[0], v[5]]));
+      box.appendChild(mk(x[2].split('|')[LIDX[cfg.lang]], cfg.theme === x[0], () => { cfg.theme = x[0]; saveCfg(); applyTheme(); renderSettings(); }, [v[0], v[5]]));
     });
   });
 }
