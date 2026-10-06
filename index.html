@@ -762,6 +762,9 @@ $('undo').onclick = () => { pts.pop(); redrawTmp(); };
 $('cancel').onclick = cancelDraw;
 
 // ---------- Grey mask ----------
+// The result strip is added as a normal 'fight' zone (via addZone), which means it goes through the
+// same carve+mergeSame pipeline as any other zone. That is what makes it visibly merge with any
+// hand-drawn fight zone it touches: they become one polygon, no seam.
 function occUnion() {
   let O = null;
   for (const z of zones) if (z.status === 'occ') { O = O ? turf.union(O, z.f) : z.f; if (!O) return null; }
@@ -782,27 +785,61 @@ function greyBuild(maskF, wKm) {
     return clipped;
   } catch (err) { console.error(err); return null; }
 }
+// Add the grey band as a proper 'fight' zone so mergeSame()/carve() work on it.
+// Keep a mask record so it can be rebuilt when occ changes.
+function setGreyBand(rec, f) {
+  if (rec.zone) { delZone(rec.zone); rec.zone = null; }
+  if (!f) { rec.f = null; return; }
+  // Punch the band out of every existing non-fight zone first (fight zones will merge below)
+  try {
+    for (const o of [...zones]) {
+      if (o.status === 'fight') continue;
+      if (!turf.booleanIntersects(o.f, f)) continue;
+      const d = turf.difference(o.f, f), st = o.status;
+      delZone(o);
+      if (d) addZone(st, d.geometry);
+    }
+  } catch (err) { console.error(err); }
+  const z = addZone('fight', f.geometry);
+  rec.zone = z;
+  rec.f = z.f;                       // may have grown after mergeSame — keep the merged shape
+  mergeSame(z);
+}
 function addGreyRaw(w, maskF, f) {
-  const rec = { w, geom: maskF, f: f || null };
-  rec.layer = L.geoJSON(f || maskF, { style: gStyle, interactive: true, pane: 'greys' }).addTo(greyLayer);
+  const rec = { w, geom: maskF, f: null, zone: null };
+  // invisible hit-target so clicking the band with the delete tool removes this mask
+  rec.layer = L.geoJSON(null, { style: gStyle, interactive: true, pane: 'greys' }).addTo(greyLayer);
+  const refreshHit = () => {
+    rec.layer.clearLayers();
+    if (rec.f) rec.layer.addData(rec.f);
+    else rec.layer.addData(maskF);   // fall back to the mask outline if no band yet
+  };
   rec.layer.on('click', e => {
     if (mode === 'del') { L.DomEvent.stopPropagation(e); delGrey(rec); stats(); }
   });
   rec.layer.on('contextmenu', e => { L.DomEvent.stopPropagation(e); delGrey(rec); stats(); });
   greys.push(rec);
+  setGreyBand(rec, f);
+  refreshHit();
+  rec.refreshHit = refreshHit;
   return rec;
 }
 function addGrey(w, maskF) {
   const f = greyBuild(maskF, w);
   return addGreyRaw(w, maskF, f);
 }
-function setGreyGeom(rec, f) {
-  rec.f = f;
-  rec.layer.clearLayers();
-  rec.layer.addData(f || rec.geom);
+function delGrey(rec) {
+  if (rec.zone) delZone(rec.zone);
+  greyLayer.removeLayer(rec.layer);
+  greys = greys.filter(x => x !== rec);
 }
-function delGrey(rec) { greyLayer.removeLayer(rec.layer); greys = greys.filter(x => x !== rec); }
 
+// Rebuild the band for a mask; uses setGreyBand so it merges with any fight zone it touches.
+function setGreyGeom(rec, f) {
+  setGreyBand(rec, f);
+  if (rec.refreshHit) rec.refreshHit();
+}
+// Rebuild every mask that touches the current occ union.
 function refreshGreys() {
   if (!greys.length) return;
   const O = occUnion();
