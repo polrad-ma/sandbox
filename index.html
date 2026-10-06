@@ -187,7 +187,7 @@ const ST = { free: { color: '#29b6f6' }, occ: { color: '#e53935' }, fight: { col
 let mode = 'draw', status = 'free';
 const COARSE = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
 let zones = [];       // {status, f, layer, autoGrey?}
-let greys = [];       // {w, geom (mask), layer}
+let greys = [];       // {w, geom (mask), layer} — masks from the Set-grey-zone tool
 let flags = [];
 let pts = [], tmp = null, ghost = null, eGhost = null;
 let gPts = [], gTmp = null;
@@ -257,7 +257,7 @@ bufOn:['Enabled','Включено'],
 t_g3:['Grey-zone mask needs at least 3 points','Маска серой зоны — минимум 3 точки'],
 t_gdone:['Grey zone updated','Серая зона обновлена'],
 t_gnone:['No occupied territory under the mask','Под маской нет оккупированной территории'],
-h_draw:['Hold the mouse button and drag to trace the shape: release to close it. "Liberated" can only be drawn over occupied or grey zones (the excess is clipped). Pan the map: Shift + drag or middle mouse button.','Зажми кнопку мыши и веди — фигура замкнётся при отпускании. «Освобождено» рисуется только на оккупированной или серой зоне (лишнее обрезается). Движение карты: Shift + перетаскивание или средняя кнопка мыши.'],
+h_draw:['Hold the mouse button and drag to trace the shape: release to close it. "Liberated" can only be drawn over occupied or grey zones (the excess is clipped), and a grey contact strip appears along the shared frontier with occupied territory. Pan the map: Shift + drag or middle mouse button.','Зажми кнопку мыши и веди — фигура замкнётся при отпускании. «Освобождено» рисуется только на оккупированной или серой зоне (лишнее обрезается), а вдоль общей границы с оккупированной территорией появляется серая контактная полоса. Движение карты: Shift + перетаскивание или средняя кнопка мыши.'],
 h_erase:['Hold and drag: the eraser removes a piece of the zone under the cursor (size in screen pixels). Pan the map: Shift + drag or middle mouse button.','Зажми и води: ластик стирает кусочек зоны под курсором (размер — в пикселях экрана). Движение карты: Shift + перетаскивание или средняя кнопка мыши.'],
 h_paint:['Click, or hold and drag: the colour changes only within the zone under the cursor. Adjacent areas of the same colour merge. Pan the map: Shift + drag or middle mouse button.','Кликни или зажми и води: цвет меняется только в пределах зоны под курсором. Смежные участки одного цвета сливаются. Движение карты: Shift + перетаскивание или средняя кнопка мыши.'],
 h_pan:['Drag the map with the mouse. Wheel to zoom.','Тяни карту мышью. Колесо — масштаб.'],
@@ -421,7 +421,7 @@ function renderStats() {
 }
 
 // ---------- History & autosave ----------
-const HMAX = 60, AS_KEY = 'frontline-map-autosave-v6';
+const HMAX = 60, AS_KEY = 'frontline-map-autosave-v7';
 let hist = [], hi = -1, restoring = false, started = false, asT = null, asWarned = false;
 const snap = () => JSON.stringify({
   z: zones.map(z => [z.status, z.f.geometry, z.autoGrey ? 1 : 0]),
@@ -604,7 +604,6 @@ let anims = [], base = null, aRaf = 0, aLast = 0, aStatic = null, aDyn = null, a
 function startShape(j) {
   let geom = j.geom;
   if (j.st === 'free') {
-    // ORIGINAL BEHAVIOUR: clip to union of occ + fight. Nothing outside them survives.
     geom = clipToEnemy(geom);
     if (!geom) return toast(t('t_fonly'));
   }
@@ -612,8 +611,8 @@ function startShape(j) {
   if (idle) base = zones.map(z => ({ status: z.status, f: z.f }));
   const A = $('anOn').checked ? prepAnim(j.st, geom, j.first) : null;
   const z = addZone(j.st, geom); carve(z); mergeSame(z);
-  // only masks that hug the occupied border — grey zones are rebuilt when occ changes
-  if (j.st === 'occ' || j.st === 'fight') refreshGreys();
+  if (j.st === 'free') makeContactGrey();      // grey band along the contact with occupied
+  if (j.st === 'occ') refreshGreys();          // keep mask bands aligned with the occupied border
   stats();
   const mk = (g, extra) => {
     const parts = [{ st: j.st, g }];
@@ -733,7 +732,6 @@ function animFrame(now) {
   if (now - aLast >= 40) { aLast = now; if (renderAnim(now)) return endAnim(); }
   aRaf = requestAnimationFrame(animFrame);
 }
-// original clip: keep only the part of geom that lies inside occ ∪ fight
 function clipToEnemy(geom) {
   try {
     let area = null;
@@ -761,12 +759,47 @@ $('fin').onclick = finish;
 $('undo').onclick = () => { pts.pop(); redrawTmp(); };
 $('cancel').onclick = cancelDraw;
 
-// ---------- Grey mask (hugs the OCCUPIED border only) ----------
+// ---------- Contact grey: band along free↔occ frontier ----------
+// Rebuilds a grey strip that lies ONLY along the shared frontier of free and occ zones.
+// The strip is symmetrical: half inside free, half inside occ, total width = slider value.
+function freeUnion() {
+  let F = null;
+  for (const z of zones) if (z.status === 'free') { F = F ? turf.union(F, z.f) : z.f; if (!F) return null; }
+  return F;
+}
 function occUnion() {
   let O = null;
   for (const z of zones) if (z.status === 'occ' && !z.autoGrey) { O = O ? turf.union(O, z.f) : z.f; if (!O) return null; }
   return O;
 }
+function contactGreyBuild() {
+  try {
+    const F = freeUnion(), O = occUnion();
+    if (!F || !O) return null;
+    // shared territory is just the intersection of F and O, but since carve() keeps them disjoint,
+    // the "frontier" is where a small buffer of F and a small buffer of O overlap.
+    const w = +$('bufW').value / 2;
+    if (!(w > 0)) return null;
+    // frontier ring: pixels within w km of both F and O
+    const bF = turf.buffer(F, w, { units: 'kilometers', steps: 8 });
+    const bO = turf.buffer(O, w, { units: 'kilometers', steps: 8 });
+    if (!bF || !bO) return null;
+    const contact = turf.intersect(bF, bO);
+    if (!contact || turf.area(contact) < 1000) return null;
+    return contact;
+  } catch (err) { console.error(err); return null; }
+}
+// Remove all auto-contact fight zones, rebuild a single one from the current free/occ sets,
+// then carve + mergeSame so it visually merges with any hand-drawn fight zone it touches.
+function makeContactGrey() {
+  zones.filter(z => z.autoGrey).forEach(delZone);
+  const contact = contactGreyBuild();
+  if (!contact) return;
+  const z = addZone('fight', contact.geometry, true);
+  carve(z); mergeSame(z);
+}
+
+// ---------- Grey mask (Set grey zone tool, hugs the occupied border inside a mask) ----------
 function greyBuild(maskF, wKm, O) {
   try {
     if (!O) return null;
@@ -792,23 +825,35 @@ function addGreyRaw(w, maskF) {
 function delGrey(rec) {
   zoneLayer.removeLayer(rec.layer);
   greys = greys.filter(x => x !== rec);
-  rebuildAutoGreys();
+  // mask deletion also re-derives the auto layers so removing a mask removes its band
+  zones.filter(z => z.autoGrey).forEach(delZone);
+  const O = occUnion();
+  if (O && greys.length) {
+    let pool = null;
+    for (const g of greys) {
+      const b = greyBuild(g.geom, g.w, O);
+      if (!b) continue;
+      pool = pool ? (turf.union(pool, b) || pool) : b;
+    }
+    if (pool) { const z = addZone('fight', pool.geometry, true); carve(z); mergeSame(z); }
+  }
+  makeContactGrey();
 }
-function rebuildAutoGreys() {
+// Called when occ changes: rebuilds mask bands, then re-derives contact grey.
+function refreshGreys() {
   const O = occUnion();
   zones.filter(z => z.autoGrey).forEach(delZone);
-  if (!O || !greys.length) return;
-  let pool = null;
-  for (const g of greys) {
-    const b = greyBuild(g.geom, g.w, O);
-    if (!b) continue;
-    pool = pool ? (turf.union(pool, b) || pool) : b;
+  if (O && greys.length) {
+    let pool = null;
+    for (const g of greys) {
+      const b = greyBuild(g.geom, g.w, O);
+      if (!b) continue;
+      pool = pool ? (turf.union(pool, b) || pool) : b;
+    }
+    if (pool) { const z = addZone('fight', pool.geometry, true); carve(z); mergeSame(z); }
   }
-  if (!pool) return;
-  const z = addZone('fight', pool.geometry, true);
-  carve(z); mergeSame(z);
+  makeContactGrey();
 }
-function refreshGreys() { rebuildAutoGreys(); }
 
 // ---------- Grey-mask drawing (freehand) ----------
 function redrawGreyTmp() {
@@ -833,7 +878,7 @@ function finishGrey() {
   const O = occUnion();
   if (O) { try { hits = turf.booleanIntersects(maskF, O); } catch (e) { hits = false; } }
   addGreyRaw(w, maskF);
-  rebuildAutoGreys();
+  refreshGreys();
   const last = greys[greys.length - 1];
   const b = last ? greyBuild(last.geom, last.w, occUnion()) : null;
   if (b) toast(t('t_gdone'));
@@ -852,7 +897,12 @@ function paintAt(ll, quiet) {
   if (!z) return quiet ? 0 : toast(t('t_inz'));
   if (z.status === status) return quiet ? 0 : toast(t('t_same'));
   const r = +$('brush').value;
-  if (r === 0) { z.status = status; z.autoGrey = false; refreshZone(z); mergeSame(z); return stats(); }
+  if (r === 0) {
+    const old = z.status;
+    z.status = status; z.autoGrey = false; refreshZone(z); mergeSame(z);
+    if (old === 'free' || old === 'occ' || status === 'free' || status === 'occ') { refreshGreys(); }
+    return stats();
+  }
   try {
     const circ = turf.circle(pt, r, { steps: 64, units: 'kilometers' });
     const inside = turf.intersect(z.f, circ);
@@ -862,6 +912,7 @@ function paintAt(ll, quiet) {
     delZone(z);
     if (rest) addZone(old, rest.geometry, false);
     mergeSame(addZone(status, inside.geometry));
+    if (old === 'free' || old === 'occ' || status === 'free' || status === 'occ') { refreshGreys(); }
   } catch (err) { console.error(err); toast(t('t_cut')); }
   stats();
 }
@@ -887,7 +938,7 @@ function eraseAt(px) {
   }
   ring.push(ring[0]);
   const circ = turf.polygon([ring]);
-  let changed = false, occTouched = false;
+  let changed = false, touched = false;
   for (const z of [...zones]) {
     if (only && z.status !== status) continue;
     try {
@@ -896,10 +947,10 @@ function eraseAt(px) {
       delZone(z);
       if (left) addZone(st, left.geometry, ag);
       changed = true;
-      if (st === 'occ' && !ag) occTouched = true;
+      if (!ag && (st === 'occ' || st === 'free')) touched = true;
     } catch (err) { console.error(err); }
   }
-  if (occTouched) refreshGreys();
+  if (touched) refreshGreys();
   return changed;
 }
 function eraseTo(px) {
@@ -1182,7 +1233,7 @@ if (auto0) {
   $('menuResume').onclick = () => { startGame(); applySave(auto0); resetHist(); toast(t('t_restored')); };
 }
 function updBuf() { $('bufV').textContent = (+$('bufW').value).toFixed(1).replace('.', decSep()) + ' ' + t('km'); }
-$('bufW').oninput = updBuf;
+$('bufW').oninput = () => { updBuf(); flushAnim(); refreshGreys(); stats(); };
 function updAn() { $('anv').textContent = (+$('anT').value).toFixed(1).replace('.', decSep()) + ' ' + t('sec'); }
 $('anT').oninput = updAn; updAn();
 
