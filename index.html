@@ -11,13 +11,17 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;font-family:var(--font);color:var(--txt);background:var(--bg)}
 #map{position:absolute;inset:0;background:#e9e5dc;user-select:none;-webkit-user-select:none}
-#map.draw,#map.paint,#map.erase,#map.ua,#map.ru,#map.gmask{cursor:crosshair}
+#map.draw,#map.paint,#map.erase,#map.ua,#map.ru,#map.bua,#map.bru{cursor:crosshair}
 #map.pan{cursor:grab}
 .leaflet-overlay-pane path:not(.leaflet-interactive){pointer-events:none}
-#menu{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:#0b1118;overflow:hidden}
+
+/* Головне меню */
+#menu{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;
+background:#0b1118;overflow:hidden}
 #menu .card{background:var(--bg);padding:40px 44px;border-radius:6px;max-width:440px;margin:16px;text-align:center;box-shadow:0 20px 60px #0008}
 #menuBg{position:absolute;inset:0;z-index:0;pointer-events:none;background:#0b1118}
-#menuShade{position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,#000e 0%,#000a 14%,#0004 32%,#0000 45%,#0000 55%,#0004 68%,#000a 86%,#000e 100%),radial-gradient(ellipse at center,#0000 35%,#0007 100%),#0003}
+#menuShade{position:absolute;inset:0;z-index:1;pointer-events:none;
+background:linear-gradient(90deg,#000e 0%,#000a 14%,#0004 32%,#0000 45%,#0000 55%,#0004 68%,#000a 86%,#000e 100%),radial-gradient(ellipse at center,#0000 35%,#0007 100%),#0003}
 #menu .card{position:relative;z-index:2;border:1px solid var(--line)}
 #mapsel{justify-content:center;margin:0 0 16px}
 #credit{font-size:11px;color:var(--mut);margin-top:12px;line-height:1.4}
@@ -30,11 +34,15 @@ html,body{margin:0;height:100%;font-family:var(--font);color:var(--txt);backgrou
 .chk input{accent-color:var(--acc)}
 .leaflet-control-layers-list{max-height:72vh;overflow:auto}
 #drop{position:fixed;inset:0;z-index:3000;display:flex;align-items:center;justify-content:center;background:#000a;color:#fff;font-size:26px;font-weight:700;pointer-events:none}
-#panel{position:absolute;z-index:1000;top:12px;left:12px;width:262px;max-height:calc(100% - 24px);overflow:auto;background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;box-shadow:0 8px 24px #0006}
+
+/* Панель керування */
+#panel{position:absolute;z-index:1000;top:12px;left:12px;width:262px;max-height:calc(100% - 24px);overflow:auto;
+background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:12px;box-shadow:0 8px 24px #0006}
 .grp{margin-bottom:12px}
 .grp>b{display:block;font-size:13px;color:var(--mut);margin-bottom:6px;font-weight:600}
 .row{display:flex;flex-wrap:wrap;gap:6px}
-button.t{font:inherit;font-size:13px;padding:7px 9px;border-radius:4px;border:1px solid var(--line);background:var(--btn);color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:6px}
+button.t{font:inherit;font-size:13px;padding:7px 9px;border-radius:4px;border:1px solid var(--line);
+background:var(--btn);color:var(--txt);cursor:pointer;display:flex;align-items:center;gap:6px}
 button.t:hover{background:var(--btnh)}
 button.t.on{border-color:var(--acc);background:var(--btnon);box-shadow:inset 0 0 0 1px var(--acc)}
 button.t:focus-visible,.big:focus-visible{outline:2px solid var(--acc);outline-offset:2px}
@@ -46,15 +54,37 @@ input[type=range]{width:100%;accent-color:var(--acc)}
 #stats{font-size:12px;color:var(--mut);border-top:1px solid var(--line);padding-top:8px;line-height:1.6}
 #stats i{font-style:normal;color:var(--txt)}
 .danger{border-color:#7a3030}
-#hint{position:absolute;z-index:1000;bottom:12px;left:50%;transform:translateX(-50%);background:var(--panel);border:1px solid var(--line);border-radius:4px;padding:8px 14px;font-size:13px;max-width:92%;text-align:center}
-#toast{position:absolute;z-index:1500;top:14px;left:50%;transform:translateX(-50%);background:var(--acc);color:var(--accT);font-weight:700;font-size:14px;padding:9px 16px;border-radius:4px;opacity:0;pointer-events:none;transition:opacity .2s}
+#hint{position:absolute;z-index:1000;bottom:12px;left:50%;transform:translateX(-50%);background:var(--panel);
+border:1px solid var(--line);border-radius:4px;padding:8px 14px;font-size:13px;max-width:92%;text-align:center}
+#toast{position:absolute;z-index:1500;top:14px;left:50%;transform:translateX(-50%);background:var(--acc);color:var(--accT);
+font-weight:700;font-size:14px;padding:9px 16px;border-radius:4px;opacity:0;pointer-events:none;transition:opacity .2s}
 #toast.show{opacity:1}
 [hidden]{display:none!important}
+
+/* Прапори на мапі */
 .flag{position:relative;width:30px;height:34px}
 .flag:before{content:"";position:absolute;left:2px;top:0;width:3px;height:34px;background:#222;border-radius:2px}
 .flag i{position:absolute;left:5px;top:1px;width:24px;height:16px;border:1px solid #222;box-shadow:0 1px 3px #0007}
 .flag.ua i{background:linear-gradient(#0057b7 50%,#ffd700 50%)}
 .flag.ru i{background:linear-gradient(#fff 33.3%,#0039a6 33.3% 66.6%,#d52b1e 66.6%)}
+.bg{width:46px;height:38px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:700 12px/1 "Trebuchet MS","Segoe UI",sans-serif;
+border:2px solid;border-radius:3px;box-shadow:0 1px 4px #0009;cursor:grab;user-select:none;-webkit-user-select:none;white-space:nowrap}
+.bg:active{cursor:grabbing}
+.bgi{color:#fff;display:flex;line-height:0}
+.bgi svg{display:block;width:28px;height:15px;fill:none;stroke:currentColor;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.bgi img{display:block;width:30px;height:18px;object-fit:contain}
+.bgt{line-height:1}
+.bic{display:flex;line-height:0;color:#fff;background:#0006;border-radius:3px;padding:2px 3px}
+.bic svg{width:22px;height:12px;fill:none;stroke:currentColor;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.bg.ua{background:#0057b7;border-color:#ffd700;color:#fff}
+.bg.ru{background:#b71c1c;border-color:#fff;color:#fff}
+#bq{width:100%;font:inherit;font-size:13px;padding:6px 8px;margin-bottom:6px;border-radius:4px;border:1px solid var(--line);background:var(--btn);color:var(--txt)}
+#blist{max-height:230px;overflow:auto;display:flex;flex-direction:column;gap:4px}
+#blist .t{justify-content:flex-start;text-align:left;padding:5px 7px;line-height:1.25}
+#blist .bd{flex:none;min-width:38px;text-align:center;font-weight:700;font-size:11px;padding:3px 4px;border-radius:3px;border:1px solid}
+#blist .bd.ua{background:#0057b7;border-color:#ffd700;color:#fff}
+#blist .bd.ru{background:#b71c1c;border-color:#fff;color:#fff}
+#blist .nm{font-size:12px}@media(max-width:560px){#panel{width:calc(100% - 24px)}#hint{bottom:8px}}
 #map{touch-action:none}
 #map.ruler{cursor:crosshair}
 button.t:disabled{opacity:.4;cursor:default}
@@ -78,6 +108,7 @@ button.t:disabled{opacity:.4;cursor:default}
 </style>
 </head>
 <body>
+
 <div id="menu">
   <div id="menuBg"></div><div id="menuShade"></div>
   <div class="card">
@@ -117,6 +148,8 @@ button.t:disabled{opacity:.4;cursor:default}
       <button class="t" data-mode="erase"><span data-i="m_erase"></span></button>
       <button class="t" data-mode="ua"><span class="mini ua"></span><span data-i="m_ua"></span></button>
       <button class="t" data-mode="ru"><span class="mini ru"></span><span data-i="m_ru"></span></button>
+      <button class="t" data-mode="bua"><span class="mini ua"></span><span data-i="m_bua"></span></button>
+      <button class="t" data-mode="bru"><span class="mini ru"></span><span data-i="m_bru"></span></button>
       <button class="t" data-mode="ruler"><span data-i="m_ruler"></span></button>
       <button class="t" data-mode="del"><span data-i="m_del"></span></button>
     </div>
@@ -131,6 +164,7 @@ button.t:disabled{opacity:.4;cursor:default}
   <div class="grp"><b data-i="buf"></b>
     <label class="chk"><input type="checkbox" id="bufOn" checked> <span><span data-i="bufOn"></span>: <span id="bufV"></span></span></label>
     <input type="range" id="bufW" min="0.5" max="10" step="0.5" value="2">
+    <div class="row" style="margin-top:6px"><button class="t" id="bufNow" data-i="bufNow"></button></div>
   </div>
   <div class="grp" id="drawBox" hidden><b data-i="curshape"></b>
     <div class="row">
@@ -148,6 +182,10 @@ button.t:disabled{opacity:.4;cursor:default}
     <input type="range" id="esize" min="1" max="300" step="1" value="40">
     <label class="chk"><input type="checkbox" id="eonly"> <span data-i="eonly"></span></label>
   </div>
+  <div class="grp" id="brigBox" hidden><b><span data-i="brigade"></span>: <span id="bsel"></span></b>
+    <input type="search" id="bq" data-ph="bq" autocomplete="off">
+    <div id="blist"></div>
+  </div>
   <div class="grp row">
     <button class="t" id="save" data-i="save"></button>
     <button class="t" id="load" data-i="load"></button>
@@ -164,84 +202,129 @@ button.t:disabled{opacity:.4;cursor:default}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Turf.js/6.5.0/turf.min.js"></script>
 <script>
-// ---------- Data & settings ----------
+// ---------- Дані та налаштування ----------
 const ST = { free: { color: '#29b6f6' }, occ: { color: '#e53935' }, fight: { color: '#9e9e9e' } };
 let mode = 'draw', status = 'free';
 const COARSE = !!(window.matchMedia && matchMedia('(pointer:coarse)').matches);
-let zones = [], flags = [];
-let pts = [], tmp = null, ghost = null, eGhost = null;
+let zones = [];   // {status, f (GeoJSON Feature), layer}
+let flags = [];   // {side, lat, lng, m}
+let brigs = [];   // {side, label, name, lat, lng, m}
+const selBrig = { ua: null, ru: null };
+let pts = [], tmp = null, tmpM = [], ghost = null, eGhost = null;
+
 const $ = id => document.getElementById(id);
 
-// ---------- Languages & themes ----------
+// ---------- Мови та теми ----------
 const D = {
-title:['Front Line','Линия фронта'],
-menuTxt:['Draw zones on the map, repaint areas inside existing polygons, plant flags along the front line. A grey contact strip is built automatically along the free↔occupied frontier.','Рисуй зоны на карте, перекрашивай участки в пределах существующих полигонов, ставь флаги вдоль линии фронта. Серая контактная полоса строится автоматически вдоль границы «освобождено↔оккупация».'],
-start:['Start playing','Начать игру'], newgame:['New game','Новая игра'],
-resume:['▶ Continue','▶ Продолжить'],
-loadsave:['📂 Load a save','📂 Загрузить сохранение'],
-settings:['⚙️ Settings','⚙️ Настройки'], settingsT:['Settings','Настройки'],
-lang:['Interface language','Язык интерфейса'],
-themeF:['Themed looks','Тематические темы'], themeP:['Solid colours','Однотонные темы'],
-collapse:['Collapse / expand','Свернуть / развернуть'],
-ctrl:['Controls','Управление'], undo:['↶ Undo','↶ Отменить'], redo:['↷ Redo','↷ Вернуть'],
-mode:['Mode','Режим'],
-m_pan:['✋ Pan map','✋ Движение карты'], m_draw:['✏️ Draw shape','✏️ Рисовать фигуру'],
-m_paint:['🖌️ Paint','🖌️ Покраска'], m_erase:['🧽 Eraser','🧽 Ластик'],
-m_ua:['UA flag','Флаг УКР'], m_ru:['RU flag','Флаг РФ'],
-m_ruler:['📏 Ruler','📏 Линейка'], m_del:['🗑️ Delete marker','🗑️ Удалить значок'],
-zonecol:['Zone / colour','Зона / цвет'],
-st_free:['Liberated','Освобождено'], st_occ:['Occupied','Оккупация'], st_fight:['Fighting','Идут бои'],
-curshape:['Current shape','Текущая фигура'], finish:['Finish','Завершить'],
-stepback:['Step back','Шаг назад'], cancel:['Cancel','Отмена'],
-anim:['🎞 Advance animation','🎞 Анимация продвижения'],
-brush:['Brush','Кисть'], brush_r:['radius {0} km','радиус {0} км'], brush_all:['whole zone','вся зона'],
-eraser:['Eraser','Ластик'], eonly:['Erase only the selected zone colour','Стирать только выбранный цвет зоны'],
-save:['💾 Save to file','💾 Сохранить в файл'], load:['📂 Load from file','📂 Загрузить из файла'],
-clear:['Clear all','Очистить всё'],
-flags:['Flags','Флаги'],
-km:['km','км'], m:['m','м'], km2:['km²','км²'], sec:['s','с'],
-dropT:['Drop the save file','Отпусти файл сохранения'],
-t_esri:['Esri failed to load, switching to OpenStreetMap','Esri не загрузился, переключаю на OpenStreetMap'],
-t_layer:['Layer "{0}" fails to load, pick another in the layers menu','Слой «{0}» не загружается — выбери другой в меню слоёв'],
-t_noas:['Autosave unavailable (blocked by the browser or no space)','Автосохранение недоступно (браузер блокирует или нет места)'],
-t_nou:['Nothing to undo','Нечего отменять'], t_u:['Undone','Отменено'],
-t_nor:['Nothing to redo','Нечего возвращать'], t_r:['Redone','Возвращено'],
-t_3:['At least 3 points are needed','Нужно минимум 3 точки'],
-t_fonly:['Liberated zones can only be drawn over occupied or grey territory','Освобождённую зону можно рисовать только на оккупированной или серой территории'],
-t_inz:['Click inside a drawn zone','Кликни внутри нарисованной зоны'],
-t_same:['This area already has that status','Этот участок уже имеет такой статус'],
-t_cut:['Could not clip the shape','Не удалось обрезать форму'],
-t_fua:['UA flag: inside a liberated zone or near its edge','Флаг УКР — в освобождённой зоне или у её границы'],
-t_fru:['RU flag: inside an occupied zone or near its edge','Флаг РФ — в оккупированной зоне или у её границы'],
-t_saved:['Saved: {0}','Сохранено: {0}'],
-t_dl:['File saved (Downloads folder)','Файл сохранён (папка «Загрузки»)'],
-t_nosave:['Could not save the file','Не удалось сохранить файл'],
-t_savedesc:['Game save','Сохранение игры'],
-t_notsave:['This is not a game save file','Это не файл сохранения игры'],
-t_bad:['The file is corrupted','Файл повреждён'],
-t_loaded:['Loaded: {0}','Загружено: {0}'], t_restored:['Autosave restored','Автосохранение восстановлено'],
-c_new:['The saved map will be replaced by a new game. Continue?','Сохранённая карта будет заменена новой игрой. Продолжить?'],
-c_load:['The current map will be replaced by the save from the file. Continue?','Текущая карта будет заменена сохранением из файла. Продолжить?'],
-c_clear:['Remove all shapes and flags from the map?','Удалить все фигуры и флаги с карты?'],
-map_empty:['🗺 Empty map','🗺 Пустая карта'],
-map_real:['🛰 Real front line','🛰 Реальная линия фронта'],
-loading:['Loading…','Загрузка…'],
-credit:['Front line data: DeepStateMap.Live (via the cyterat/deepstate-map-data GitHub mirror). Internet required.','Данные линии фронта: DeepStateMap.Live (через GitHub-зеркало cyterat/deepstate-map-data). Нужен интернет.'],
-t_front:['Front line loaded {0}','Линия фронта загружена {0}'],
-t_frontfail:['Could not load the front line, starting with an empty map','Не удалось загрузить линию фронта — начата пустая карта'],
-buf:['Contact strip width','Ширина контактной полосы'],
-bufOn:['Build automatically','Строить автоматически'],
-h_draw:['Hold the mouse and drag to trace the shape: release to close it. "Liberated" can only be drawn over occupied or grey territory — a grey contact strip appears at once along the frontier. The strip stays outside the shape you drew, so your blue (or red) keeps its full area. Pan: Shift + drag or middle mouse button.','Зажми кнопку мыши и веди — фигура замкнётся при отпускании. «Освобождено» рисуется только на оккупированной или серой территории — серая контактная полоса появляется сразу вдоль границы. Полоса остаётся снаружи нарисованной фигуры, поэтому твой синий (или красный) сохраняет всю площадь. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
-h_erase:['Hold and drag: the eraser removes a piece of the zone under the cursor (size in screen pixels). Pan: Shift + drag or middle mouse button.','Зажми и води: ластик стирает кусочек зоны под курсором (размер — в пикселях экрана). Движение: Shift + перетаскивание или средняя кнопка мыши.'],
-h_paint:['Click, or hold and drag: the colour changes only within the zone under the cursor. Adjacent areas of the same colour merge. Pan: Shift + drag or middle mouse button.','Кликни или зажми и води: цвет меняется только в пределах зоны под курсором. Смежные участки одного цвета сливаются. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
-h_pan:['Drag the map with the mouse. Wheel to zoom.','Тяни карту мышью. Колесо — масштаб.'],
-h_ruler:['Click the first point, then the second to see the straight-line distance. The next click starts a new measurement. Esc clears it.','Кликни первую точку, затем вторую — увидишь расстояние по прямой. Следующий клик начинает новое измерение. Esc — убрать.'],
-h_del:['Click (tap) a flag to delete it. Right-click also deletes.','Кликни (коснись) флага, чтобы удалить. ПКМ тоже удаляет.'],
-h_ua:['Place a UA flag in a liberated zone or near its edge. Right-click a flag to delete it.','Ставь флаг УКР в освобождённой зоне или у её границы. ПКМ по флагу — удалить.'],
-h_ru:['Place a RU flag in an occupied zone or near its edge. Right-click a flag to delete it.','Ставь флаг РФ в оккупированной зоне или у её границы. ПКМ по флагу — удалить.'],
-ht_draw:['One finger: drag to trace the outline (closes on release). Two fingers pan and zoom the map.','Один палец: веди, чтобы обвести контур (замкнётся при отпускании). Два пальца — движение и масштаб карты.'],
-ht_paint:['Touch or drag: the colour changes only within the zone. Two fingers pan and zoom the map.','Коснись или веди пальцем — цвет меняется только в пределах зоны. Два пальца — движение и масштаб карты.'],
-ht_erase:['Drag a finger: the eraser removes the zone under it. Two fingers pan and zoom the map.','Веди пальцем — ластик стирает зону под ним. Два пальца — движение и масштаб карты.']
+title:["Front Line","Линия фронта"],
+menuTxt:["Draw zones on the map, repaint areas inside existing polygons, plant flags along the front line and place brigades.","Рисуй зоны на карте, перекрашивай участки в пределах существующих полигонов, ставь флаги вдоль линии фронта и расставляй бригады."],
+start:["Start playing","Начать играть"],
+newgame:["New game","Новая игра"],
+resume:["▶ Continue","▶ Продолжить"],
+loadsave:["📂 Load a save","📂 Загрузить сохранение"],
+settings:["⚙️ Settings","⚙️ Настройки"],
+settingsT:["Settings","Настройки"],
+lang:["Interface language","Язык интерфейса"],
+themeF:["Themed looks","Тематические темы"],
+themeP:["Solid colours","Однотонные темы"],
+collapse:["Collapse / expand","Свернуть / развернуть"],
+ctrl:["Controls","Управление"],
+undo:["↶ Undo","↶ Отменить"],
+redo:["↷ Redo","↷ Вернуть"],
+mode:["Mode","Режим"],
+m_pan:["✋ Pan map","✋ Движение карты"],
+m_draw:["✏️ Draw shape","✏️ Рисовать фигуру"],
+m_paint:["🖌️ Paint","🖌️ Покраска"],
+m_erase:["🧽 Eraser","🧽 Ластик"],
+m_ua:["UA flag","Флаг УКР"],
+m_ru:["RU flag","Флаг РФ"],
+m_bua:["UA brigades","Бригады УКР"],
+m_bru:["RU brigades","Бригады РФ"],
+m_ruler:["📏 Ruler","📏 Линейка"],
+m_del:["🗑️ Delete marker","🗑️ Удалить значок"],
+zonecol:["Zone / colour","Зона / цвет"],
+st_free:["Liberated","Освобождено"],
+st_occ:["Occupied","Оккупация"],
+st_fight:["Fighting","Идут бои"],
+curshape:["Current shape","Текущая фигура"],
+finish:["Finish","Завершить"],
+stepback:["Step back","Шаг назад"],
+cancel:["Cancel","Отмена"],
+anim:["🎞 Advance animation","🎞 Анимация продвижения"],
+brush:["Brush","Кисть"],
+brush_r:["radius {0} km","радиус {0} км"],
+brush_all:["whole zone","вся зона"],
+eraser:["Eraser","Ластик"],
+eonly:["Erase only the selected zone colour","Стирать только выбранный цвет зоны"],
+brigade:["Brigade","Бригада"],
+bq:["Search or type your own name…","Поиск или своё название…"],
+save:["💾 Save to file","💾 Сохранить в файл"],
+load:["📂 Load from file","📂 Загрузить из файла"],
+clear:["Clear all","Очистить всё"],
+flags:["Flags","Флаги"],
+brigs:["Brigades","Бригады"],
+sUA:["UA","УКР"],
+sRU:["RU","РФ"],
+km:["km","км"],
+m:["m","м"],
+km2:["km²","км²"],
+sec:["s","с"],
+dropT:["Drop the save file","Отпусти файл сохранения"],
+none:["none selected","не выбрано"],
+nf:["Nothing found","Ничего не найдено"],
+own:["➕ Custom: ","➕ Своя: "],
+t_esri:["Esri failed to load, switching to OpenStreetMap","Esri не загрузился, переключаю на OpenStreetMap"],
+t_layer:["Layer \"{0}\" fails to load, pick another in the layers menu","Слой «{0}» не загружается — выбери другой в меню слоёв"],
+t_noas:["Autosave unavailable (blocked by the browser or no space)","Автосохранение недоступно (браузер блокирует или нет места)"],
+t_nou:["Nothing to undo","Нечего отменять"],
+t_u:["Undone","Отменено"],
+t_nor:["Nothing to redo","Нечего возвращать"],
+t_r:["Redone","Возвращено"],
+t_3:["At least 3 points are needed","Нужно минимум 3 точки"],
+t_fonly:["Liberated zones can only be drawn over occupied or grey territory","Освобождённую зону можно рисовать только на оккупированной или серой территории"],
+t_inz:["Click inside a drawn zone","Кликни внутри нарисованной зоны"],
+t_same:["This area already has that status","Этот участок уже имеет такой статус"],
+t_cut:["Could not clip the shape","Не удалось обрезать форму"],
+t_fua:["UA flag: inside a liberated zone or near its edge","Флаг УКР — в освобождённой зоне или у её границы"],
+t_fru:["RU flag: inside an occupied zone or near its edge","Флаг РФ — в оккупированной зоне или у её границы"],
+t_pick:["Pick a brigade from the list first","Сначала выбери бригаду из списка"],
+t_bua:["UA brigades: liberated territory only","Бригады УКР — только на освобождённой территории"],
+t_bru:["RU brigades: occupied territory only","Бригады РФ — только на оккупированной территории"],
+t_saved:["Saved: {0}","Сохранено: {0}"],
+t_dl:["File saved (Downloads folder)","Файл сохранён (папка «Загрузки»)"],
+t_nosave:["Could not save the file","Не удалось сохранить файл"],
+t_savedesc:["Game save","Сохранение игры"],
+t_notsave:["This is not a game save file","Это не файл сохранения игры"],
+t_bad:["The file is corrupted","Файл повреждён"],
+t_loaded:["Loaded: {0}","Загружено: {0}"],
+t_restored:["Autosave restored","Автосохранение восстановлено"],
+c_new:["The saved map will be replaced by a new game. Continue?","Сохранённая карта будет заменена новой игрой. Продолжить?"],
+c_load:["The current map will be replaced by the save from the file. Continue?","Текущая карта будет заменена сохранением из файла. Продолжить?"],
+c_clear:["Remove all shapes and flags from the map?","Удалить все фигуры и флаги с карты?"],
+map_empty:["🗺 Empty map","🗺 Пустая карта"],
+map_real:["🛰 Real front line","🛰 Реальная линия фронта"],
+loading:["Loading…","Загрузка…"],
+credit:["Front line data: DeepStateMap.Live (via the cyterat/deepstate-map-data GitHub mirror). Internet required.","Данные линии фронта: DeepStateMap.Live (через GitHub-зеркало cyterat/deepstate-map-data). Нужен интернет."],
+t_front:["Front line loaded {0}","Линия фронта загружена {0}"],
+t_frontfail:["Could not load the front line, starting with an empty map","Не удалось загрузить линию фронта — начата пустая карта"],
+buf:["Grey zone between fronts","Серая зона между фронтами"],
+bufOn:["Auto combat strip (liberated + occupied)","Авто-полоса боёв (освобождённая + оккупированная)"],
+bufNow:["Build now","Построить сейчас"],
+t_bufok:["Grey zone built","Серая зона построена"],
+t_bufno:["No occupied territory to build a combat strip on","Нет оккупированной территории для полосы боёв"],
+h_draw:["Click to add points, or hold the mouse button and drag: the shape closes on release. \"Liberated\" can only be drawn over occupied or grey zones (the excess is clipped). Pan the map: Shift + drag or middle mouse button.","Кликай, чтобы ставить точки, или зажми кнопку мыши и веди — фигура замкнётся при отпускании. «Освобождено» рисуется только на оккупированной или серой зоне (лишнее обрезается). Движение карты: Shift + перетаскивание или средняя кнопка мыши."],
+h_erase:["Hold and drag: the eraser removes a piece of the zone under the cursor (size in screen pixels). Pan the map: Shift + drag or middle mouse button.","Зажми и води: ластик стирает кусочек зоны под курсором (размер — в пикселях экрана). Движение карты: Shift + перетаскивание или средняя кнопка мыши."],
+h_paint:["Click, or hold and drag: the colour changes only within the zone under the cursor. Adjacent areas of the same colour merge. Pan the map: Shift + drag or middle mouse button.","Кликни или зажми и води: цвет меняется только в пределах зоны под курсором. Смежные участки одного цвета сливаются. Движение карты: Shift + перетаскивание или средняя кнопка мыши."],
+h_pan:["Drag the map with the mouse. Wheel to zoom.","Тяни карту мышью. Колесо — масштаб."],
+h_ruler:["Click the first point, then the second to see the straight-line distance. The next click starts a new measurement. Esc clears it.","Кликни первую точку, затем вторую — увидишь расстояние по прямой. Следующий клик начинает новое измерение. Esc — убрать."],
+h_del:["Click (tap) a flag or brigade to delete it. Right-click also deletes.","Кликни (коснись) флага или бригады, чтобы удалить. ПКМ тоже удаляет."],
+h_ua:["Place a UA flag in a liberated zone or near its edge. Right-click a flag to delete it.","Ставь флаг УКР в освобождённой зоне или у её границы. ПКМ по флагу — удалить."],
+h_ru:["Place a RU flag in an occupied zone or near its edge. Right-click a flag to delete it.","Ставь флаг РФ в оккупированной зоне или у её границы. ПКМ по флагу — удалить."],
+h_bua:["Pick a brigade from the list and click on liberated territory. Drag the badge to move it (outside liberated territory it snaps back). Right-click deletes. You can type your own name in the search box.","Выбери бригаду из списка и кликни по освобождённой территории. Тяни значок, чтобы переместить (вне освобождённой территории он вернётся обратно). ПКМ — удалить. Своё название можно ввести в поиске."],
+h_bru:["Pick a brigade from the list and click on occupied territory. Drag the badge to move it (outside occupied territory it snaps back). Right-click deletes. You can type your own name in the search box.","Выбери бригаду из списка и кликни по оккупированной территории. Тяни значок, чтобы переместить (вне оккупированной территории он вернётся обратно). ПКМ — удалить. Своё название можно ввести в поиске."],
+ht_draw:["One finger: tap adds a point, dragging draws a free line (closes on release). Two fingers pan and zoom the map.","Один палец: тап — точка, ведение — свободная линия (замкнётся при отпускании). Два пальца — движение и масштаб карты."],
+ht_paint:["Touch or drag: the colour changes only within the zone. Two fingers pan and zoom the map.","Коснись или веди пальцем — цвет меняется только в пределах зоны. Два пальца — движение и масштаб карты."],
+ht_erase:["Drag a finger: the eraser removes the zone under it. Two fingers pan and zoom the map.","Веди пальцем — ластик стирает зону под ним. Два пальца — движение и масштаб карты."]
 };
 const LOC = { en: 'en-US', ru: 'ru-RU' }, LIDX = { en: 0, ru: 1 };
 const SET_KEY = 'frontline-settings';
@@ -251,11 +334,11 @@ if (!(cfg.lang in LIDX)) cfg.lang = 'en';
 function saveCfg() { try { localStorage.setItem(SET_KEY, JSON.stringify(cfg)); } catch (e) {} }
 const t = (k, ...a) => { const e = D[k]; let s = e ? e[LIDX[cfg.lang]] : k; a.forEach((v, i) => { s = s.split('{' + i + '}').join(v); }); return s; };
 const decSep = () => cfg.lang === 'en' ? '.' : ',';
-
-const LN = [['Terrain','Рельеф местности'],['Shaded relief','Теневой рельеф'],['French style','Французский стиль'],['German style','Немецкий стиль'],['Topographic','Топографическая'],['Physical','Физическая карта'],['Hillshade','Тени рельефа'],['Railways','Железные дороги'],['Sea marks','Морские знаки'],['Bike roads','Велодороги'],['Relief','Рельеф'],['Map','Схема'],['Light','Светлая'],['Dark','Тёмная'],['Oceans','Океаны'],['Satellite','Спутник'],['Labels','Подписи'],['Roads','Дороги']];
+// map layer names (English source; translated via LN)
+const LN = [["Terrain","Рельеф местности"],["Shaded relief","Теневой рельеф"],["French style","Французский стиль"],["German style","Немецкий стиль"],["Topographic","Топографическая"],["Physical","Физическая карта"],["Hillshade","Тени рельефа"],["Railways","Железные дороги"],["Sea marks","Морские знаки"],["Bike roads","Велодороги"],["Relief","Рельеф"],["Map","Схема"],["Light","Светлая"],["Dark","Тёмная"],["Oceans","Океаны"],["Satellite","Спутник"],["Labels","Подписи"],["Roads","Дороги"]];
 const LNre = new RegExp(LN.map(x => x[0]).join('|'), 'g');
 const ln = s => LNre ? s.replace(LNre, w => LN.find(x => x[0] === w)[LIDX[cfg.lang]]) : s;
-
+// Themes: [id, group (f - themed, p - plain), 'en|ru', 'bg panel line txt mut acc accT btn btnh btnon', font]
 const THEMES = [
 ['nightops','f','Night Ops|Ночной дозор','#0b140d #101d12 #24402a #d6f5d9 #7fa886 #5dff7a #04140a #16281a #1d3623 #23422b'],
 ['cyber','f','Cyberpunk|Киберпанк','#120a24 #1a1033 #43276e #f1e6ff #a28dc9 #ff2e97 #1a0614 #261548 #321d5c #3d2270'],
@@ -270,46 +353,48 @@ const THEMES = [
 ];
 const TKEYS = ['bg','panel','line','txt','mut','acc','accT','btn','btnh','btnon'], DEF_FONT = '"Trebuchet MS","Segoe UI",system-ui,sans-serif';
 
-// ---------- Map ----------
+// ---------- Карта ----------
 const map = L.map('map', { doubleClickZoom: false, zoomControl: false, boxZoom: false, maxZoom: 19 }).setView([48.6, 32.2], 6);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
+// Підкладки. Apple Maps не має відкритих тайлів (потрібен платний ключ Apple Developer), тому — схожі за стилем Esri, OSM та інші безкоштовні
 const ES = 'https://server.arcgisonline.com/ArcGIS/rest/services/';
 const esriL = (svc, nz, o) => L.tileLayer(ES + svc + '/MapServer/tile/{z}/{y}/{x}', Object.assign({ maxZoom: 19, maxNativeZoom: nz, attribution: 'Tiles © Esri' }, o));
 const osmL = (url, nz, o) => L.tileLayer(url, Object.assign({ maxZoom: 19, maxNativeZoom: nz, attribution: '© OpenStreetMap' }, o));
 const BASES = [
-  ['esri','Esri · Map',esriL('World_Street_Map', 18)],
-  ['osm','OpenStreetMap',osmL('https://tile.openstreetmap.org/{z}/{x}/{y}.png', 19)],
-  ['osmfr','OSM · French style',osmL('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', 19, { subdomains: 'abc' })],
-  ['osmde','OSM · German style',osmL('https://tile.openstreetmap.de/{z}/{x}/{y}.png', 18)],
-  ['hot','OSM · Humanitarian',osmL('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', 19, { subdomains: 'abc', attribution: '© OpenStreetMap, HOT' })],
-  ['cyclo','CyclOSM · Bike roads',osmL('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 19, { subdomains: 'abc', attribution: '© OpenStreetMap, CyclOSM' })],
-  ['topo','OpenTopoMap · Relief',osmL('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 17, { subdomains: 'abc', attribution: '© OpenStreetMap, SRTM, OpenTopoMap' })],
-  ['esriLight','Esri · Light',esriL('Canvas/World_Light_Gray_Base', 16)],
-  ['esriDark','Esri · Dark',esriL('Canvas/World_Dark_Gray_Base', 16)],
-  ['esriTopo','Esri · Topographic',esriL('World_Topo_Map', 18)],
-  ['esriNat','Esri · National Geographic',esriL('NatGeo_World_Map', 16)],
-  ['esriTerr','Esri · Terrain',esriL('World_Terrain_Base', 13)],
-  ['esriShade','Esri · Shaded relief',esriL('World_Shaded_Relief', 13)],
-  ['esriPhys','Esri · Physical',esriL('World_Physical_Map', 8)],
-  ['esriOcean','Esri · Oceans',esriL('Ocean/World_Ocean_Base', 13)],
-  ['sat','Esri · Satellite',esriL('World_Imagery', 18)],
-  ['eox','Sentinel-2 · Satellite (EOX)',L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 19, maxNativeZoom: 13, attribution: 'Sentinel-2 cloudless © EOX (Copernicus)' })]
+  ['esri',      'Esri · Схема',                 esriL('World_Street_Map', 18)],
+  ['osm',       'OpenStreetMap',                osmL('https://tile.openstreetmap.org/{z}/{x}/{y}.png', 19)],
+  ['osmfr',     'OSM · Французький стиль',      osmL('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', 19, { subdomains: 'abc' })],
+  ['osmde',     'OSM · Німецький стиль',        osmL('https://tile.openstreetmap.de/{z}/{x}/{y}.png', 18)],
+  ['hot',       'OSM · Humanitarian',           osmL('https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', 19, { subdomains: 'abc', attribution: '© OpenStreetMap, HOT' })],
+  ['cyclo',     'CyclOSM · Bike roads',         osmL('https://{s}.tile-cyclosm.openstreetmap.fr/cyclosm/{z}/{x}/{y}.png', 19, { subdomains: 'abc', attribution: '© OpenStreetMap, CyclOSM' })],
+  ['topo',      'OpenTopoMap · Relief',         osmL('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', 17, { subdomains: 'abc', attribution: '© OpenStreetMap, SRTM, OpenTopoMap' })],
+  ['esriLight', 'Esri · Light',                esriL('Canvas/World_Light_Gray_Base', 16)],
+  ['esriDark',  'Esri · Dark',                 esriL('Canvas/World_Dark_Gray_Base', 16)],
+  ['esriTopo',  'Esri · Topographic',          esriL('World_Topo_Map', 18)],
+  ['esriNat',   'Esri · National Geographic',   esriL('NatGeo_World_Map', 16)],
+  ['esriTerr',  'Esri · Terrain',     esriL('World_Terrain_Base', 13)],
+  ['esriShade', 'Esri · Shaded relief',       esriL('World_Shaded_Relief', 13)],
+  ['esriPhys',  'Esri · Physical',         esriL('World_Physical_Map', 8)],
+  ['esriOcean', 'Esri · Oceans',                esriL('Ocean/World_Ocean_Base', 13)],
+  ['sat',       'Esri · Satellite',              esriL('World_Imagery', 18)],
+  ['eox',       'Sentinel-2 · Satellite (EOX)',  L.tileLayer('https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg', { maxZoom: 19, maxNativeZoom: 13, attribution: 'Sentinel-2 cloudless © EOX (Copernicus)' })]
 ];
 const OVERS = [
-  ['labels','Labels (Esri)',esriL('Reference/World_Boundaries_and_Places', 18, { zIndex: 10 })],
-  ['roads','Roads (Esri)',esriL('Reference/World_Transportation', 18, { zIndex: 10 })],
-  ['hill','Hillshade (Esri)',esriL('Elevation/World_Hillshade', 15, { zIndex: 10, opacity: 0.6 })],
-  ['rail','Railways (OpenRailwayMap)',osmL('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', 19, { subdomains: 'abc', zIndex: 10, attribution: '© OpenRailwayMap' })],
-  ['sea','Sea marks (OpenSeaMap)',osmL('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', 18, { zIndex: 10, attribution: '© OpenSeaMap' })]
+  ['labels', 'Labels (Esri)',               esriL('Reference/World_Boundaries_and_Places', 18, { zIndex: 10 })],
+  ['roads',  'Roads (Esri)',                esriL('Reference/World_Transportation', 18, { zIndex: 10 })],
+  ['hill',   'Hillshade (Esri)',          esriL('Elevation/World_Hillshade', 15, { zIndex: 10, opacity: 0.6 })],
+  ['rail',   'Railways (OpenRailwayMap)',   osmL('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', 19, { subdomains: 'abc', zIndex: 10, attribution: '© OpenRailwayMap' })],
+  ['sea',    'Sea marks (OpenSeaMap)',   osmL('https://tiles.openseamap.org/seamark/{z}/{x}/{y}.png', 18, { zIndex: 10, attribution: '© OpenSeaMap' })]
 ];
 BASES[0][2].addTo(map);
 let layersCtl = null;
-function buildLayersCtl() {
+function buildLayersCtl() {                              // перебудовуємо меню шарів при зміні мови
   if (layersCtl) map.removeControl(layersCtl);
   const bo = {}, oo = {};
   BASES.forEach(b => bo[ln(b[1])] = b[2]); OVERS.forEach(o => oo[ln(o[1])] = o[2]);
   layersCtl = L.control.layers(bo, oo, { position: 'topright' }).addTo(map);
 }
+// Якщо підложка не вантажиться (мережа, блокувальник) — кажемо про це; Esri за замовчуванням змінюємо на OSM
 const okT = new Map(), badT = new Map();
 BASES.forEach(([id, name, l]) => {
   l.on('tileload', () => okT.set(l, (okT.get(l) || 0) + 1));
@@ -328,39 +413,40 @@ function applyLayers(d) {
   const want = Array.isArray(d.over) ? d.over : [];
   OVERS.forEach(o => { const w = want.includes(o[0]), h = map.hasLayer(o[2]); if (w && !h) map.addLayer(o[2]); else if (!w && h) map.removeLayer(o[2]); });
 }
-map.createPane('zones').style.zIndex = 399;
+map.createPane('zones').style.zIndex = 399;             // зони та їх анімація лежать під іншими векторними шарами
 map.createPane('zanim').style.zIndex = 399;
 map.getPane('zanim').style.display = 'none';
 const zoneLayer = L.layerGroup().addTo(map);
 const flagLayer = L.layerGroup().addTo(map);
+const brigLayer = L.layerGroup().addTo(map);
 
-// ---------- Helpers ----------
+// ---------- Допоміжні ----------
 function toast(t) {
   const el = $('toast'); el.textContent = t; el.classList.add('show');
   clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove('show'), 2200);
 }
 const zStyle = s => ({ color: ST[s].color, weight: 2, opacity: 1, fillColor: ST[s].color, fillOpacity: 0.4, lineJoin: 'miter', lineCap: 'butt' });
-function addZone(s, geometry, autoGrey) {
+
+function addZone(s, geometry) {
   const f = { type: 'Feature', properties: {}, geometry };
-  const z = { status: s, f, autoGrey: !!autoGrey };
+  const z = { status: s, f };
   z.layer = L.geoJSON(f, { style: () => zStyle(z.status), interactive: false, pane: 'zones' }).addTo(zoneLayer);
   zones.push(z);
   return z;
 }
+// Об'єднує зону з дотичними зонами того ж статусу, щоб не було «швів» між шматками
 function mergeSame(z) {
   try {
     let cur = z, found = true;
     while (found) {
       found = false;
       for (const o of zones) {
-        if (o === cur || o.status !== cur.status) continue;
-        if (cur.autoGrey && o.autoGrey) continue;
-        if (!turf.booleanIntersects(cur.f, o.f)) continue;
+        if (o === cur || o.status !== cur.status || !turf.booleanIntersects(cur.f, o.f)) continue;
         const u = turf.union(cur.f, o.f);
         if (!u) continue;
-        const st = cur.status, ag = cur.autoGrey && o.autoGrey;
+        const st = cur.status;
         delZone(cur); delZone(o);
-        cur = addZone(st, u.geometry, ag);
+        cur = addZone(st, u.geometry);
         found = true; break;
       }
     }
@@ -369,41 +455,49 @@ function mergeSame(z) {
 }
 function refreshZone(z) { z.layer.clearLayers(); z.layer.addData(z.f); }
 function delZone(z) { zoneLayer.removeLayer(z.layer); zones = zones.filter(x => x !== z); }
+
 function addFlag(side, lat, lng) {
-  const m = L.marker([lat, lng], { icon: L.divIcon({ className: '', iconSize: [30, 34], iconAnchor: [4, 32], html: '<div class="flag ' + side + '"><i></i></div>' }) }).addTo(flagLayer);
+  const m = L.marker([lat, lng], {
+    icon: L.divIcon({ className: '', iconSize: [30, 34], iconAnchor: [4, 32],
+      html: '<div class="flag ' + side + '"><i></i></div>' })
+  }).addTo(flagLayer);
   const rec = { side, lat, lng, m };
   const del = () => { flagLayer.removeLayer(m); flags = flags.filter(x => x !== rec); stats(); };
   m.on('contextmenu', del);
   m.on('click', () => { if (mode === 'del') del(); });
   flags.push(rec);
 }
+
 function stats() { renderStats(); afterChange(); }
 function renderStats() {
   const sum = { free: 0, occ: 0, fight: 0 };
   zones.forEach(z => { try { sum[z.status] += turf.area(z.f) / 1e6; } catch (e) {} });
   $('stats').innerHTML = Object.keys(ST).map(k =>
     t('st_' + k) + ': <i>' + Math.round(sum[k]).toLocaleString(LOC[cfg.lang]) + ' ' + t('km2') + '</i>').join('<br>') +
-    '<br>' + t('flags') + ': <i>' + flags.length + '</i>';
+    '<br>' + t('flags') + ': <i>' + flags.length + '</i>' +
+    '<br>' + t('brigs') + ': ' + t('sUA') + ' <i>' + brigs.filter(b => b.side === 'ua').length + '</i> · ' + t('sRU') + ' <i>' + brigs.filter(b => b.side === 'ru').length + '</i>';
+  if (!$('brigBox').hidden) renderBrig();               // галочки «✓» у списку бригад після undo/redo/завантаження
 }
 
-// ---------- History & autosave ----------
-const HMAX = 60, AS_KEY = 'frontline-map-autosave-v9';
+// ---------- Історія (Ctrl+Z / Ctrl+Y) та автозбереження ----------
+const HMAX = 60, AS_KEY = 'frontline-map-autosave-v2';
 let hist = [], hi = -1, restoring = false, started = false, asT = null, asWarned = false;
 const snap = () => JSON.stringify({
-  z: zones.map(z => [z.status, z.f.geometry, z.autoGrey ? 1 : 0]),
-  f: flags.map(f => [f.side, f.lat, f.lng])
+  z: zones.map(z => [z.status, z.f.geometry]),
+  f: flags.map(f => [f.side, f.lat, f.lng]),
+  b: brigs.map(b => [b.side, b.label, b.name, b.lat, b.lng])
 });
 function updHist() { $('hundo').disabled = hi <= 0; $('hredo').disabled = hi >= hist.length - 1; }
 function commit() {
-  const s = snap();
-  if (hi >= 0 && hist[hi] === s) return;
-  hist.length = hi + 1; hist.push(s);
+  const t = snap();
+  if (hi >= 0 && hist[hi] === t) return;
+  hist.length = hi + 1; hist.push(t);
   if (hist.length > HMAX) hist.shift();
   hi = hist.length - 1; updHist();
 }
 function resetHist() { hist = [snap()]; hi = 0; updHist(); }
 function afterChange() {
-  if (restoring || drawing || painting || erasing) return;
+  if (restoring || drawing || painting || erasing) return;   // під час штриха не фіксуємо — зробимо це після відпускання
   commit(); scheduleSave();
 }
 function restore(str) {
@@ -411,26 +505,27 @@ function restore(str) {
   restoring = true;
   try {
     clearData();
-    d.z.forEach(z => addZone(z[0], z[1], z[2]));
+    d.z.forEach(z => addZone(z[0], z[1]));
     d.f.forEach(f => addFlag(f[0], f[1], f[2]));
+    d.b.forEach(b => addBrig(b[0], b[1], b[2], b[3], b[4]));
   } finally { restoring = false; }
   stats(); scheduleSave();
 }
 function doUndo() { flushAnim(); if (hi <= 0) return toast(t('t_nou')); hi--; restore(hist[hi]); updHist(); toast(t('t_u')); }
 function doRedo() { flushAnim(); if (hi >= hist.length - 1) return toast(t('t_nor')); hi++; restore(hist[hi]); updHist(); toast(t('t_r')); }
-function saveAuto() {
+function saveAuto(force) {
   if (!started) return;
   try {
     const d = buildSave();
-    if (!d.zones.length && !d.flags.length) localStorage.removeItem(AS_KEY);
+    if (!d.zones.length && !d.flags.length && !d.brigades.length) localStorage.removeItem(AS_KEY);
     else localStorage.setItem(AS_KEY, JSON.stringify(d));
   } catch (err) { if (!asWarned) { asWarned = true; toast(t('t_noas')); } }
 }
 function scheduleSave() { clearTimeout(asT); asT = setTimeout(saveAuto, 600); }
-window.addEventListener('pagehide', () => saveAuto());
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAuto(); });
+window.addEventListener('pagehide', () => saveAuto(true));
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') saveAuto(true); });
 
-// ---------- Ruler ----------
+// ---------- Лінійка ----------
 const rulerLayer = L.layerGroup().addTo(map);
 let rA = null, rLine = null, rLab = null, rDone = false;
 const fmtKm = km => km < 1 ? Math.round(km * 1000) + ' ' + t('m') : km.toFixed(km < 10 ? 2 : 1).replace('.', decSep()) + ' ' + t('km');
@@ -450,19 +545,21 @@ function rulerClick(ll) {
   rDraw(ll); rDot(ll); rDone = true;
 }
 
-// ---------- Modes & UI ----------
+// ---------- Режими та інтерфейс ----------
 function setMode(m) {
   if (mode === 'draw' && m !== 'draw') cancelDraw();
   if (mode === 'ruler' && m !== 'ruler') rClear();
   mode = m;
   document.querySelectorAll('#modes .t').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
-  ['draw','paint','erase','ua','ru','pan','ruler','del'].forEach(c => $('map').classList.toggle(c, c === m));
+  ['draw','paint','erase','ua','ru','bua','bru','pan','ruler','del'].forEach(c => $('map').classList.toggle(c, c === m));
   $('drawBox').hidden = m !== 'draw';
   $('brushBox').hidden = m !== 'paint';
   $('eraseBox').hidden = m !== 'erase';
   updHint();
   clearGhost();
-  setPan();
+  $('brigBox').hidden = m !== 'bua' && m !== 'bru';
+  if (m === 'bua' || m === 'bru') { $('bq').value = ''; renderBrig(); }
+  setPan(false);
 }
 function setStatus(s) {
   status = s;
@@ -477,21 +574,20 @@ function startGame() {
   started = true;
   map.invalidateSize(); setMode('draw'); setStatus('free'); updBrush(); updErase(); resetHist(); stats();
 }
-
-// ---------- Real front line ----------
-const FRONT_TOL = 0.002;
+// ---------- Реальна лінія фронту (DeepStateMap через відкрите GitHub-дзеркало, завантажується при старті) ----------
+const FRONT_TOL = 0.002;                               // спрощення геометрії, ° (~200 м): менше вершин — швидша гра
 async function loadFront() {
   const RAW = 'https://raw.githubusercontent.com/cyterat/deepstate-map-data/main/data/';
   const ctl = new AbortController(), to = setTimeout(() => ctl.abort(), 30000);
   const get = async url => { const r = await fetch(url, { signal: ctl.signal }); if (!r.ok) throw new Error(r.status); return r.json(); };
   try {
     let name = null, data = null;
-    try {
+    try {                                              // найновіший файл із папки data
       const list = await get('https://api.github.com/repos/cyterat/deepstate-map-data/contents/data');
       name = list.map(x => x.name).filter(n => /\.geojson$/.test(n)).sort().pop();
       if (name) data = await get(RAW + name);
     } catch (e) { data = null; }
-    for (let i = 0; !data && i < 8; i++) {
+    for (let i = 0; !data && i < 8; i++) {             // запасний шлях: перебираємо останні дні
       const d = new Date(Date.now() - i * 864e5), y = d.getUTCFullYear(), m = String(d.getUTCMonth() + 1).padStart(2, '0'), dd = String(d.getUTCDate()).padStart(2, '0');
       for (const x of [y + m + dd, y + '-' + m + '-' + dd]) {
         try { name = 'deepstatemap_data_' + x + '.geojson'; data = await get(RAW + name); break; } catch (e) { data = null; }
@@ -507,9 +603,9 @@ async function loadFront() {
     if (!polys.length) return null;
     let mp = turf.multiPolygon(polys);
     try { mp = turf.simplify(mp, { tolerance: FRONT_TOL, highQuality: true }); } catch (e) { console.error(e); }
-    try { const u = turf.union(mp, mp); if (u) mp = u; } catch (e) { console.error(e); }
+    try { const u = turf.union(mp, mp); if (u) mp = u; } catch (e) { console.error(e); }   // прибираємо самоперетини після спрощення
     const keep = [];
-    turf.flatten(mp).features.forEach(p => { if (turf.area(p) > 3e5) keep.push(p.geometry.coordinates); });
+    turf.flatten(mp).features.forEach(p => { if (turf.area(p) > 3e5) keep.push(p.geometry.coordinates); });   // відкидаємо дрібні острівці
     if (!keep.length) return null;
     const m = (name || '').match(/(\d{4})-?(\d{2})-?(\d{2})/);
     return { geometry: { type: 'MultiPolygon', coordinates: keep }, date: m ? m[1] + '-' + m[2] + '-' + m[3] : '' };
@@ -540,19 +636,21 @@ $('brush').oninput = updBrush;
 function updErase() { $('ev').textContent = $('esize').value + ' px'; }
 $('esize').oninput = updErase;
 
-// ---------- Freehand drawing ----------
-function redrawTmp() {
-  if (tmp) map.removeLayer(tmp); tmp = null;
-  if (pts.length < 2) return;
+// ---------- Малювання полігонів ----------
+function redrawTmp(light) {
+  if (tmp) map.removeLayer(tmp);
+  tmpM.forEach(m => map.removeLayer(m)); tmpM = []; tmp = null;
+  if (!pts.length) return;
   const c = ST[status].color;
   tmp = (pts.length > 2 ? L.polygon : L.polyline)(pts, { color: c, weight: 2, dashArray: '6 4', fillOpacity: 0.2, interactive: false }).addTo(map);
+  if (!light) tmpM = pts.map((p, i) => L.circleMarker(p, { radius: i ? 4 : 6, color: '#fff', weight: 2, fillColor: c, fillOpacity: 1, interactive: false }).addTo(map));
 }
 function cancelDraw() { pts = []; redrawTmp(); }
 function finish() {
   if (pts.length < 3) return toast(t('t_3'));
   const ring = pts.map(p => [p.lng, p.lat]); ring.push(ring[0]);
   let geom = { type: 'Polygon', coordinates: [ring] };
-  try {
+  try {                                              // прибираємо самоперетини від малювання від руки
     const f = { type: 'Feature', properties: {}, geometry: geom }, u = turf.union(f, f);
     if (u) geom = u.geometry;
   } catch (err) { console.error(err); }
@@ -561,29 +659,29 @@ function finish() {
   startShape(job);
 }
 
-// ---------- Advance animation ----------
+// ---------- Анімація просування фронту ----------
+// Дані змінюються одразу. Поки йде анімація, справжній шар зон прихований, а на екрані — «візуальний» стан:
+// початкова карта, на яку по черзі накладено вже відкриті частини кожної фігури. Тому кілька анімацій можуть іти одночасно.
 let anims = [], base = null, aRaf = 0, aLast = 0, aStatic = null, aDyn = null, aDynZ = [];
 function startShape(j) {
   let geom = j.geom;
-  if (j.st === 'free') {
-    // ORIGINAL FILE BEHAVIOUR: clip to occ ∪ fight.
+  if (j.st === 'free') {                             // «Звільнено» можна малювати лише поверх «Окупації» та «Йдуть бої»
     geom = clipToEnemy(geom);
     if (!geom) return toast(t('t_fonly'));
   }
   const idle = !anims.length;
-  if (idle) base = zones.map(z => ({ status: z.status, f: z.f }));
+  if (idle) base = zones.map(z => ({ status: z.status, f: z.f }));      // стан ДО змін
   const A = $('anOn').checked ? prepAnim(j.st, geom, j.first) : null;
-  const z = addZone(j.st, geom); carve(z); mergeSame(z);
-  if (j.st === 'free' || j.st === 'occ') rebuildAutoGreys();  // instant grey strip
-  stats();
-  const mk = (g, extra) => {
+  const z = addZone(j.st, geom); carve(z); mergeSame(z); const S = autoBuffer(false, turf.bbox(geom)); stats();
+  const mk = (g, extra) => {                         // одна анімація = фігура + сіра смуга, що відкриваються разом
     const parts = [{ st: j.st, g }];
+    if (S) parts.push({ st: 'fight', g: S });
     return Object.assign({ parts, AG: turf.featureCollection(parts.map(p => p.g)) }, extra);
   };
   if (A) {
-    anims.push(mk(A.AG, { c: A.c, r0: A.r0, r1: A.r1, t0: performance.now(), T: +$('anT').value * 1000, done: false }));
+    anims.push(mk(A.AG, { c: A.c, r0: A.r0, r1: Math.max(A.r1, farthest(A.c, S)), t0: performance.now(), T: +$('anT').value * 1000, done: false }));
     if (idle) beginAnim(); else { rebuildStatic(); renderAnim(performance.now()); }
-  } else if (!idle) {
+  } else if (!idle) {                                // анімацію вимкнено, але інші ще йдуть — ця фігура з'являється миттєво
     anims.push(mk({ type: 'Feature', properties: {}, geometry: geom }, { done: true }));
     rebuildStatic(); renderAnim(performance.now());
   } else base = null;
@@ -594,6 +692,7 @@ function farthest(c, G) {
   if (G) flatC(G.geometry.coordinates, []).forEach(p => { const d = turf.distance(c, p, { units: 'kilometers' }); if (d > m) m = d; });
   return m;
 }
+// Анімація розходиться колом від ПЕРШОЇ точки, з якої почато малювання фігури, у бік наступу
 function prepAnim(st, geom, first) {
   try {
     const G = { type: 'Feature', properties: {}, geometry: geom };
@@ -603,7 +702,7 @@ function prepAnim(st, geom, first) {
     if (S) { AG = turf.difference(G, S); if (!AG) return null; }
     const c = first ? [first.lng, first.lat] : turf.centroid(AG).geometry.coordinates, pc = turf.point(c);
     let r0 = 0;
-    if (!turf.booleanPointInPolygon(pc, AG)) {
+    if (!turf.booleanPointInPolygon(pc, AG)) {         // стартова точка поза новою ділянкою — рахуємо від її краю
       r0 = Infinity;
       turf.flatten(AG).features.forEach(pl => {
         const np = turf.nearestPointOnLine(turf.polygonToLine(pl), pc, { units: 'kilometers' });
@@ -619,6 +718,7 @@ function prepAnim(st, geom, first) {
 const zanimStyle = ft => zStyle(ft.properties.s);
 const mkAL = () => L.geoJSON(null, { style: zanimStyle, interactive: false, pane: 'zanim' }).addTo(map);
 const bboxOv = (a, b) => !(a[2] < b[0] || a[0] > b[2] || a[3] < b[1] || a[1] > b[3]);
+// Зони, що не торкаються жодної анімації, малюємо один раз; решту перераховуємо щокадру
 function rebuildStatic() {
   let bb = null;
   anims.forEach(a => {
@@ -645,11 +745,11 @@ function endAnim() {
   map.getPane('zanim').style.display = 'none'; map.getPane('zones').style.display = '';
   anims = []; base = null; aDynZ = [];
 }
-function flushAnim() { if (anims.length) endAnim(); }
+function flushAnim() { if (anims.length) endAnim(); }   // оголюємо справжній шар зон (дані вже актуальні)
 function renderAnim(now) {
   let V = aDynZ.map(z => ({ s: z.status, f: z.f }));
   for (const a of anims) {
-    let H = null;
+    let H = null;                                    // відкрите на цей момент коло (null — усе)
     if (!a.done) {
       const t = Math.min(1, (now - a.t0) / a.T);
       if (t >= 1) a.done = true;
@@ -660,12 +760,12 @@ function renderAnim(now) {
         catch (err) { console.error(err); continue; }
       }
     }
-    for (const pc of a.parts) {
+    for (const pc of a.parts) {                      // фігура й сіра смуга ріжуться одним і тим самим колом
       let part = pc.g;
       if (H) { try { part = turf.intersect(pc.g, H); } catch (err) { console.error(err); part = null; } }
       if (!part) continue;
       const nv = [];
-      for (const v of V) {
+      for (const v of V) {                            // нова ділянка вирізається з усього, що було під нею
         let hit = false;
         try { hit = turf.booleanIntersects(v.f, part); } catch (err) { hit = false; }
         if (!hit) { nv.push(v); continue; }
@@ -676,13 +776,13 @@ function renderAnim(now) {
     }
   }
   aDyn.clearLayers();
-  const by = {};
+  const by = {};                                      // шматки одного статусу зливаємо в одну фігуру — без «швів» і ліній між ними
   V.forEach(v => { (by[v.s] = by[v.s] || []).push(v.f); });
   Object.keys(by).forEach(st => {
     let u = null;
     by[st].forEach(f => {
       if (!u) { u = f; return; }
-      try { const x = turf.union(u, f); if (x) { u = x; return; } } catch (err) {}
+      try { const x = turf.union(u, f); if (x) { u = x; return; } } catch (err) { /* додамо окремо */ }
       aDyn.addData({ type: 'Feature', properties: { s: st }, geometry: f.geometry });
     });
     if (u) aDyn.addData({ type: 'Feature', properties: { s: st }, geometry: u.geometry });
@@ -694,6 +794,7 @@ function animFrame(now) {
   if (now - aLast >= 40) { aLast = now; if (renderAnim(now)) return endAnim(); }
   aRaf = requestAnimationFrame(animFrame);
 }
+// Обрізає геометрію по окупованих і сірих зонах: все, що поза ними (порожня карта, звільнені зони), відкидається
 function clipToEnemy(geom) {
   try {
     let area = null;
@@ -707,66 +808,30 @@ function clipToEnemy(geom) {
     return r ? r.geometry : null;
   } catch (err) { console.error(err); return null; }
 }
+// Нова фігура вирізає свою площу із зон іншого статусу — перекриттів і подвійного підрахунку немає
 function carve(z) {
   try {
     for (const o of [...zones]) {
       if (o === z || o.status === z.status || !turf.intersect(o.f, z.f)) continue;
       const d = turf.difference(o.f, z.f), st = o.status;
       delZone(o);
-      if (d) addZone(st, d.geometry, o.autoGrey);
+      if (d) addZone(st, d.geometry);
     }
   } catch (err) { console.error(err); }
 }
 $('fin').onclick = finish;
 $('undo').onclick = () => { pts.pop(); redrawTmp(); };
 $('cancel').onclick = cancelDraw;
+document.addEventListener('keydown', e => {
+  if (mode !== 'draw' || $('panel').hidden || !$('set').hidden) return;
+  const tg = e.target;
+  if (tg && (tg.tagName === 'TEXTAREA' || (tg.tagName === 'INPUT' && /^(text|search)$/.test(tg.type)) || (e.key === 'Enter' && tg.tagName === 'BUTTON'))) return;
+  if (e.key === 'Enter') finish();
+  else if (e.key === 'Escape') cancelDraw();
+  else if (e.key === 'Backspace') { pts.pop(); redrawTmp(); }
+});
 
-// ============================================================
-// Auto-grey: instant contact strip, outside both shapes.
-// Original-file semantics: it's built right when the shape is finished.
-// ============================================================
-function freeUnion() {
-  let F = null;
-  for (const z of zones) if (z.status === 'free' && !z.autoGrey) { F = F ? turf.union(F, z.f) : z.f; if (!F) return null; }
-  return F;
-}
-function occUnion() {
-  let O = null;
-  for (const z of zones) if (z.status === 'occ' && !z.autoGrey) { O = O ? turf.union(O, z.f) : z.f; if (!O) return null; }
-  return O;
-}
-// Contact strip: strip of w km that lies on the OUTSIDE of both free and occ, in the belt
-// where the two are within 2w of each other. The strip does NOT eat into either shape.
-function contactGreyBuild(wKm, F, O) {
-  try {
-    if (!F || !O || !(wKm > 0)) return null;
-    const bF = turf.buffer(F, wKm, { units: 'kilometers', steps: 8 });
-    const bO = turf.buffer(O, wKm, { units: 'kilometers', steps: 8 });
-    if (!bF || !bO) return null;
-    let contact = turf.intersect(bF, bO);
-    if (!contact) return null;
-    // trim anything that lies inside F or inside O — keeps both drawn shapes whole
-    const dF = turf.difference(contact, F);
-    if (dF) contact = dF;
-    const dO = turf.difference(contact, O);
-    if (dO) contact = dO;
-    if (!contact || turf.area(contact) < 1000) return null;
-    return contact;
-  } catch (err) { console.error(err); return null; }
-}
-// Wipe every auto-grey zone, rebuild the contact strip, add it back, carve + merge.
-function rebuildAutoGreys() {
-  zones.filter(z => z.autoGrey).forEach(delZone);
-  const F = freeUnion(), O = occUnion();
-  const w = +$('bufW').value / 2;
-  const contact = contactGreyBuild(w, F, O);
-  if (!contact) return;
-  const z = addZone('fight', contact.geometry, true);
-  carve(z); mergeSame(z);
-}
-function refreshGreys() { rebuildAutoGreys(); }
-
-// ---------- Paint ----------
+// ---------- Покраска (в межах існуючої зони) ----------
 function paintAt(ll, quiet) {
   flushAnim();
   const pt = turf.point([ll.lng, ll.lat]);
@@ -774,22 +839,16 @@ function paintAt(ll, quiet) {
   if (!z) return quiet ? 0 : toast(t('t_inz'));
   if (z.status === status) return quiet ? 0 : toast(t('t_same'));
   const r = +$('brush').value;
-  if (r === 0) {
-    const old = z.status;
-    z.status = status; z.autoGrey = false; refreshZone(z); mergeSame(z);
-    if (old === 'free' || old === 'occ' || status === 'free' || status === 'occ') rebuildAutoGreys();
-    return stats();
-  }
+  if (r === 0) { z.status = status; refreshZone(z); mergeSame(z); return stats(); }
   try {
     const circ = turf.circle(pt, r, { steps: 64, units: 'kilometers' });
-    const inside = turf.intersect(z.f, circ);
+    const inside = turf.intersect(z.f, circ);          // частина кола всередині зони
     if (!inside) return;
-    const rest = turf.difference(z.f, circ);
+    const rest = turf.difference(z.f, circ);           // решта зони зберігає старий колір
     const old = z.status;
     delZone(z);
-    if (rest) addZone(old, rest.geometry, false);
+    if (rest) addZone(old, rest.geometry);
     mergeSame(addZone(status, inside.geometry));
-    if (old === 'free' || old === 'occ' || status === 'free' || status === 'occ') rebuildAutoGreys();
   } catch (err) { console.error(err); toast(t('t_cut')); }
   stats();
 }
@@ -803,33 +862,32 @@ map.on('mousemove', e => {
 });
 map.on('mouseout', clearGhost);
 
-// ---------- Eraser ----------
+// ---------- Ластик (стирає шматочок зони, розмір у пікселях екрана) ----------
 function eraseAt(px) {
   flushAnim();
   const d = +$('esize').value, r = d / 2, only = $('eonly').checked;
   const ring = [];
-  for (let i = 0; i < 48; i++) {
+  for (let i = 0; i < 48; i++) {                         // коло рівно того розміру, що видно на екрані
     const a = i / 48 * Math.PI * 2;
     const ll = map.containerPointToLatLng(L.point(px.x + r * Math.cos(a), px.y + r * Math.sin(a)));
     ring.push([ll.lng, ll.lat]);
   }
   ring.push(ring[0]);
   const circ = turf.polygon([ring]);
-  let changed = false, touched = false;
+  let changed = false;
   for (const z of [...zones]) {
     if (only && z.status !== status) continue;
     try {
       if (!turf.booleanIntersects(z.f, circ)) continue;
-      const left = turf.difference(z.f, circ), st = z.status, ag = z.autoGrey;
+      const left = turf.difference(z.f, circ), st = z.status;
       delZone(z);
-      if (left) addZone(st, left.geometry, ag);
+      if (left) addZone(st, left.geometry);
       changed = true;
-      if (!ag && (st === 'occ' || st === 'free')) touched = true;
     } catch (err) { console.error(err); }
   }
-  if (touched) rebuildAutoGreys();
   return changed;
 }
+// Рухаємося від попередньої точки до нової з малим кроком, щоб швидка рука не лишала прогалин
 function eraseTo(px) {
   const d = +$('esize').value, step = Math.max(1, d * 0.25);
   const dist = lastErasePx.distanceTo(px);
@@ -850,11 +908,11 @@ map.on('mousemove', e => {
   eGhost.setLatLng(e.latlng).setRadius(rad);
 });
 
-// ---------- Flags ----------
+// ---------- Прапори (прив'язка до зони / лінії фронту) ----------
 function flagAt(ll, side) {
   const need = side === 'ua' ? 'free' : 'occ';
   const mpp = 40075016.686 * Math.cos(ll.lat * Math.PI / 180) / Math.pow(2, map.getZoom() + 8);
-  const limit = 40 * mpp;
+  const limit = 40 * mpp;                               // радіус прив'язки ≈ 40 px
   const pt = turf.point([ll.lng, ll.lat]);
   let inside = false, best = null, bd = Infinity;
   try {
@@ -872,42 +930,304 @@ function flagAt(ll, side) {
   toast(side === 'ua' ? t('t_fua') : t('t_fru'));
 }
 
-// ---------- Pointer input ----------
+// ---------- Бригади ----------
+const BRIG = {
+  ua: [
+    ['14', '14 ОМБр — імені князя Романа Великого'], ['24', '24 ОМБр — імені короля Данила'],
+    ['28', '28 ОМБр — імені Лицарів Зимового походу'], ['30', '30 ОМБр — імені князя Костянтина Острозького'],
+    ['33', '33 ОМБр — 33-тя окрема механізована бригада'], ['47', '47 ОМБр «Магура»'],
+    ['53', '53 ОМБр — імені князя Володимира Мономаха'], ['54', '54 ОМБр — імені гетьмана Івана Мазепи'],
+    ['56', '56 ОМПБр — 56-та окрема мотопіхотна бригада'], ['57', '57 ОМПБр — імені кошового отамана Костя Гордієнка'],
+    ['58', '58 ОМПБр — імені гетьмана Івана Виговського'], ['59', '59 ОМПБр — імені Якова Гандзюка'],
+    ['60', '60 ОМБр — 60-та окрема механізована бригада'], ['62', '62 ОМБр — 62-га окрема механізована бригада'],
+    ['63', '63 ОМБр — 63-тя окрема механізована бригада'], ['65', '65 ОМБр — 65-та окрема механізована бригада'],
+    ['66', '66 ОМБр — 66-та окрема механізована бригада'], ['67', '67 ОМБр — 67-ма окрема механізована бригада'],
+    ['68', '68 ОЄБр — імені Олекси Довбуша (єгерська)'], ['71', '71 ОЄБр — 71-ша окрема єгерська бригада'],
+    ['72', '72 ОМБр — імені Чорних Запорожців'], ['92', '92 ОШБр — імені кошового отамана Івана Сірка'],
+    ['93', '93 ОМБр «Холодний Яр»'], ['100', '100 ОМБр — 100-ма окрема механізована бригада'],
+    ['110', '110 ОМБр — 110-та окрема механізована бригада'], ['115', '115 ОМБр — 115-та окрема механізована бригада'],
+    ['116', '116 ОМБр — 116-та окрема механізована бригада'], ['118', '118 ОМБр — 118-ма окрема механізована бригада'],
+    ['1 ТБр', '1 ОТБр — 1-ша окрема танкова бригада'], ['4 ТБр', '4 ОТБр — 4-та окрема танкова бригада'],
+    ['17 ТБр', '17 ОТБр — 17-та окрема танкова бригада'],
+    ['25', '25 ОПДБр — 25-та окрема повітрянодесантна бригада'], ['46', '46 ОАеМБр — 46-та окрема аеромобільна бригада'],
+    ['77', '77 ОАеМБр — 77-ма окрема аеромобільна бригада'], ['78', '78 ОДШП — 78-й окремий десантно-штурмовий полк'],
+    ['79', '79 ОДШБр — 79-та окрема десантно-штурмова бригада'], ['80', '80 ОДШБр — 80-та окрема десантно-штурмова бригада'],
+    ['81', '81 ОАеМБр — 81-ша окрема аеромобільна бригада'], ['82', '82 ОДШБр — 82-га окрема десантно-штурмова бригада'],
+    ['95', '95 ОДШБр — 95-та окрема десантно-штурмова бригада'],
+    ['35', '35 ОБрМП — 35-та окрема бригада морської піхоти'], ['36', '36 ОБрМП — 36-та окрема бригада морської піхоти'],
+    ['37', '37 ОБрМП — 37-ма окрема бригада морської піхоти'], ['38', '38 ОБрМП — 38-ма окрема бригада морської піхоти'],
+    ['3 ШБр', '3 ОШБр — 3-тя окрема штурмова бригада'], ['5 ШБр', '5 ОШБр — 5-та окрема штурмова бригада'],
+    ['10', '10 ОГШБр «Едельвейс» — гірсько-штурмова'], ['128', '128 ОГШБр — Закарпатська гірсько-штурмова'],
+    ['26 АБр', '26 ОАБр — 26-та окрема артилерійська бригада'], ['40 АБр', '40 ОАБр — 40-ва окрема артилерійська бригада'],
+    ['43 АБр', '43 ОМАБр — 43-тя окрема важка артилерійська бригада'], ['44 АБр', '44 ОАБр — 44-та окрема артилерійська бригада'],
+    ['45 АБр', '45 ОАБр — 45-та окрема артилерійська бригада'], ['55 АБр', '55 ОАБр «Запорізька Січ»'],
+    ['Азов', '12 бригада спеціального призначення «Азов» (НГУ)'], ['Хартія', '13 бригада НГУ «Хартія»'],
+    ['Калина', '14 бригада НГУ «Червона Калина»'], ['Кара-Даг', '15 бригада НГУ «Кара-Даг»'],
+    ['Рубіж', '4 бригада оперативного призначення НГУ «Рубіж»'], ['Омега', 'Омега — спецпризначення НГУ'],
+    ['Скеля', '3 полк спеціального призначення «Скеля»'], ['Бохдан', '1 президентська бригада імені гетьмана Богдана Хмельницького'],
+    ['Лють', 'Штурмова бригада «Лють» (ДПСУ)'], ['Кракен', 'Окремий загін спеціального призначення «Кракен»'],
+    ['ГУР', 'ГУР МОУ — Головне управління розвідки'], ['ССО', 'Сили спеціальних операцій ЗСУ']
+  ],
+  ru: [
+    ['1 ГвТА', '1-ша гвардійська танкова армія'], ['2 МСД', '2-га гвардійська мотострілецька дивізія «Таманська»'],
+    ['3 МСД', '3-тя мотострілецька дивізія'], ['4 ТД', '4-та гвардійська танкова дивізія «Кантемирівська»'],
+    ['47 ТД', '47-ма гвардійська танкова дивізія'], ['20 МСД', '20-та гвардійська мотострілецька дивізія'],
+    ['144 МСД', '144-та гвардійська мотострілецька дивізія'], ['150 МСД', '150-та мотострілецька дивізія'],
+    ['7 ДШД', '7-ма гвардійська десантно-штурмова дивізія'], ['76 ДШД', '76-та гвардійська десантно-штурмова дивізія'],
+    ['98 ВДД', '98-ма гвардійська повітрянодесантна дивізія'], ['106 ВДД', '106-та гвардійська повітрянодесантна дивізія'],
+    ['11 ДШБр', '11-та окрема гвардійська десантно-штурмова бригада'], ['31 ДШБр', '31-ша окрема гвардійська десантно-штурмова бригада'],
+    ['56 ДШБр', '56-та окрема гвардійська десантно-штурмова бригада'], ['83 ДШБр', '83-тя окрема гвардійська десантно-штурмова бригада'],
+    ['5 ТБр', '5-та окрема гвардійська танкова бригада'],
+    ['15 МСБр', '15-та окрема мотострілецька бригада'], ['21 МСБр', '21-ша окрема мотострілецька бригада'],
+    ['25 МСБр', '25-та окрема мотострілецька бригада'], ['27 МСБр', '27-ма окрема гвардійська мотострілецька бригада'],
+    ['33 МСБр', '33-тя окрема гірська мотострілецька бригада'], ['34 МСБр', '34-та окрема гірська мотострілецька бригада'],
+    ['37 МСБр', '37-ма окрема гвардійська мотострілецька бригада'], ['55 МСБр', '55-та окрема гірська мотострілецька бригада'],
+    ['57 МСБр', '57-ма окрема гвардійська мотострілецька бригада'], ['64 МСБр', '64-та окрема гвардійська мотострілецька бригада'],
+    ['74 МСБр', '74-та окрема гвардійська мотострілецька бригада'], ['79 МСБр', '79-та окрема гвардійська мотострілецька бригада'],
+    ['138 МСБр', '138-ма окрема гвардійська мотострілецька бригада'], ['200 МСБр', '200-та окрема мотострілецька бригада'],
+    ['205 МСБр', '205-та окрема мотострілецька бригада'],
+    ['40 МП', '40-ва окрема бригада морської піхоти'], ['61 МП', '61-ша окрема бригада морської піхоти'],
+    ['155 МП', '155-та окрема бригада морської піхоти'], ['336 МП', '336-ма окрема бригада морської піхоти'],
+    ['810 МП', '810-та окрема бригада морської піхоти'],
+    ['2 СпП', '2-га окрема бригада спеціального призначення'], ['3 СпП', '3-тя окрема бригада спеціального призначення'],
+    ['10 СпП', '10-та окрема бригада спеціального призначення'], ['14 СпП', '14-та окрема бригада спеціального призначення'],
+    ['16 СпП', '16-та окрема бригада спеціального призначення'], ['22 СпП', '22-га окрема бригада спеціального призначення'],
+    ['24 СпП', '24-та окрема бригада спеціального призначення'], ['45 СпП', '45-та окрема бригада спеціального призначення ВДВ'],
+    ['346 СпП', '346-та окрема бригада спеціального призначення'], ['Ахмат', 'Спецпризначення «Ахмат»'],
+    ['1 АК', '1-й армійський корпус (ДНР)'], ['2 АК', '2-й армійський корпус (ЛНР)'],
+    ['Сомалі', 'Батальйон «Сомалі»'], ['Спарта', 'Батальйон «Спарта»'], ['Восток', 'Батальйон «Восток»'], ['П\'ятнашка', 'Батальйон «П\'ятнашка»']
+  ]
+};
+const brigSide = () => mode === 'bua' ? 'ua' : 'ru';
+const needZone = side => side === 'ua' ? 'free' : 'occ';
+function inZone(ll, st) {
+  const pt = turf.point([ll.lng, ll.lat]);
+  try { return zones.some(z => z.status === st && turf.booleanPointInPolygon(pt, z.f)); } catch (e) { return false; }
+}
+const badZoneMsg = side => side === 'ua' ? t('t_bua') : t('t_bru');
+
+// ---------- Сіра зона між звільненим і окупованим ----------
+// Смуга = точки, що лежать у межах w км і від звільненої, і від окупованої території (разом ширина 2w).
+// Прибирає «голки», петельки та дрібні острівці/дірки зі смуги: стискаємо й розтискаємо на малу відстань
+function cleanStrip(s, w) {
+  try {
+    const eps = w * 0.12, o1 = { units: 'kilometers', steps: 1 };
+    const e = turf.buffer(s, -eps, o1);
+    if (!e) return null;
+    const o = turf.buffer(e, eps, o1);
+    if (!o) return null;
+    const minA = Math.pow(w * 1000, 2) * 0.5, polys = [];
+    turf.flatten(o).features.forEach(p => {
+      if (turf.area(p) < minA) return;                                   // дрібний острівець
+      polys.push(p.geometry.coordinates.filter((r, i) => i === 0 || turf.area(turf.polygon([r])) >= minA));   // дрібні дірки
+    });
+    return polys.length ? turf.multiPolygon(polys) : null;
+  } catch (err) { console.error(err); return turf.feature(s.geometry); }
+}
+// Обрізає смугу по території двох зон (з невеликим «замиканням» щілин), щоб вона не стирчала «язиком» у порожню карту
+function clipTerr(raw, F, O, w) {
+  try {
+    let area = turf.union(F, O);
+    if (!area) return raw;
+    try {
+      const c = w * 0.2, o1 = { units: 'kilometers', steps: 1 }, cl = turf.buffer(turf.buffer(area, c, o1), -c, o1);
+      if (cl) area = cl;
+    } catch (err) { /* лишаємо без замикання */ }
+    return turf.intersect(raw, area);
+  } catch (err) { console.error(err); return raw; }
+}
+function autoBuffer(force, bb) {
+  if (!force && !$('bufOn').checked) return false;
+  const W = +$('bufW').value, w = W / 2, bs = 1;      // W = strip width from the slider (km); 1 segment per quarter circle keeps corners sharp
+  const o1 = { units: 'kilometers', steps: bs };
+  try {
+    const uni = sts => { let u = null; for (const z of zones) if (sts.includes(z.status)) { u = u ? turf.union(u, z.f) : z.f; if (!u) return null; } return u; };
+    const F = uni(['free']), O = uni(['occ']), G = uni(['occ', 'fight']);   // G = all enemy-held land (occupied + grey)
+    if (!O) return false;
+    let box = null, inner = null;
+    if (bb) {                                          // only work around the new shape, so it stays fast on a big map
+      const lat0 = (bb[1] + bb[3]) / 2, kd = 1 / (111.32 * Math.max(0.2, Math.cos(lat0 * Math.PI / 180)));   // km -> degrees of longitude
+      const bp = 4 * W * kd, ip = 1.5 * W * kd;
+      box = turf.bboxPolygon([bb[0] - bp, bb[1] - bp, bb[2] + bp, bb[3] + bp]);
+      inner = turf.bboxPolygon([bb[0] - ip, bb[1] - ip, bb[2] + ip, bb[3] + ip]);
+    }
+    // 1) strip where liberated meets occupied (total width W, w on each side)
+    let contact = null;
+    try {
+      let F1 = F, O1 = O;
+      if (F1 && O1) {
+        if (bb) {
+          const pad = w * 3 / 50, bx = turf.bboxPolygon([bb[0] - pad, bb[1] - pad, bb[2] + pad, bb[3] + pad]);
+          F1 = turf.intersect(F1, bx); O1 = turf.intersect(O1, bx);
+        }
+        if (F1 && O1) {
+          const raw0 = turf.intersect(turf.buffer(F1, w, o1), turf.buffer(O1, w, o1));
+          const raw = raw0 && clipTerr(raw0, F1, O1, w);
+          if (raw && turf.area(raw) >= 2000) contact = cleanStrip(raw, w);
+        }
+      }
+    } catch (err) { console.error(err); }
+    // 2) strip inside the occupied territory along its edge facing the empty map (depth W)
+    let outer = null;
+    try {
+      let Gl = G, Fl = F;
+      if (bb) { Gl = turf.intersect(Gl, box); Fl = Fl ? turf.intersect(Fl, box) : null; }
+      if (Gl) {
+        let ring = Gl;
+        const sh = turf.buffer(Gl, -W, o1);
+        if (sh) ring = turf.difference(Gl, sh);        // ring of depth W along the whole edge
+        if (ring && Fl) { const fb = turf.buffer(Fl, W, o1); if (fb) ring = turf.difference(ring, fb); }   // the border with liberated land already has its own strip
+        if (ring && inner) ring = turf.intersect(ring, inner);                                      // drop the false edge created by the clip box
+        if (ring && turf.area(ring) >= 2000) outer = cleanStrip(ring, w);
+      }
+    } catch (err) { console.error(err); }
+    const parts = [contact, outer].filter(Boolean);
+    if (!parts.length) return false;
+    parts.forEach(p => { const z = addZone('fight', p.geometry); carve(z); mergeSame(z); });
+    if (parts.length === 1) return parts[0];
+    try { const u = turf.union(parts[0], parts[1]); if (u) return u; } catch (err) { /* fall back to a multipolygon */ }
+    const cs = []; parts.forEach(p => turf.flatten(p).features.forEach(f => cs.push(f.geometry.coordinates)));
+    return turf.multiPolygon(cs);
+  } catch (err) { console.error(err); return false; }
+}
+function updBuf() { $('bufV').textContent = (+$('bufW').value).toFixed(1).replace('.', decSep()) + ' ' + t('km'); }
+$('bufW').oninput = updBuf;
+$('bufNow').onclick = () => { flushAnim(); if (autoBuffer(true)) { stats(); toast(t('t_bufok')); } else toast(t('t_bufno')); };
+
+// ---------- Значки бригад ----------
+// Щоб підставити справжню емблему бригади, додай сюди посилання: 'ua:14': 'https://…/emblem.png'
+const BRIG_IMG = {};
+function brigType(label, name) {
+  const s = label + ' ' + name;
+  if (/СпП|спеціал|ССО|ГУР|Омега|Скеля|Кракен|Ахмат/.test(s)) return 'spec';
+  if (/морськ\S* піхот|\bМП\b|ОБрМП/.test(s)) return 'mar';
+  if (/ДШ|ПДБр|ВДД|десант|аеромоб|АеМБр/.test(s)) return 'air';
+  if (/ГШБр|гірськ/.test(s)) return 'mtn';
+  if (/ТБр|ТД|ГвТА|танков/.test(s)) return 'tank';
+  if (/АБр|артилер/.test(s)) return 'art';
+  if (/МБр|МСБр|МСД|МПБр|мотопіх|механіз|мотостріл/.test(s)) return 'mech';
+  return 'inf';
+}
+const X_ = '<path d="M3 1.5l18 13M21 1.5L3 14.5"/>';
+const SYM = {
+  inf:  X_,
+  mech: X_ + '<ellipse cx="12" cy="8" rx="6" ry="3.6"/>',
+  tank: '<ellipse cx="12" cy="8" rx="8.5" ry="4.8"/><path d="M6 8h12"/>',
+  air:  '<path d="M3 7.5A9 6.5 0 0 1 21 7.5M3 7.5L12 15M21 7.5L12 15M12 1v14"/>',
+  mar:  '<circle cx="12" cy="3.2" r="1.7"/><path d="M12 5v9.5M7.5 8h9M5 10.5c0 3 3 4 7 4s7-1 7-4"/>',
+  art:  '<circle cx="12" cy="8" r="4.2" fill="currentColor"/>',
+  mtn:  '<path d="M2 15L9.5 3l3.2 5.2L16 5l6 10z"/>',
+  spec: '<path fill="currentColor" d="M12 1.1L13.8 6.1 19.1 6.3 14.9 9.6 16.4 14.7 12 11.7 7.6 14.7 9.1 9.6 4.9 6.3 10.2 6.1z"/>'
+};
+const brigSvg = (label, name) => '<svg viewBox="0 0 24 16">' + SYM[brigType(label, name)] + '</svg>';
+
+function addBrig(side, label, name, lat, lng) {
+  const el = document.createElement('div'); el.className = 'bg ' + side;
+  const ic = document.createElement('span'); ic.className = 'bgi';
+  const img = BRIG_IMG[side + ':' + label];
+  ic.innerHTML = img ? '<img alt="" src="' + encodeURI(img) + '">' : brigSvg(label, name);
+  const tx = document.createElement('span'); tx.className = 'bgt'; tx.textContent = label;
+  if (label.length > 4) tx.style.fontSize = label.length > 5 ? '9px' : '10px';
+  el.append(ic, tx);
+  const m = L.marker([lat, lng], {
+    draggable: true, keyboard: false, zIndexOffset: 500,
+    icon: L.divIcon({ className: '', html: el, iconSize: [46, 38], iconAnchor: [23, 19] })
+  }).addTo(brigLayer);
+  const tip = document.createElement('div'); tip.textContent = name;
+  m.bindTooltip(tip, { direction: 'top', offset: [0, -16] });
+  const rec = { side, label, name, lat, lng, m };
+  m.on('dragend', () => {                             // нове місце має бути в «своїй» зоні, інакше повертаємо назад
+    const q = m.getLatLng();
+    if (inZone(q, needZone(side))) { rec.lat = q.lat; rec.lng = q.lng; }
+    else { m.setLatLng([rec.lat, rec.lng]); toast(badZoneMsg(side)); }
+    stats();
+  });
+  const del = () => { brigLayer.removeLayer(m); brigs = brigs.filter(x => x !== rec); stats(); };
+  m.on('contextmenu', del);
+  m.on('click', () => { if (mode === 'del') del(); });
+  brigs.push(rec);
+  return rec;
+}
+function placeBrig(ll) {
+  const side = brigSide(), b = selBrig[side];
+  if (!b) return toast(t('t_pick'));
+  if (!inZone(ll, needZone(side))) return toast(badZoneMsg(side));
+  addBrig(side, b.label, b.name, ll.lat, ll.lng); stats(); renderBrig();
+}
+function renderBrig() {
+  const side = brigSide(), raw = $('bq').value.trim(), q = raw.toLowerCase(), box = $('blist'), cur = selBrig[side];
+  const keep = box.scrollTop;
+  box.textContent = '';
+  const item = (label, name, extra) => {
+    const b = document.createElement('button');
+    const on = cur && cur.label === label && cur.name === name;
+    const placed = brigs.some(r => r.side === side && r.label === label && r.name === name);
+    b.className = 't' + (on ? ' on' : '');
+    const bd = document.createElement('span'); bd.className = 'bd ' + side; bd.textContent = label;
+    const nm = document.createElement('span'); nm.className = 'nm'; nm.textContent = (extra || '') + name + (placed ? ' ✓' : '');
+    const ic = document.createElement('span'); ic.className = 'bic'; ic.innerHTML = brigSvg(label, name);
+    b.append(ic, bd, nm);
+    b.onclick = () => { selBrig[side] = { label, name }; renderBrig(); };
+    box.appendChild(b);
+  };
+  if (raw) item(raw.slice(0, 6), raw, t('own'));
+  BRIG[side].filter(b => !q || (b[0] + ' ' + b[1]).toLowerCase().includes(q)).forEach(b => item(b[0], b[1]));
+  if (!box.children.length) box.textContent = t('nf');
+  $('bsel').textContent = cur ? cur.label : t('none');
+  box.scrollTop = keep;
+}
+$('bq').oninput = renderBrig;
+
+// ---------- Кліки по карті ----------
+// У режимах малювання/покраски рідне перетягування вимкнено. Рух карти — Shift + ліва або середня кнопка
+// (Leaflet сам ігнорує перетягування із Shift, тому панорамуємо вручну через panBy).
 let panFrom = null;
 function setPan() { if (mode === 'draw' || mode === 'paint' || mode === 'erase') map.dragging.disable(); else map.dragging.enable(); }
-let drawing = false, painting = false, erasing = false;
-let lastPaintPx = null, lastErasePx = null, lastDrag = 0;
+
+let drawing = false, freehand = false, painting = false, erasing = false, downPx = null, lastPaintPx = null, lastErasePx = null, lastDrag = 0;
 const mpp = ll => 40075016.686 * Math.cos(ll.lat * Math.PI / 180) / Math.pow(2, map.getZoom() + 8);
+
 function ptrDown(cp, ll) {
-  if (mode === 'draw') { drawing = true; pts.push(ll); redrawTmp(); }
+  downPx = cp;
+  if (mode === 'draw') drawing = true;
   else if (mode === 'paint') { painting = true; lastPaintPx = cp; paintAt(ll); }
   else if (mode === 'erase') { erasing = true; lastErasePx = cp; if (eraseAt(lastErasePx)) stats(); }
 }
 function ptrMove(cp, ll) {
-  if (drawing) {
-    if (map.latLngToContainerPoint(pts[pts.length - 1]).distanceTo(cp) >= 6) { pts.push(ll); redrawTmp(); }
-  } else if (erasing) {
+  if (drawing) {                                         // малювання від руки
+    if (!freehand) {
+      if (downPx.distanceTo(cp) < 8) return;
+      freehand = true;
+      if (!pts.length) pts.push(map.containerPointToLatLng(downPx));
+    }
+    if (map.latLngToContainerPoint(pts[pts.length - 1]).distanceTo(cp) >= 6) {
+      pts.push(ll); redrawTmp(true);
+    }
+  } else if (erasing) {                                  // ластик із затисканням
     eraseTo(cp);
-  } else if (painting) {
+  } else if (painting) {                                 // покраска із затисканням
     const r = +$('brush').value;
     if (!r) return;
     const rpx = r * 1000 / mpp(ll);
-    if (lastPaintPx.distanceTo(cp) >= Math.max(6, rpx * 0.5)) { lastPaintPx = cp; paintAt(ll, true); }
+    if (lastPaintPx.distanceTo(cp) >= Math.max(6, rpx * 0.5)) {
+      lastPaintPx = cp; paintAt(ll, true);
+    }
   }
 }
 function ptrUp() {
   const had = drawing || painting || erasing;
-  if (painting) renderStats();
-  if (drawing) { lastDrag = Date.now(); finishFree(); }
-  drawing = painting = erasing = false; panFrom = null;
+  if (painting) { autoBuffer(); renderStats(); }
+  if (drawing && freehand) { lastDrag = Date.now(); finishFree(); }
+  drawing = freehand = painting = erasing = false; panFrom = null;
   if (had) afterChange();
 }
-function abortStroke() {
+function abortStroke() {                                  // другий палець: перериваємо штрих, далі працює щипок/рух карти
   const had = drawing || painting || erasing;
-  if (drawing) cancelDraw();
-  drawing = painting = erasing = false;
+  if (drawing && freehand) cancelDraw();
+  drawing = freehand = painting = erasing = false;
   if (had) afterChange();
 }
+
 map.on('mousedown', e => {
   const oe = e.originalEvent;
   if (oe.button === 1 || (oe.button === 0 && oe.shiftKey)) { panFrom = { x: oe.clientX, y: oe.clientY }; oe.preventDefault(); return; }
@@ -925,6 +1245,7 @@ map.on('mousemove', e => {
 });
 window.addEventListener('mouseup', ptrUp);
 
+// Сенсорні екрани: один палець — малювати/фарбувати/стирати, два пальці — рух і масштаб (це робить Leaflet)
 let tState = null;
 const tMode = () => mode === 'draw' || mode === 'paint' || mode === 'erase';
 const mapEl = map.getContainer();
@@ -933,13 +1254,14 @@ mapEl.addEventListener('touchstart', e => {
   if (e.touches.length > 1) { abortStroke(); tState = { multi: true }; return; }
   e.preventDefault();
   const cp = map.mouseEventToContainerPoint(e.touches[0]);
-  tState = { multi: false };
+  tState = { px: cp, moved: false, multi: false };
   ptrDown(cp, map.containerPointToLatLng(cp));
 }, { passive: false });
 mapEl.addEventListener('touchmove', e => {
   if (!tState || tState.multi || !tMode()) return;
   e.preventDefault();
   const cp = map.mouseEventToContainerPoint(e.touches[0]);
+  if (tState.px.distanceTo(cp) > 8) tState.moved = true;
   ptrMove(cp, map.containerPointToLatLng(cp));
 }, { passive: false });
 function tEnd(e) {
@@ -948,17 +1270,19 @@ function tEnd(e) {
   if (st.multi) return;
   if (e.type === 'touchcancel') return abortStroke();
   e.preventDefault();
+  const cp = map.mouseEventToContainerPoint(e.changedTouches[0]), ll = map.containerPointToLatLng(cp);
+  const tap = !st.moved && mode === 'draw' && !(drawing && freehand);
   ptrUp();
+  if (tap) handleClick(cp, ll);                          // тап у режимі малювання = поставити точку
 }
 mapEl.addEventListener('touchend', tEnd, { passive: false });
 mapEl.addEventListener('touchcancel', tEnd, { passive: false });
-
 function finishFree() {
   if (pts.length < 3) return cancelDraw();
-  if (pts.length >= 4) {
+  if (pts.length >= 4) {                                  // спрощуємо лінію, щоб не було сотень вершин
     try {
       const ring = pts.map(p => [p.lng, p.lat]); ring.push(ring[0]);
-      const tol = 2 * 360 / (256 * Math.pow(2, map.getZoom()));
+      const tol = 2 * 360 / (256 * Math.pow(2, map.getZoom()));  // ≈ 2 px
       const r = turf.simplify(turf.polygon([ring]), { tolerance: tol, highQuality: true }).geometry.coordinates[0];
       if (r.length >= 4) pts = r.slice(0, -1).map(c => L.latLng(c[1], c[0]));
     } catch (err) { console.error(err); }
@@ -966,39 +1290,47 @@ function finishFree() {
   finish();
 }
 
+function handleClick(cp, ll) {
+  if (mode === 'draw') {
+    if (pts.length > 2 && map.latLngToContainerPoint(pts[0]).distanceTo(cp) < 12) return finish();
+    pts.push(ll); redrawTmp();
+  } else if (mode === 'ua' || mode === 'ru') flagAt(ll, mode);
+  else if (mode === 'bua' || mode === 'bru') placeBrig(ll);
+  else if (mode === 'ruler') rulerClick(ll);
+}
 map.on('click', e => {
-  if (Date.now() - lastDrag < 150) return;
-  if (mode === 'ua' || mode === 'ru') flagAt(e.latlng, mode);
-  else if (mode === 'ruler') rulerClick(e.latlng);
+  if (Date.now() - lastDrag < 150) return;               // клік після протягування ігноруємо
+  handleClick(e.containerPoint, e.latlng);
 });
-document.addEventListener('keydown', e => {
-  if ($('panel').hidden || !$('set').hidden) return;
-  if (mode === 'draw' && e.key === 'Escape') cancelDraw();
-  if (e.key === 'Escape' && mode === 'ruler') rClear();
+map.on('dblclick', () => {                              // два кліки додали дубль — прибираємо його
+  if (mode === 'draw' && pts.length > 3) { pts.pop(); finish(); }
 });
 
-// ---------- Save / load ----------
+// ---------- Збереження / завантаження ----------
 function clearData() {
   flushAnim();
   cancelDraw();
   zones.slice().forEach(delZone);
   flags.forEach(f => flagLayer.removeLayer(f.m)); flags = [];
+  brigs.forEach(b => brigLayer.removeLayer(b.m)); brigs = [];
 }
 function clearAll() { clearData(); stats(); }
 function applySave(d) {
   clearData();
-  d.zs.forEach(z => addZone(z.s, z.g, z.autoGrey));
+  d.zs.forEach(z => addZone(z.s, z.g));
   d.fs.forEach(f => addFlag(f.side, f.lat, f.lng));
+  d.bs.forEach(b => addBrig(b.side, b.label, b.name, b.lat, b.lng));
   if (d.view) map.setView([d.view.c.lat, d.view.c.lng], d.view.z);
   applyLayers(d.layers);
-  rebuildAutoGreys();
   stats();
 }
+// Збереження — це звичайний файл .json: його можна покласти на флешку, у хмару, надіслати собі й відкрити де завгодно
 function buildSave() {
   return {
-    app: 'frontline-map', v: 5, savedAt: new Date().toISOString(),
-    zones: zones.map(z => ({ s: z.status, g: z.f.geometry, autoGrey: z.autoGrey ? 1 : 0 })),
+    app: 'frontline-map', v: 2, savedAt: new Date().toISOString(),
+    zones: zones.map(z => ({ s: z.status, g: z.f.geometry })),
     flags: flags.map(f => ({ side: f.side, lat: f.lat, lng: f.lng })),
+    brigades: brigs.map(b => ({ side: b.side, label: b.label, name: b.name, lat: b.lat, lng: b.lng })),
     layers: curLayers(),
     view: { c: { lat: map.getCenter().lat, lng: map.getCenter().lng }, z: map.getZoom() }
   };
@@ -1007,12 +1339,12 @@ async function saveFile() {
   const data = JSON.stringify(buildSave());
   const dt = new Date(), p = n => String(n).padStart(2, '0');
   const name = 'frontline-save-' + dt.getFullYear() + '-' + p(dt.getMonth() + 1) + '-' + p(dt.getDate()) + '_' + p(dt.getHours()) + p(dt.getMinutes()) + '.json';
-  if (window.showSaveFilePicker) {
+  if (window.showSaveFilePicker) {                       // Chrome/Edge на ПК: вікно «Зберегти як…»
     try {
       const h = await window.showSaveFilePicker({ suggestedName: name, types: [{ description: t('t_savedesc'), accept: { 'application/json': ['.json'] } }] });
       const w = await h.createWritable(); await w.write(data); await w.close();
       return toast(t('t_saved', h.name));
-    } catch (e) { if (e && e.name === 'AbortError') return; }
+    } catch (e) { if (e && e.name === 'AbortError') return; }   // інакше — звичайне завантаження
   }
   try {
     const url = URL.createObjectURL(new Blob([data], { type: 'application/json' }));
@@ -1025,26 +1357,31 @@ async function saveFile() {
 function parseSave(txt) {
   const d = JSON.parse(txt);
   if (!d || !Array.isArray(d.zones) || !Array.isArray(d.flags)) throw new Error('format');
-  const zs = d.zones.filter(z => z && ST[z.s] && z.g && (z.g.type === 'Polygon' || z.g.type === 'MultiPolygon') && Array.isArray(z.g.coordinates))
-    .map(z => ({ s: z.s, g: z.g, autoGrey: z.autoGrey ? 1 : 0 }));
+  const zs = d.zones.filter(z => z && ST[z.s] && z.g && (z.g.type === 'Polygon' || z.g.type === 'MultiPolygon') && Array.isArray(z.g.coordinates));
   const fs = d.flags.filter(f => f && (f.side === 'ua' || f.side === 'ru') && isFinite(f.lat) && isFinite(f.lng));
+  const bs = (Array.isArray(d.brigades) ? d.brigades : []).filter(b => b && (b.side === 'ua' || b.side === 'ru') && typeof b.label === 'string' && isFinite(b.lat) && isFinite(b.lng)).map(b => ({ ...b, name: typeof b.name === 'string' ? b.name : b.label }));
   const v = d.view, view = v && v.c && isFinite(v.c.lat) && isFinite(v.c.lng) && isFinite(v.z) ? v : null;
-  return { zs, fs, view, layers: d.layers };
+  return { zs, fs, bs, view, layers: d.layers };
 }
 async function loadFile(file) {
   if (!file) return;
   let d;
   try { d = parseSave(await file.text()); } catch (e) { return toast(t('t_notsave')); }
-  if (zones.length || flags.length) { if (!confirm(t('c_load'))) return; }
+  if (zones.length || flags.length) {
+    if (!confirm(t('c_load'))) return;
+  }
   if (!$('menu').hidden) startGame();
-  try { applySave(d); toast(t('t_loaded', file.name)); }
-  catch (e) { console.error(e); toast(t('t_bad')); }
+  try {
+    applySave(d);
+    toast(t('t_loaded', file.name));
+  } catch (e) { console.error(e); toast(t('t_bad')); }
 }
 $('save').onclick = saveFile;
 const pickFile = () => { $('file').value = ''; $('file').click(); };
 $('load').onclick = pickFile;
 $('menuLoad').onclick = pickFile;
 $('file').onchange = e => loadFile(e.target.files[0]);
+// Перетягни файл збереження прямо у вікно гри
 let dragDepth = 0;
 const hasFiles = e => e.dataTransfer && Array.from(e.dataTransfer.types || []).includes('Files');
 window.addEventListener('dragenter', e => { if (hasFiles(e)) { dragDepth++; $('drop').hidden = false; } });
@@ -1057,24 +1394,27 @@ window.addEventListener('drop', e => {
 });
 $('clear').onclick = () => { if (confirm(t('c_clear'))) clearAll(); };
 
-// ---------- History buttons & shortcuts ----------
+// ---------- Кнопки історії, гарячі клавіші, згортання панелі ----------
 $('hundo').onclick = doUndo; $('hredo').onclick = doRedo;
 $('ptoggle').onclick = () => { const c = $('panel').classList.toggle('collapsed'); $('ptoggle').textContent = c ? '▴' : '▾'; };
 document.addEventListener('keydown', e => {
   if ($('panel').hidden) return;
+  if (e.key === 'Escape' && mode === 'ruler') { rClear(); return; }
   if (!(e.ctrlKey || e.metaKey)) return;
   const tg = e.target;
   if (tg && (tg.tagName === 'TEXTAREA' || (tg.tagName === 'INPUT' && /^(text|search)$/.test(tg.type)))) return;
-  if (e.code === 'KeyZ' && !e.shiftKey) { e.preventDefault(); doUndo(); }
-  else if (e.code === 'KeyY' || (e.code === 'KeyZ' && e.shiftKey)) { e.preventDefault(); doRedo(); }
+  if (e.code === 'KeyZ' && !e.shiftKey) {
+    e.preventDefault();
+    if (mode === 'draw' && pts.length) { pts.pop(); redrawTmp(); } else doUndo();   // у фігурі, що малюється, Ctrl+Z знімає останню точку
+  } else if (e.code === 'KeyY' || (e.code === 'KeyZ' && e.shiftKey)) { e.preventDefault(); doRedo(); }
 });
 
-// ---------- Autosave restore ----------
+// ---------- Відновлення автозбереження ----------
 function readAuto() {
   try {
-    const raw = localStorage.getItem(AS_KEY); if (!raw) return null;
-    const p = parseSave(raw); p.at = JSON.parse(raw).savedAt;
-    return (p.zs.length || p.fs.length) ? p : null;
+    const t = localStorage.getItem(AS_KEY); if (!t) return null;
+    const p = parseSave(t); p.at = JSON.parse(t).savedAt;
+    return (p.zs.length || p.fs.length || p.bs.length) ? p : null;
   } catch (err) { return null; }
 }
 const auto0 = readAuto();
@@ -1083,31 +1423,28 @@ if (auto0) {
   $('start').dataset.i = 'newgame'; $('start').classList.add('sec');
   $('menuResume').onclick = () => { startGame(); applySave(auto0); resetHist(); toast(t('t_restored')); };
 }
-function updBuf() { $('bufV').textContent = (+$('bufW').value).toFixed(1).replace('.', decSep()) + ' ' + t('km'); }
-$('bufW').oninput = () => { updBuf(); flushAnim(); rebuildAutoGreys(); stats(); };
+
 function updAn() { $('anv').textContent = (+$('anT').value).toFixed(1).replace('.', decSep()) + ' ' + t('sec'); }
 $('anT').oninput = updAn; updAn();
-
-// ---------- Settings & theme ----------
 function applyTheme() {
   const th = THEMES.find(x => x[0] === cfg.theme) || THEMES.find(x => x[0] === 'blue'), v = th[3].split(' '), st = document.documentElement.style;
   TKEYS.forEach((k, i) => st.setProperty('--' + k, v[i]));
   st.setProperty('--font', th[4] || DEF_FONT);
 }
 function renderSettings() {
-  const mk = (label, on, fn, sw) => {
+  const mk = (cls, label, on, fn, sw) => {
     const b = document.createElement('button'); b.className = 't' + (on ? ' on' : '');
     if (sw) { const s = document.createElement('span'); s.className = 'swp'; s.style.background = 'linear-gradient(135deg,' + sw[0] + ' 50%,' + sw[1] + ' 50%)'; b.appendChild(s); }
     b.appendChild(document.createTextNode(label)); b.onclick = fn; return b;
   };
   const L = $('langs'); L.textContent = '';
   [['en', 'English'], ['ru', 'Русский']].forEach(([c, n]) =>
-    L.appendChild(mk(n, cfg.lang === c, () => { cfg.lang = c; saveCfg(); applyLang(); })));
+    L.appendChild(mk('', n, cfg.lang === c, () => { cfg.lang = c; saveCfg(); applyLang(); })));
   [[$('thF'), 'f'], [$('thP'), 'p']].forEach(([box, g]) => {
     box.textContent = '';
     THEMES.filter(x => x[1] === g).forEach(x => {
       const v = x[3].split(' ');
-      box.appendChild(mk(x[2].split('|')[LIDX[cfg.lang]], cfg.theme === x[0], () => { cfg.theme = x[0]; saveCfg(); applyTheme(); renderSettings(); }, [v[0], v[5]]));
+      box.appendChild(mk('', x[2].split('|')[LIDX[cfg.lang]], cfg.theme === x[0], () => { cfg.theme = x[0]; saveCfg(); applyTheme(); renderSettings(); }, [v[0], v[5]]));
     });
   });
 }
@@ -1130,6 +1467,7 @@ function applyLang() {
   buildLayersCtl(); updHint(); updBrush(); updAn(); updBuf(); renderStats(); resumeLabel(); renderSettings();
 }
 
+// Фон меню — карта світу (супутник) із затемненням по боках
 let menuMap = null;
 try {
   const z = Math.min(4, Math.max(2, Math.round(Math.log2(innerWidth / 256))));
