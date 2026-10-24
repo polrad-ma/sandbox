@@ -69,6 +69,12 @@ button.t:disabled{opacity:.4;cursor:default}
 #panel.collapsed>:not(#phead){display:none}
 #panel.collapsed #phead{margin-bottom:0}
 .rlab span{display:inline-block;transform:translate(-50%,-135%);background:var(--acc);color:var(--accT);font:700 12px/1 "Trebuchet MS","Segoe UI",sans-serif;padding:4px 7px;border-radius:3px;white-space:nowrap;box-shadow:0 1px 4px #0006}
+.crow{display:flex;gap:6px;align-items:center;margin-top:6px}
+.crow input[type=color]{width:34px;height:30px;padding:0;border:1px solid var(--line);border-radius:4px;background:var(--btn);cursor:pointer;flex:none}
+.crow .cname{flex:1;min-width:0;font:inherit;font-size:13px;padding:6px 8px;border-radius:4px;border:1px solid var(--line);background:var(--btn);color:var(--txt)}
+.crow.on .cname{border-color:var(--acc);box-shadow:inset 0 0 0 1px var(--acc)}
+.crow .csel,.crow .cdel{flex:none;padding:7px 8px}
+#custAdd{margin-top:8px}
 @media(pointer:coarse){button.t{padding:10px 11px;font-size:14px}.big{padding:14px 30px}}
 @media(max-width:560px){
 #panel{top:auto;bottom:0;left:0;right:0;width:auto;max-height:46vh;border-radius:12px 12px 0 0;border-width:1px 0 0 0}
@@ -127,6 +133,10 @@ button.t:disabled{opacity:.4;cursor:default}
       <button class="t" data-st="occ"><span class="dot" style="background:var(--occ)"></span><span data-i="st_occ"></span></button>
       <button class="t" data-st="fight"><span class="dot" style="background:var(--fight)"></span><span data-i="st_fight"></span></button>
     </div>
+  </div>
+  <div class="grp"><b data-i="customcol"></b>
+    <div id="cust"></div>
+    <button class="t" id="custAdd" data-i="addcol"></button>
   </div>
   <div class="grp"><b data-i="buf"></b>
     <label class="chk"><input type="checkbox" id="bufOn" checked> <span><span data-i="bufOn"></span>: <span id="bufV"></span></span></label>
@@ -195,6 +205,8 @@ m_ua:['UA flag','Флаг УКР'], m_ru:['RU flag','Флаг РФ'],
 m_ruler:['📏 Ruler','📏 Линейка'], m_del:['🗑️ Delete marker','🗑️ Удалить значок'],
 zonecol:['Zone / colour','Зона / цвет'],
 st_free:['Liberated','Освобождено'], st_occ:['Occupied','Оккупация'], st_fight:['Fighting','Идут бои'],
+customcol:['Custom colours','Свои цвета'], addcol:['＋ Add colour','＋ Добавить цвет'],
+colN:['Colour {0}','Цвет {0}'], colname:['Colour name','Название цвета'], pickcol:['Pick colour','Выбрать цвет'], delcol:['Delete this colour and its zones','Удалить цвет и его зоны'],
 curshape:['Current shape','Текущая фигура'], finish:['Finish','Завершить'],
 stepback:['Step back','Шаг назад'], cancel:['Cancel','Отмена'],
 anim:['🎞 Advance animation','🎞 Анимация продвижения'],
@@ -290,6 +302,11 @@ const darkBase = L.layerGroup([
   esriL('Reference/World_Boundaries_and_Places', 18, { zIndex: 5 })
 ]);
 
+const darkCarto = L.layerGroup([
+  esriL('Canvas/World_Dark_Gray_Base', 16),
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', { maxZoom: 19, subdomains: 'abcd', zIndex: 5, attribution: '© OpenStreetMap, © CARTO' })
+]);
+
 const BASES = [
   ['esri','Esri · Map',esriL('World_Street_Map', 18)],
   ['osm','OpenStreetMap',osmL('https://tile.openstreetmap.org/{z}/{x}/{y}.png', 19)],
@@ -301,6 +318,7 @@ const BASES = [
   ['esriLight','Esri · Light',esriL('Canvas/World_Light_Gray_Base', 16)],
   ['esriDark','Esri · Dark',esriL('Canvas/World_Dark_Gray_Base', 16)],
   ['esriDarkLabels','Esri · Dark (labels)',darkBase],
+  ['esriDarkCarto','Esri · Dark + Carto Labels',darkCarto],
   ['esriTopo','Esri · Topographic',esriL('World_Topo_Map', 18)],
   ['esriNat','Esri · National Geographic',esriL('NatGeo_World_Map', 16)],
   ['esriTerr','Esri · Terrain',esriL('World_Terrain_Base', 13)],
@@ -407,19 +425,71 @@ function addFlag(side, lat, lng) {
 }
 function stats() { renderStats(); afterChange(); }
 function renderStats() {
-  const sum = { free: 0, occ: 0, fight: 0 };
-  zones.forEach(z => { try { sum[z.status] += turf.area(z.f) / 1e6; } catch (e) {} });
+  const sum = {};
+  Object.keys(ST).forEach(k => { sum[k] = 0; });
+  zones.forEach(z => { try { if (z.status in sum) sum[z.status] += turf.area(z.f) / 1e6; } catch (e) {} });
   $('stats').innerHTML = Object.keys(ST).map(k =>
-    t('st_' + k) + ': <i>' + Math.round(sum[k]).toLocaleString(LOC[cfg.lang]) + ' ' + t('km2') + '</i>').join('<br>') +
+    stName(k) + ': <i>' + Math.round(sum[k]).toLocaleString(LOC[cfg.lang]) + ' ' + t('km2') + '</i>').join('<br>') +
     '<br>' + t('flags') + ': <i>' + flags.length + '</i>';
 }
+
+// ---------- Custom colours ----------
+const CPAL = ['#ab47bc', '#ffa726', '#26a69a', '#ec407a', '#7e57c2', '#66bb6a', '#8d6e63', '#26c6da'];
+let customs = [];
+const stName = k => ST[k].custom ? (ST[k].name || k) : t('st_' + k);
+function syncST() {
+  Object.keys(ST).forEach(k => { if (ST[k].custom) delete ST[k]; });
+  customs.forEach(c => { ST[c.id] = { color: c.color, name: c.name, custom: true }; });
+}
+function setCustoms(list) {
+  customs = (list || []).map(c => ({ id: c.id, name: c.name, color: c.color }));
+  syncST();
+  if (!ST[status]) status = 'free';
+  renderCustoms(); setStatus(status); restyleAll();
+}
+function removeCustom(id) {
+  flushAnim();
+  zones.filter(z => z.status === id).forEach(delZone);
+  customs = customs.filter(c => c.id !== id);
+  syncST();
+  if (status === id) status = 'free';
+  renderCustoms(); setStatus(status); stats();
+}
+function renderCustoms() {
+  const box = $('cust'); box.textContent = '';
+  customs.forEach(c => {
+    const row = document.createElement('div'); row.className = 'crow' + (status === c.id ? ' on' : ''); row.dataset.st = c.id;
+    const sel = document.createElement('button'); sel.className = 't csel' + (status === c.id ? ' on' : ''); sel.dataset.st = c.id; sel.title = c.name;
+    const dot = document.createElement('span'); dot.className = 'dot'; dot.style.background = c.color; sel.appendChild(dot);
+    sel.onclick = () => setStatus(c.id);
+    const nm = document.createElement('input'); nm.type = 'text'; nm.className = 'cname'; nm.value = c.name; nm.maxLength = 40; nm.title = t('colname');
+    nm.onfocus = () => setStatus(c.id);
+    nm.oninput = () => { c.name = nm.value; ST[c.id].name = nm.value; sel.title = nm.value; renderStats(); scheduleSave(); };
+    nm.onchange = () => afterChange();
+    const col = document.createElement('input'); col.type = 'color'; col.value = c.color; col.title = t('pickcol');
+    col.oninput = () => { c.color = col.value; ST[c.id].color = col.value; dot.style.background = col.value; restyleAll(); redrawTmp(); };
+    col.onchange = () => { flushAnim(); stats(); };
+    const del = document.createElement('button'); del.className = 't cdel'; del.textContent = '✕'; del.title = t('delcol');
+    del.onclick = () => removeCustom(c.id);
+    row.append(sel, nm, col, del); box.appendChild(row);
+  });
+  $('custAdd').disabled = customs.length >= 12;
+}
+$('custAdd').onclick = () => {
+  if (customs.length >= 12) return;
+  let n = 1; while (customs.some(c => c.id === 'c' + n)) n++;
+  const id = 'c' + n;
+  customs.push({ id, name: t('colN', n), color: CPAL[(n - 1) % CPAL.length] });
+  syncST(); renderCustoms(); setStatus(id); stats();
+};
 
 // ---------- History & autosave ----------
 const HMAX = 60, AS_KEY = 'frontline-map-autosave-v10';
 let hist = [], hi = -1, restoring = false, started = false, asT = null, asWarned = false;
 const snap = () => JSON.stringify({
   z: zones.map(z => [z.status, z.f.geometry, z.autoGrey ? 1 : 0]),
-  f: flags.map(f => [f.side, f.lat, f.lng])
+  f: flags.map(f => [f.side, f.lat, f.lng]),
+  c: customs.map(c => ({ id: c.id, name: c.name, color: c.color }))
 });
 function updHist() { $('hundo').disabled = hi <= 0; $('hredo').disabled = hi >= hist.length - 1; }
 function commit() {
@@ -439,6 +509,7 @@ function restore(str) {
   restoring = true;
   try {
     clearData();
+    setCustoms(d.c || []);
     d.z.forEach(z => addZone(z[0], z[1], z[2]));
     d.f.forEach(f => addFlag(f[0], f[1], f[2]));
   } finally { restoring = false; }
@@ -494,7 +565,8 @@ function setMode(m) {
 }
 function setStatus(s) {
   status = s;
-  document.querySelectorAll('#sts .t').forEach(b => b.classList.toggle('on', b.dataset.st === s));
+  document.querySelectorAll('#sts .t, #cust .csel').forEach(b => b.classList.toggle('on', b.dataset.st === s));
+  document.querySelectorAll('#cust .crow').forEach(r => r.classList.toggle('on', r.dataset.st === s));
   redrawTmp();
 }
 document.querySelectorAll('#modes .t').forEach(b => b.onclick = () => setMode(b.dataset.mode));
@@ -593,7 +665,10 @@ function finish() {
 // Smoother advance: newly taken territory appears WHITE first; the real colour
 // follows a moment later (LAG seconds behind the front), so a white band travels
 // with the advance and the whole area ends up filled in with its colour.
-const WHITE_OP = 0.92;      // opacity of the white territory
+const WHITE_OP = 0.92;      // opacity of the white territory on satellite and dark maps
+const WHITE_OP_LIGHT = 0.4; // more transparent white on every other map
+const DARK_SAT = ['sat', 'eox', 'esriDark', 'esriDarkLabels', 'esriDarkCarto'];
+const whiteOp = () => DARK_SAT.includes(curLayers().base) ? WHITE_OP : WHITE_OP_LIGHT;
 const LAG_FRAC = 0.22;      // colour lags behind the white front by this fraction of the animation time
 let anims = [], base = null, aRaf = 0, aLast = 0, aStatic = null, aDyn = null, aDynZ = [];
 let rimLayer = null;        // draws the white leading-edge rim
@@ -756,7 +831,8 @@ function renderAnim(now) {
   if (whites.length) {
     if (!rimLayer) rimLayer = L.geoJSON(null, { interactive: false, pane: 'whitepane' }).addTo(map);
     rimLayer.clearLayers();
-    whites.forEach(w => L.geoJSON(w, { interactive: false, pane: 'whitepane', style: () => ({ color: '#ffffff', weight: 0, opacity: 0, fillColor: '#ffffff', fillOpacity: WHITE_OP }) }).addTo(rimLayer));
+    const wop = whiteOp();
+    whites.forEach(w => L.geoJSON(w, { interactive: false, pane: 'whitepane', style: () => ({ color: '#ffffff', weight: 0, opacity: 0, fillColor: '#ffffff', fillOpacity: wop }) }).addTo(rimLayer));
   } else clearRim();
 
   return anims.every(a => a.done);
@@ -1053,6 +1129,7 @@ function clearData() {
 function clearAll() { clearData(); stats(); }
 function applySave(d) {
   clearData();
+  setCustoms(d.cs || []);
   d.zs.forEach(z => addZone(z.s, z.g, z.autoGrey));
   d.fs.forEach(f => addFlag(f.side, f.lat, f.lng));
   if (d.view) map.setView([d.view.c.lat, d.view.c.lng], d.view.z);
@@ -1066,6 +1143,7 @@ function buildSave() {
     app: 'frontline-map', v: 6, savedAt: new Date().toISOString(),
     zones: zones.map(z => ({ s: z.status, g: z.f.geometry, autoGrey: z.autoGrey ? 1 : 0 })),
     flags: flags.map(f => ({ side: f.side, lat: f.lat, lng: f.lng })),
+    customs: customs.map(c => ({ id: c.id, name: c.name, color: c.color })),
     layers: curLayers(),
     view: { c: { lat: map.getCenter().lat, lng: map.getCenter().lng }, z: map.getZoom() }
   };
@@ -1092,11 +1170,13 @@ async function saveFile() {
 function parseSave(txt) {
   const d = JSON.parse(txt);
   if (!d || !Array.isArray(d.zones) || !Array.isArray(d.flags)) throw new Error('format');
-  const zs = d.zones.filter(z => z && ST[z.s] && z.g && (z.g.type === 'Polygon' || z.g.type === 'MultiPolygon') && Array.isArray(z.g.coordinates))
+  const cs = Array.isArray(d.customs) ? d.customs.filter(c => c && /^c\d+$/.test(c.id) && /^#[0-9a-f]{6}$/i.test(c.color)).slice(0, 24).map(c => ({ id: c.id, name: String(c.name || '').slice(0, 40), color: c.color })) : [];
+  const okS = new Set(['free', 'occ', 'fight'].concat(cs.map(c => c.id)));
+  const zs = d.zones.filter(z => z && okS.has(z.s) && z.g && (z.g.type === 'Polygon' || z.g.type === 'MultiPolygon') && Array.isArray(z.g.coordinates))
     .map(z => ({ s: z.s, g: z.g, autoGrey: z.autoGrey ? 1 : 0 }));
   const fs = d.flags.filter(f => f && (f.side === 'ua' || f.side === 'ru') && isFinite(f.lat) && isFinite(f.lng));
   const v = d.view, view = v && v.c && isFinite(v.c.lat) && isFinite(v.c.lng) && isFinite(v.z) ? v : null;
-  return { zs, fs, view, layers: d.layers };
+  return { zs, fs, view, layers: d.layers, cs };
 }
 async function loadFile(file) {
   if (!file) return;
@@ -1201,7 +1281,7 @@ function applyLang() {
   document.querySelectorAll('[data-i]').forEach(e => { e.textContent = t(e.dataset.i); });
   document.querySelectorAll('[data-ph]').forEach(e => { e.placeholder = t(e.dataset.ph); });
   document.querySelectorAll('[data-tt]').forEach(e => { e.title = t(e.dataset.tt); });
-  buildLayersCtl(); updHint(); updBrush(); updAn(); updBuf(); renderStats(); resumeLabel(); renderSettings();
+  buildLayersCtl(); renderCustoms(); updHint(); updBrush(); updAn(); updBuf(); renderStats(); resumeLabel(); renderSettings();
 }
 
 let menuMap = null;
