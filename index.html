@@ -11,7 +11,7 @@
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;font-family:var(--font);color:var(--txt);background:var(--bg)}
 #map{position:absolute;inset:0;background:#e9e5dc;user-select:none;-webkit-user-select:none}
-#map.draw,#map.paint,#map.erase,#map.ua,#map.ru{cursor:crosshair}
+#map.draw,#map.paint,#map.erase,#map.ua,#map.ru,#map.border{cursor:crosshair}
 #map.pan{cursor:grab}
 .leaflet-overlay-pane path:not(.leaflet-interactive){pointer-events:none}
 #menu{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;background:#0b1118;overflow:hidden}
@@ -119,6 +119,7 @@ button.t:disabled{opacity:.4;cursor:default}
     <div class="row" id="modes">
       <button class="t" data-mode="pan"><span data-i="m_pan"></span></button>
       <button class="t" data-mode="draw"><span data-i="m_draw"></span></button>
+      <button class="t" data-mode="border"><span data-i="m_border"></span></button>
       <button class="t" data-mode="paint"><span data-i="m_paint"></span></button>
       <button class="t" data-mode="erase"><span data-i="m_erase"></span></button>
       <button class="t" data-mode="ua"><span class="mini ua"></span><span data-i="m_ua"></span></button>
@@ -145,6 +146,7 @@ button.t:disabled{opacity:.4;cursor:default}
   <div class="grp"><b data-i="display"></b>
     <label class="chk"><input type="checkbox" id="noOutline"> <span data-i="noOutline"></span></label>
     <label class="chk"><input type="checkbox" id="smoothAdv"> <span data-i="smoothAdv"></span></label>
+    <label class="chk"><input type="checkbox" id="showBord" checked> <span data-i="showBord"></span></label>
   </div>
   <div class="grp" id="drawBox" hidden><b data-i="curshape"></b>
     <div class="row">
@@ -154,6 +156,10 @@ button.t:disabled{opacity:.4;cursor:default}
     </div>
     <label class="chk"><input type="checkbox" id="anOn" checked> <span><span data-i="anim"></span>: <span id="anv"></span></span></label>
     <input type="range" id="anT" min="0.5" max="5" step="0.5" value="1.5">
+  </div>
+  <div class="grp" id="borderBox" hidden><b><span data-i="bord"></span>: <span id="bwv"></span></b>
+    <input type="range" id="bW" min="1" max="8" step="0.5" value="3">
+    <label class="chk"><input type="color" id="bColor" value="#1a1a1a" style="width:34px;height:26px;padding:0"> <span data-i="bcol"></span></label>
   </div>
   <div class="grp" id="brushBox" hidden><b><span data-i="brush"></span>: <span id="bv"></span></b>
     <input type="range" id="brush" min="0" max="100" step="5" value="20">
@@ -207,6 +213,10 @@ zonecol:['Zone / colour','Зона / цвет'],
 st_free:['Liberated','Освобождено'], st_occ:['Occupied','Оккупация'], st_fight:['Fighting','Идут бои'],
 customcol:['Custom colours','Свои цвета'], addcol:['＋ Add colour','＋ Добавить цвет'],
 colN:['Colour {0}','Цвет {0}'], colname:['Colour name','Название цвета'], pickcol:['Pick colour','Выбрать цвет'], delcol:['Delete this colour and its zones','Удалить цвет и его зоны'],
+m_border:['〰️ Border line','〰️ Граница'], bord:['Border width','Толщина границы'], bcol:['Border colour','Цвет границы'],
+showBord:['Show borders','Показывать границы'], borders:['Borders','Границы'],
+h_border:['Hold and drag to draw a border line (release to finish). Start a stroke on an existing border to redraw it. Right-click a border (or use Delete marker) to remove it. Pan: Shift + drag or middle mouse button.','Зажми и води, чтобы нарисовать линию границы (отпусти — готово). Начни штрих на существующей границе — она будет перерисована. ПКМ по границе (или режим «Удалить значок») — удалить. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
+ht_border:['One finger: drag to draw a border; start on an existing border to redraw it. Two fingers pan and zoom the map.','Один палец: веди, чтобы нарисовать границу; начни на существующей — перерисуешь её. Два пальца — движение и масштаб карты.'],
 curshape:['Current shape','Текущая фигура'], finish:['Finish','Завершить'],
 stepback:['Step back','Шаг назад'], cancel:['Cancel','Отмена'],
 anim:['🎞 Advance animation','🎞 Анимация продвижения'],
@@ -264,7 +274,7 @@ ht_erase:['Drag a finger: the eraser removes the zone under it. Two fingers pan 
 };
 const LOC = { en: 'en-US', ru: 'ru-RU' }, LIDX = { en: 0, ru: 1 };
 const SET_KEY = 'frontline-settings';
-const cfg = { lang: 'en', theme: 'blue', noOutline: false, smoothAdv: false };
+const cfg = { lang: 'en', theme: 'blue', noOutline: false, smoothAdv: false, showBorders: true };
 try { Object.assign(cfg, JSON.parse(localStorage.getItem(SET_KEY) || '{}')); } catch (e) {}
 if (!(cfg.lang in LIDX)) cfg.lang = 'en';
 function saveCfg() { try { localStorage.setItem(SET_KEY, JSON.stringify(cfg)); } catch (e) {} }
@@ -369,6 +379,8 @@ map.getPane('zanim').style.display = 'none';
 map.createPane('whitepane').style.zIndex = 400;
 const zoneLayer = L.layerGroup().addTo(map);
 const flagLayer = L.layerGroup().addTo(map);
+map.createPane('borders').style.zIndex = 401;
+const borderLayer = L.layerGroup().addTo(map);
 
 // ---------- Helpers ----------
 function toast(t) {
@@ -430,7 +442,8 @@ function renderStats() {
   zones.forEach(z => { try { if (z.status in sum) sum[z.status] += turf.area(z.f) / 1e6; } catch (e) {} });
   $('stats').innerHTML = Object.keys(ST).map(k =>
     stName(k) + ': <i>' + Math.round(sum[k]).toLocaleString(LOC[cfg.lang]) + ' ' + t('km2') + '</i>').join('<br>') +
-    '<br>' + t('flags') + ': <i>' + flags.length + '</i>';
+    '<br>' + t('flags') + ': <i>' + flags.length + '</i>' +
+    '<br>' + t('borders') + ': <i>' + borders.length + '</i>';
 }
 
 // ---------- Custom colours ----------
@@ -483,13 +496,75 @@ $('custAdd').onclick = () => {
   syncST(); renderCustoms(); setStatus(id); stats();
 };
 
+// ---------- Borders (freehand lines) ----------
+let borders = [], bpts = [], btmp = null, bTarget = null, drawingB = false;
+function bStyle(color, w) { return { color, weight: w, opacity: 0.95, lineJoin: 'round', lineCap: 'round', interactive: false, pane: 'borders' }; }
+function bLayer(b) {
+  const ll = b.c.map(p => [p[1], p[0]]);
+  return L.layerGroup([
+    L.polyline(ll, { color: '#ffffff', weight: b.w + 3, opacity: 0.45, lineJoin: 'round', lineCap: 'round', interactive: false, pane: 'borders' }),
+    L.polyline(ll, bStyle(b.color, b.w))
+  ]);
+}
+function addBorder(color, w, c) {
+  const b = { color, w, c };
+  b.layer = bLayer(b); b.layer.addTo(borderLayer);
+  borders.push(b); return b;
+}
+function setBorder(b, color, w, c) {
+  borderLayer.removeLayer(b.layer);
+  b.color = color; b.w = w; b.c = c;
+  b.layer = bLayer(b); b.layer.addTo(borderLayer);
+}
+function removeBorder(b) { borderLayer.removeLayer(b.layer); borders = borders.filter(x => x !== b); }
+function nearestBorder(cp, maxPx) {
+  let best = null, bd = maxPx;
+  for (const b of borders) {
+    let prev = null;
+    for (const c of b.c) {
+      const pt = map.latLngToContainerPoint([c[1], c[0]]);
+      if (prev) { const d = L.LineUtil.pointToSegmentDistance(cp, prev, pt); if (d < bd) { bd = d; best = b; } }
+      prev = pt;
+    }
+  }
+  return best;
+}
+function delBorderAt(cp) { const b = nearestBorder(cp, 12); if (!b) return false; removeBorder(b); stats(); return true; }
+function redrawBtmp() {
+  if (btmp) map.removeLayer(btmp); btmp = null;
+  if (bpts.length < 2) return;
+  btmp = L.polyline(bpts, { color: $('bColor').value, weight: +$('bW').value, dashArray: '6 4', opacity: 0.9, interactive: false, pane: 'borders' }).addTo(map);
+}
+function cancelBorder() { bpts = []; bTarget = null; drawingB = false; redrawBtmp(); }
+function finishBorder() {
+  const raw = bpts, target = bTarget;
+  bpts = []; bTarget = null; redrawBtmp();
+  if (raw.length < 2) return;
+  let c = raw.map(p => [p.lng, p.lat]);
+  try {
+    const tol = 1.2 * 360 / (256 * Math.pow(2, map.getZoom()));
+    const r = turf.simplify(turf.lineString(c), { tolerance: tol, highQuality: true }).geometry.coordinates;
+    if (r.length >= 2) c = r;
+  } catch (err) { console.error(err); }
+  const color = $('bColor').value, w = +$('bW').value;
+  if (target && borders.includes(target)) setBorder(target, color, w, c); else addBorder(color, w, c);
+  renderStats();
+}
+function applyBordVis() {
+  if (cfg.showBorders !== false) { if (!map.hasLayer(borderLayer)) borderLayer.addTo(map); }
+  else if (map.hasLayer(borderLayer)) map.removeLayer(borderLayer);
+}
+function updBW() { $('bwv').textContent = (+$('bW').value).toFixed(1).replace('.', decSep()) + ' px'; }
+$('bW').oninput = () => { updBW(); redrawBtmp(); };
+
 // ---------- History & autosave ----------
 const HMAX = 60, AS_KEY = 'frontline-map-autosave-v10';
 let hist = [], hi = -1, restoring = false, started = false, asT = null, asWarned = false;
 const snap = () => JSON.stringify({
   z: zones.map(z => [z.status, z.f.geometry, z.autoGrey ? 1 : 0]),
   f: flags.map(f => [f.side, f.lat, f.lng]),
-  c: customs.map(c => ({ id: c.id, name: c.name, color: c.color }))
+  c: customs.map(c => ({ id: c.id, name: c.name, color: c.color })),
+  b: borders.map(b => [b.color, b.w, b.c])
 });
 function updHist() { $('hundo').disabled = hi <= 0; $('hredo').disabled = hi >= hist.length - 1; }
 function commit() {
@@ -501,7 +576,7 @@ function commit() {
 }
 function resetHist() { hist = [snap()]; hi = 0; updHist(); }
 function afterChange() {
-  if (restoring || drawing || painting || erasing) return;
+  if (restoring || drawing || painting || erasing || drawingB) return;
   commit(); scheduleSave();
 }
 function restore(str) {
@@ -512,6 +587,7 @@ function restore(str) {
     setCustoms(d.c || []);
     d.z.forEach(z => addZone(z[0], z[1], z[2]));
     d.f.forEach(f => addFlag(f[0], f[1], f[2]));
+    (d.b || []).forEach(b => addBorder(b[0], b[1], b[2]));
   } finally { restoring = false; }
   stats(); scheduleSave();
 }
@@ -521,7 +597,7 @@ function saveAuto() {
   if (!started) return;
   try {
     const d = buildSave();
-    if (!d.zones.length && !d.flags.length) localStorage.removeItem(AS_KEY);
+    if (!d.zones.length && !d.flags.length && !d.borders.length) localStorage.removeItem(AS_KEY);
     else localStorage.setItem(AS_KEY, JSON.stringify(d));
   } catch (err) { if (!asWarned) { asWarned = true; toast(t('t_noas')); } }
 }
@@ -553,10 +629,12 @@ function rulerClick(ll) {
 function setMode(m) {
   if (mode === 'draw' && m !== 'draw') cancelDraw();
   if (mode === 'ruler' && m !== 'ruler') rClear();
+  if (mode === 'border' && m !== 'border') cancelBorder();
   mode = m;
   document.querySelectorAll('#modes .t').forEach(b => b.classList.toggle('on', b.dataset.mode === m));
-  ['draw','paint','erase','ua','ru','pan','ruler','del'].forEach(c => $('map').classList.toggle(c, c === m));
+  ['draw','paint','erase','ua','ru','pan','ruler','del','border'].forEach(c => $('map').classList.toggle(c, c === m));
   $('drawBox').hidden = m !== 'draw';
+  $('borderBox').hidden = m !== 'border';
   $('brushBox').hidden = m !== 'paint';
   $('eraseBox').hidden = m !== 'erase';
   updHint();
@@ -1022,7 +1100,7 @@ function flagAt(ll, side) {
 
 // ---------- Pointer input ----------
 let panFrom = null;
-function setPan() { if (mode === 'draw' || mode === 'paint' || mode === 'erase') map.dragging.disable(); else map.dragging.enable(); }
+function setPan() { if (mode === 'draw' || mode === 'paint' || mode === 'erase' || mode === 'border') map.dragging.disable(); else map.dragging.enable(); }
 let drawing = false, painting = false, erasing = false;
 let lastPaintPx = null, lastErasePx = null, lastDrag = 0;
 const mpp = ll => 40075016.686 * Math.cos(ll.lat * Math.PI / 180) / Math.pow(2, map.getZoom() + 8);
@@ -1030,10 +1108,16 @@ function ptrDown(cp, ll) {
   if (mode === 'draw') { drawing = true; pts.push(ll); redrawTmp(); }
   else if (mode === 'paint') { painting = true; lastPaintPx = cp; paintAt(ll); }
   else if (mode === 'erase') { erasing = true; lastErasePx = cp; if (eraseAt(lastErasePx)) stats(); }
+  else if (mode === 'border') {
+    if (cfg.showBorders === false) { cfg.showBorders = true; $('showBord').checked = true; saveCfg(); applyBordVis(); }
+    drawingB = true; bTarget = nearestBorder(cp, 12); bpts = [ll]; redrawBtmp();
+  }
 }
 function ptrMove(cp, ll) {
   if (drawing) {
     if (map.latLngToContainerPoint(pts[pts.length - 1]).distanceTo(cp) >= 6) { pts.push(ll); redrawTmp(); }
+  } else if (drawingB) {
+    if (map.latLngToContainerPoint(bpts[bpts.length - 1]).distanceTo(cp) >= 5) { bpts.push(ll); redrawBtmp(); }
   } else if (erasing) {
     eraseTo(cp);
   } else if (painting) {
@@ -1044,16 +1128,18 @@ function ptrMove(cp, ll) {
   }
 }
 function ptrUp() {
-  const had = drawing || painting || erasing;
+  const had = drawing || painting || erasing || drawingB;
   if (painting) renderStats();
   if (drawing) { lastDrag = Date.now(); finishFree(); }
-  drawing = painting = erasing = false; panFrom = null;
+  if (drawingB) { lastDrag = Date.now(); finishBorder(); }
+  drawing = painting = erasing = drawingB = false; panFrom = null;
   if (had) afterChange();
 }
 function abortStroke() {
-  const had = drawing || painting || erasing;
+  const had = drawing || painting || erasing || drawingB;
   if (drawing) cancelDraw();
-  drawing = painting = erasing = false;
+  if (drawingB) cancelBorder();
+  drawing = painting = erasing = drawingB = false;
   if (had) afterChange();
 }
 map.on('mousedown', e => {
@@ -1074,7 +1160,7 @@ map.on('mousemove', e => {
 window.addEventListener('mouseup', ptrUp);
 
 let tState = null;
-const tMode = () => mode === 'draw' || mode === 'paint' || mode === 'erase';
+const tMode = () => mode === 'draw' || mode === 'paint' || mode === 'erase' || mode === 'border';
 const mapEl = map.getContainer();
 mapEl.addEventListener('touchstart', e => {
   if (!tMode() || (e.target.closest && e.target.closest('.leaflet-control'))) return;
@@ -1118,10 +1204,13 @@ map.on('click', e => {
   if (Date.now() - lastDrag < 150) return;
   if (mode === 'ua' || mode === 'ru') flagAt(e.latlng, mode);
   else if (mode === 'ruler') rulerClick(e.latlng);
+  else if (mode === 'del') delBorderAt(e.containerPoint);
 });
+map.on('contextmenu', e => { if (mode === 'border' || mode === 'del') delBorderAt(e.containerPoint); });
 document.addEventListener('keydown', e => {
   if ($('panel').hidden || !$('set').hidden) return;
   if (mode === 'draw' && e.key === 'Escape') cancelDraw();
+  if (mode === 'border' && e.key === 'Escape') cancelBorder();
   if (e.key === 'Escape' && mode === 'ruler') rClear();
 });
 
@@ -1131,6 +1220,7 @@ function clearData() {
   cancelDraw();
   zones.slice().forEach(delZone);
   flags.forEach(f => flagLayer.removeLayer(f.m)); flags = [];
+  borders.slice().forEach(removeBorder);
 }
 function clearAll() { clearData(); stats(); }
 function applySave(d) {
@@ -1138,6 +1228,7 @@ function applySave(d) {
   setCustoms(d.cs || []);
   d.zs.forEach(z => addZone(z.s, z.g, z.autoGrey));
   d.fs.forEach(f => addFlag(f.side, f.lat, f.lng));
+  d.bs.forEach(b => addBorder(b.color, b.w, b.c));
   if (d.view) map.setView([d.view.c.lat, d.view.c.lng], d.view.z);
   applyLayers(d.layers);
   rebuildAutoGreys();
@@ -1150,6 +1241,7 @@ function buildSave() {
     zones: zones.map(z => ({ s: z.status, g: z.f.geometry, autoGrey: z.autoGrey ? 1 : 0 })),
     flags: flags.map(f => ({ side: f.side, lat: f.lat, lng: f.lng })),
     customs: customs.map(c => ({ id: c.id, name: c.name, color: c.color })),
+    borders: borders.map(b => ({ color: b.color, w: b.w, c: b.c })),
     layers: curLayers(),
     view: { c: { lat: map.getCenter().lat, lng: map.getCenter().lng }, z: map.getZoom() }
   };
@@ -1182,7 +1274,9 @@ function parseSave(txt) {
     .map(z => ({ s: z.s, g: z.g, autoGrey: z.autoGrey ? 1 : 0 }));
   const fs = d.flags.filter(f => f && (f.side === 'ua' || f.side === 'ru') && isFinite(f.lat) && isFinite(f.lng));
   const v = d.view, view = v && v.c && isFinite(v.c.lat) && isFinite(v.c.lng) && isFinite(v.z) ? v : null;
-  return { zs, fs, view, layers: d.layers, cs };
+  const bs = Array.isArray(d.borders) ? d.borders.filter(b => b && /^#[0-9a-f]{6}$/i.test(b.color) && isFinite(b.w) && Array.isArray(b.c) && b.c.length >= 2 && b.c.every(q => Array.isArray(q) && isFinite(q[0]) && isFinite(q[1])))
+    .map(b => ({ color: b.color, w: Math.min(12, Math.max(1, +b.w)), c: b.c.map(q => [+q[0], +q[1]]) })) : [];
+  return { zs, fs, view, layers: d.layers, cs, bs };
 }
 async function loadFile(file) {
   if (!file) return;
@@ -1227,13 +1321,16 @@ $('noOutline').checked = !!cfg.noOutline;
 $('smoothAdv').checked = !!cfg.smoothAdv;
 $('noOutline').onchange = () => { cfg.noOutline = $('noOutline').checked; saveCfg(); restyleAll(); };
 $('smoothAdv').onchange = () => { cfg.smoothAdv = $('smoothAdv').checked; saveCfg(); };
+$('showBord').checked = cfg.showBorders !== false;
+$('showBord').onchange = () => { cfg.showBorders = $('showBord').checked; saveCfg(); applyBordVis(); };
+applyBordVis(); updBW();
 
 // ---------- Autosave restore ----------
 function readAuto() {
   try {
     const raw = localStorage.getItem(AS_KEY); if (!raw) return null;
     const p = parseSave(raw); p.at = JSON.parse(raw).savedAt;
-    return (p.zs.length || p.fs.length) ? p : null;
+    return (p.zs.length || p.fs.length || p.bs.length) ? p : null;
   } catch (err) { return null; }
 }
 const auto0 = readAuto();
@@ -1287,7 +1384,7 @@ function applyLang() {
   document.querySelectorAll('[data-i]').forEach(e => { e.textContent = t(e.dataset.i); });
   document.querySelectorAll('[data-ph]').forEach(e => { e.placeholder = t(e.dataset.ph); });
   document.querySelectorAll('[data-tt]').forEach(e => { e.title = t(e.dataset.tt); });
-  buildLayersCtl(); renderCustoms(); updHint(); updBrush(); updAn(); updBuf(); renderStats(); resumeLabel(); renderSettings();
+  buildLayersCtl(); renderCustoms(); updBW(); updHint(); updBrush(); updAn(); updBuf(); renderStats(); resumeLabel(); renderSettings();
 }
 
 let menuMap = null;
