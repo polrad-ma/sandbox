@@ -845,18 +845,24 @@ function animFrame(now) {
   }
   aRaf = requestAnimationFrame(animFrame);
 }
+// Liberated can go over any polygon except liberated itself. The shape is clipped against each
+// other zone separately (robust on big real-front-line polygons) and the pieces are joined.
 function clipToEnemy(geom) {
-  try {
-    let area = null;
-    for (const o of zones) {
-      if (o.status === 'free') continue;   // liberated can go over any polygon except liberated itself
-      area = area ? turf.union(area, o.f) : o.f;
-      if (!area) return null;
-    }
-    if (!area) return null;
-    const r = turf.intersect({ type: 'Feature', properties: {}, geometry: geom }, area);
-    return r ? r.geometry : null;
-  } catch (err) { console.error(err); return null; }
+  const G = { type: 'Feature', properties: {}, geometry: geom };
+  const pieces = [];
+  for (const o of zones) {
+    if (o.status === 'free') continue;
+    try { const r = turf.intersect(G, o.f); if (r) pieces.push(r); } catch (err) { console.error(err); }
+  }
+  if (!pieces.length) return null;
+  const polysOf = f => turf.flatten(f).features.map(x => x.geometry.coordinates);
+  let acc = pieces[0];
+  for (let i = 1; i < pieces.length; i++) {
+    let u = null;
+    try { u = turf.union(acc, pieces[i]); } catch (err) { console.error(err); }
+    acc = u || turf.multiPolygon(polysOf(acc).concat(polysOf(pieces[i])));
+  }
+  return acc.geometry;
 }
 function carve(z) {
   try {
