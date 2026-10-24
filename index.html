@@ -590,12 +590,11 @@ function finish() {
 }
 
 // ---------- Advance animation (with "smoother advance" variant) ----------
-// Smoother advance: the new colour fills in as normal, but its leading edge
-// carries a thin bright-white rim that travels outward with the front and
-// fades away once the advance has finished.
-const RIM_OP = 0.95;        // peak opacity of the white rim
-const RIM_PX = 2.6;         // rim thickness in screen pixels
-const RIM_FADE = 700;       // ms the rim takes to fade after the front stops
+// Smoother advance: newly taken territory appears WHITE first; the real colour
+// follows a moment later (LAG seconds behind the front), so a white band travels
+// with the advance and the whole area ends up filled in with its colour.
+const WHITE_OP = 0.92;      // opacity of the white territory
+const LAG_FRAC = 0.22;      // colour lags behind the white front by this fraction of the animation time
 let anims = [], base = null, aRaf = 0, aLast = 0, aStatic = null, aDyn = null, aDynZ = [];
 let rimLayer = null;        // draws the white leading-edge rim
 function startShape(j) {
@@ -616,7 +615,7 @@ function startShape(j) {
     return Object.assign({ parts, AG: turf.featureCollection(parts.map(p => p.g)) }, extra);
   };
   if (A) {
-    anims.push(mk(A.AG, { c: A.c, r0: A.r0, r1: A.r1, t0: performance.now(), T: +$('anT').value * 1000, done: false, smooth: !!cfg.smoothAdv, Sb: cfg.smoothAdv ? A.Sb : null, doneAt: 0 }));
+    anims.push(mk(A.AG, { c: A.c, r0: A.r0, r1: A.r1, t0: performance.now(), T: +$('anT').value * 1000, done: false, smooth: !!cfg.smoothAdv, lag: cfg.smoothAdv ? +$('anT').value * 1000 * LAG_FRAC : 0 }));
     if (idle) beginAnim(); else { rebuildStatic(); renderAnim(performance.now()); }
   } else if (!idle) {
     anims.push(mk({ type: 'Feature', properties: {}, geometry: geom }, { done: true }));
@@ -629,8 +628,6 @@ function farthest(c, G) {
   if (G) flatC(G.geometry.coordinates, []).forEach(p => { const d = turf.distance(c, p, { units: 'kilometers' }); if (d > m) m = d; });
   return m;
 }
-// Rim thickness in km at the current zoom.
-const rimKm = () => Math.max(RIM_PX * 40075016.686 * Math.cos(map.getCenter().lat * Math.PI / 180) / Math.pow(2, map.getZoom() + 8) / 1000, 1e-4);
 function prepAnim(st, geom, first) {
   try {
     const G = { type: 'Feature', properties: {}, geometry: geom };
@@ -656,10 +653,7 @@ function prepAnim(st, geom, first) {
     }
     const r1 = farthest(c, AG);
     if (!(r1 - r0 > 1e-6)) return null;
-    // Sb = the old territory of the same colour, slightly grown: the rim is not drawn along the seam with it.
-    let Sb = null;
-    if (S && cfg.smoothAdv) { try { Sb = turf.buffer(S, rimKm() * 1.6, { units: 'kilometers', steps: 4 }); } catch (e) { Sb = S; } }
-    return { AG, c, r0, r1, Sb };
+    return { AG, c, r0, r1 };
   } catch (err) { console.error(err); return null; }
 }
 const zanimStyle = ft => zStyle(ft.properties.s);
@@ -697,35 +691,43 @@ function flushAnim() {
   if (anims.length) endAnim();
   clearRim();
 }
-// Build the thin band along the outer edge of `part` (skipping the seam with old territory).
-function rimBand(part, Sb, w) {
-  let inner = null;
-  try { inner = turf.buffer(part, -w, { units: 'kilometers', steps: 4 }); } catch (e) { inner = null; }
-  let band = part;
-  if (inner) { try { band = turf.difference(part, inner) || part; } catch (e) { band = part; } }
-  if (Sb) { try { band = turf.difference(band, Sb); } catch (e) {} }
-  return band;
-}
+const easeIO = t => t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+const circAt = (a, t) => turf.circle(a.c, Math.max(a.r0 + (a.r1 - a.r0) * easeIO(t), 0.001), { steps: 64, units: 'kilometers' });
 function renderAnim(now) {
   let V = aDynZ.map(z => ({ s: z.status, f: z.f }));
-  const rims = [];   // {part, a} for smooth-advance animations
+  const whites = [];   // white (not yet coloured) territory of smooth-advance animations
   for (const a of anims) {
-    let H = null;
+    let H = null, HW = null;
     if (!a.done) {
-      const t = Math.min(1, (now - a.t0) / a.T);
-      if (t >= 1) { a.done = true; if (!a.doneAt) a.doneAt = now; }
-      else if (t <= 0) continue;
+      const tw = Math.min(1, (now - a.t0) / a.T);            // white front
+      const tc = Math.min(1, (now - a.t0 - a.lag) / a.T);    // colour front (lags behind)
+      if (tc >= 1) a.done = true;
+      else if (tw <= 0) continue;
       else {
-        const e = t < .5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-        try { H = turf.circle(a.c, Math.max(a.r0 + (a.r1 - a.r0) * e, 0.001), { steps: 64, units: 'kilometers' }); }
-        catch (err) { console.error(err); continue; }
+        try {
+          if (tc > 0) H = circAt(a, tc);
+          if (a.smooth && tw < 1) HW = circAt(a, tw);
+        } catch (err) { console.error(err); continue; }
+        if (tc <= 0) H = null;
+      }
+      if (!a.done && tc <= 0) {
+        // colour has not started yet: nothing coloured, only white
+        if (a.smooth) {
+          for (const pc of a.parts) { try { const w = HW ? turf.intersect(pc.g, HW) : pc.g; if (w) whites.push(w); } catch (e) {} }
+        }
+        continue;
       }
     }
     for (const pc of a.parts) {
       let part = pc.g;
       if (H) { try { part = turf.intersect(pc.g, H); } catch (err) { console.error(err); part = null; } }
+      if (a.smooth && !a.done) {
+        try {
+          const wp = HW ? turf.intersect(pc.g, HW) : pc.g;
+          if (wp) { const wd = part ? turf.difference(wp, part) : wp; if (wd) whites.push(wd); }
+        } catch (err) { console.error(err); }
+      }
       if (!part) continue;
-      if (a.smooth) rims.push({ part, a });
       const nv = [];
       for (const v of V) {
         let hit = false;
@@ -750,24 +752,14 @@ function renderAnim(now) {
     if (u) aDyn.addData({ type: 'Feature', properties: { s: st }, geometry: u.geometry });
   });
 
-  // Smooth advance: bright white rim on the leading edge, fading after the front stops.
-  if (rims.length) {
+  // White territory, drawn above the coloured fill until the colour catches up.
+  if (whites.length) {
     if (!rimLayer) rimLayer = L.geoJSON(null, { interactive: false, pane: 'whitepane' }).addTo(map);
     rimLayer.clearLayers();
-    const w = rimKm();
-    for (const r of rims) {
-      let op = RIM_OP;
-      if (r.a.done) op = RIM_OP * (1 - (now - r.a.doneAt) / RIM_FADE);
-      if (op <= 0.01) continue;
-      try {
-        const band = rimBand(r.part, r.a.Sb, w);
-        if (!band) continue;
-        L.geoJSON(band, { interactive: false, pane: 'whitepane', style: () => ({ color: '#ffffff', weight: 0, opacity: 0, fillColor: '#ffffff', fillOpacity: op }) }).addTo(rimLayer);
-      } catch (err) { console.error(err); }
-    }
+    whites.forEach(w => L.geoJSON(w, { interactive: false, pane: 'whitepane', style: () => ({ color: '#ffffff', weight: 0, opacity: 0, fillColor: '#ffffff', fillOpacity: WHITE_OP }) }).addTo(rimLayer));
   } else clearRim();
 
-  return anims.every(a => a.done && (!a.smooth || now - a.doneAt >= RIM_FADE));
+  return anims.every(a => a.done);
 }
 function animFrame(now) {
   if (!anims.length) return;
@@ -831,6 +823,7 @@ function contactGreyBuild(wKm, F, O) {
 }
 function rebuildAutoGreys() {
   zones.filter(z => z.autoGrey).forEach(delZone);
+  if (!$('bufOn').checked) return;
   const F = freeUnion(), O = occUnion();
   const w = +$('bufW').value / 2;
   const contact = contactGreyBuild(w, F, O);
@@ -1164,6 +1157,7 @@ if (auto0) {
   $('menuResume').onclick = () => { startGame(); applySave(auto0); resetHist(); toast(t('t_restored')); };
 }
 function updBuf() { $('bufV').textContent = (+$('bufW').value).toFixed(1).replace('.', decSep()) + ' ' + t('km'); }
+$('bufOn').onchange = () => { flushAnim(); rebuildAutoGreys(); stats(); };
 $('bufW').oninput = () => { updBuf(); flushAnim(); rebuildAutoGreys(); stats(); };
 function updAn() { $('anv').textContent = (+$('anT').value).toFixed(1).replace('.', decSep()) + ' ' + t('sec'); }
 $('anT').oninput = updAn; updAn();
