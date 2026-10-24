@@ -226,7 +226,7 @@ t_noas:['Autosave unavailable (blocked by the browser or no space)','Автос�
 t_nou:['Nothing to undo','Нечего отменять'], t_u:['Undone','Отменено'],
 t_nor:['Nothing to redo','Нечего возвращать'], t_r:['Redone','Возвращено'],
 t_3:['At least 3 points are needed','Нужно минимум 3 точки'],
-t_fonly:['Liberated zones can only be drawn over occupied or grey territory','Освобождённую зону можно рисовать только на оккупированной или серой территории'],
+t_fonly:['Liberated zones can only be drawn over existing zones of another colour','Освобождённую зону можно рисовать только поверх существующих зон другого цвета'],
 t_inz:['Click inside a drawn zone','Кликни внутри нарисованной зоны'],
 t_same:['This area already has that status','Этот участок уже имеет такой статус'],
 t_cut:['Could not clip the shape','Не удалось обрезать форму'],
@@ -250,7 +250,7 @@ t_front:['Front line loaded {0}','Линия фронта загружена {0}
 t_frontfail:['Could not load the front line, starting with an empty map','Не удалось загрузить линию фронта — начата пустая карта'],
 buf:['Contact strip width','Ширина контактной полосы'],
 bufOn:['Build automatically','Строить автоматически'],
-h_draw:['Hold the mouse and drag to trace the shape: release to close it. "Liberated" can only be drawn over occupied or grey territory — a grey contact strip appears at once along the frontier. Pan: Shift + drag or middle mouse button.','Зажми кнопку мыши и веди — фигура замкнётся при отпускании. «Освобождено» рисуется только на оккупированной или серой территории — серая контактная полоса появляется сразу вдоль границы. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
+h_draw:['Hold the mouse and drag to trace the shape: release to close it. "Liberated" can be drawn over any existing zone except another liberated one — a grey contact strip appears at once along the frontier with occupied land. Pan: Shift + drag or middle mouse button.','Зажми кнопку мыши и веди — фигура замкнётся при отпускании. «Освобождено» рисуется поверх любой существующей зоны, кроме освобождённой — серая контактная полоса с оккупацией появляется сразу вдоль границы. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
 h_erase:['Hold and drag: the eraser removes a piece of the zone under the cursor (size in screen pixels). Pan: Shift + drag or middle mouse button.','Зажми и води: ластик стирает кусочек зоны под курсором (размер — в пикселях экрана). Движение: Shift + перетаскивание или средняя кнопка мыши.'],
 h_paint:['Click, or hold and drag: the colour changes only within the zone under the cursor. Adjacent areas of the same colour merge. Pan: Shift + drag or middle mouse button.','Кликни или зажми и води: цвет меняется только в пределах зоны под курсором. Смежные участки одного цвета сливаются. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
 h_pan:['Drag the map with the mouse. Wheel to zoom.','Тяни карту мышью. Колесо — масштаб.'],
@@ -849,7 +849,7 @@ function clipToEnemy(geom) {
   try {
     let area = null;
     for (const o of zones) {
-      if (o.status !== 'occ' && o.status !== 'fight') continue;
+      if (o.status === 'free') continue;   // liberated can go over any polygon except liberated itself
       area = area ? turf.union(area, o.f) : o.f;
       if (!area) return null;
     }
