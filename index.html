@@ -567,68 +567,106 @@ $('bW').oninput = () => { updBW(); redrawBtmp(); };
 let arrows = [], apts = [], drawingArrow = false, arrowTimer = null, fadeRaf = 0;
 let arrowPreview = null;
 
-function buildArrowHead(pts, color, isPreview) {
+function buildArrow(pts, color, opacity) {
   if (pts.length < 2) return null;
-  const p1 = map.latLngToContainerPoint(pts[pts.length - 2]);
-  const p2 = map.latLngToContainerPoint(pts[pts.length - 1]);
-  const dx = p2.x - p1.x, dy = p2.y - p1.y;
-  const len = Math.hypot(dx, dy);
-  if (len < 1) return null;
-  
+  const cpts = pts.map(p => map.latLngToContainerPoint(p));
+  let totalLen = 0;
+  for (let i = 1; i < cpts.length; i++) totalLen += cpts[i - 1].distanceTo(cpts[i]);
+  if (totalLen < 15) return null;
+
+  const tip = cpts[cpts.length - 1];
+
+  let dx = 0, dy = 0;
+  const samples = Math.min(4, cpts.length - 1);
+  for (let i = 1; i <= samples; i++) {
+    dx += cpts[cpts.length - i].x - cpts[cpts.length - 1 - i].x;
+    dy += cpts[cpts.length - i].y - cpts[cpts.length - 1 - i].y;
+  }
+  const dlen = Math.hypot(dx, dy);
+  if (dlen < 0.001) return null;
   const angle = Math.atan2(dy, dx);
-  const headLen = Math.max(12, Math.min(25, len * 0.6));
-  const headW = Math.max(8, headLen * 0.7);
-  
-  const tip = p2;
-  const base = { x: p2.x - headLen * Math.cos(angle), y: p2.y - headLen * Math.sin(angle) };
-  const left = { x: base.x + headW * Math.sin(angle), y: base.y - headW * Math.cos(angle) };
+
+  const headLen = Math.min(32, Math.max(16, totalLen * 0.25));
+  const headW   = headLen * 0.8;
+
+  const base  = { x: tip.x - headLen * Math.cos(angle), y: tip.y - headLen * Math.sin(angle) };
+  const left  = { x: base.x + headW * Math.sin(angle), y: base.y - headW * Math.cos(angle) };
   const right = { x: base.x - headW * Math.sin(angle), y: base.y + headW * Math.cos(angle) };
-  
-  const poly = [
-    map.containerPointToLatLng(tip),
-    map.containerPointToLatLng(left),
-    map.containerPointToLatLng(right)
-  ];
-  
-  return L.polygon(poly, {
-    color: color, fillColor: color, weight: 1,
-    opacity: isPreview ? 0.6 : 0.95,
-    fillOpacity: isPreview ? 0.6 : 0.95,
+
+  let remaining = headLen;
+  const trimmedRev = [tip];
+  for (let i = cpts.length - 2; i >= 0; i--) {
+    if (remaining <= 0) { trimmedRev.push(cpts[i]); continue; }
+    const segLen = cpts[i].distanceTo(cpts[i + 1]);
+    if (segLen <= remaining) {
+      remaining -= segLen;
+      trimmedRev.push(cpts[i]);
+    } else {
+      const frac = remaining / segLen;
+      const px = cpts[i + 1].x + (cpts[i].x - cpts[i + 1].x) * frac;
+      const py = cpts[i + 1].y + (cpts[i].y - cpts[i + 1].y) * frac;
+      trimmedRev.push(L.point(px, py));
+      remaining = 0;
+    }
+  }
+
+  const head = L.polygon(
+    [map.containerPointToLatLng(tip),
+     map.containerPointToLatLng(left),
+     map.containerPointToLatLng(right)],
+    { color, fillColor: color, weight: 1, opacity, fillOpacity: opacity,
+      interactive: false, pane: 'arrows' }
+  );
+
+  if (trimmedRev.length < 2) return { shaft: null, head };
+
+  const shaftPts = trimmedRev.reverse().map(p => map.containerPointToLatLng(p));
+  const shaft = L.polyline(shaftPts, {
+    color, weight: 3, opacity, lineCap: 'round', lineJoin: 'round',
     interactive: false, pane: 'arrows'
   });
+
+  return { shaft, head };
 }
 
 function redrawArrowPreview() {
   if (arrowPreview) { map.removeLayer(arrowPreview); arrowPreview = null; }
   if (apts.length < 2) return;
   const color = ST[status].color;
-  const group = L.layerGroup().addTo(map);
-  L.polyline(apts, { color, weight: 4, opacity: 0.6, lineCap: 'round', lineJoin: 'round', interactive: false, pane: 'arrows' }).addTo(group);
-  const head = buildArrowHead(apts, color, true);
-  if (head) group.addLayer(head);
-  arrowPreview = group;
+  const arrow = buildArrow(apts, color, 0.7);
+  if (!arrow) return;
+  const layers = [];
+  if (arrow.shaft) layers.push(arrow.shaft);
+  layers.push(arrow.head);
+  arrowPreview = L.layerGroup(layers).addTo(map);
 }
 
 function clearArrows() {
-  clearTimeout(arrowTimer); arrowTimer = null;
-  cancelAnimationFrame(fadeRaf); fadeRaf = 0;
-  arrows.forEach(a => { arrowLayer.removeLayer(a.shaft); arrowLayer.removeLayer(a.head); });
+  if (arrowTimer) { clearTimeout(arrowTimer); arrowTimer = null; }
+  if (fadeRaf)    { cancelAnimationFrame(fadeRaf); fadeRaf = 0; }
+  arrows.forEach(a => {
+    if (a.shaft) arrowLayer.removeLayer(a.shaft);
+    if (a.head)  arrowLayer.removeLayer(a.head);
+  });
   arrows = [];
 }
 
 function startFade() {
-  const T = 1000; // 1 second fade out
+  const T = 1000;
   const t0 = performance.now();
   const step = (now) => {
     const p = Math.min(1, (now - t0) / T);
     const op = 1 - p;
     arrows.forEach(a => {
-      a.shaft.setStyle({ opacity: op });
-      a.head.setStyle({ opacity: op, fillOpacity: op });
+      if (a.shaft) a.shaft.setStyle({ opacity: op });
+      if (a.head)  a.head.setStyle({ opacity: op, fillOpacity: op });
     });
     if (p < 1) fadeRaf = requestAnimationFrame(step);
     else {
-      arrows.forEach(a => { arrowLayer.removeLayer(a.shaft); arrowLayer.removeLayer(a.head); });
+      arrows.forEach(a => {
+        if (a.shaft) arrowLayer.removeLayer(a.shaft);
+        if (a.head)  arrowLayer.removeLayer(a.head);
+      });
       arrows = [];
     }
   };
@@ -636,13 +674,12 @@ function startFade() {
 }
 
 function resetArrowTimer() {
-  clearTimeout(arrowTimer); arrowTimer = null;
+  if (arrowTimer) { clearTimeout(arrowTimer); arrowTimer = null; }
   if (fadeRaf) {
     cancelAnimationFrame(fadeRaf); fadeRaf = 0;
-    // restore opacity if it was mid-fade
     arrows.forEach(a => {
-      a.shaft.setStyle({ opacity: 1 });
-      a.head.setStyle({ opacity: 1, fillOpacity: 0.95 });
+      if (a.shaft) a.shaft.setStyle({ opacity: 1 });
+      if (a.head)  a.head.setStyle({ opacity: 1, fillOpacity: 1 });
     });
   }
   const ms = Math.max(200, (+$('arrowT').value || 4) * 1000);
@@ -654,13 +691,15 @@ function finishArrow() {
   const pts = apts;
   apts = []; drawingArrow = false;
   if (pts.length < 2) return;
-  
+
   const color = ST[status].color;
-  const shaft = L.polyline(pts, { color, weight: 4, opacity: 1, lineCap: 'round', lineJoin: 'round', interactive: false, pane: 'arrows' }).addTo(arrowLayer);
-  const head = buildArrowHead(pts, color, false);
-  if (head) head.addTo(arrowLayer);
-  
-  arrows.push({ shaft, head });
+  const arrow = buildArrow(pts, color, 1);
+  if (!arrow) return;
+
+  if (arrow.shaft) arrow.shaft.addTo(arrowLayer);
+  arrow.head.addTo(arrowLayer);
+
+  arrows.push({ shaft: arrow.shaft, head: arrow.head });
   resetArrowTimer();
 }
 
@@ -1228,7 +1267,7 @@ function ptrMove(cp, ll) {
   } else if (drawingB) {
     if (map.latLngToContainerPoint(bpts[bpts.length - 1]).distanceTo(cp) >= 5) { bpts.push(ll); redrawBtmp(); }
   } else if (drawingArrow) {
-    if (map.latLngToContainerPoint(apts[apts.length - 1]).distanceTo(cp) >= 4) { apts.push(ll); redrawArrowPreview(); }
+    if (map.latLngToContainerPoint(apts[apts.length - 1]).distanceTo(cp) >= 3) { apts.push(ll); redrawArrowPreview(); }
   } else if (erasing) {
     eraseTo(cp);
   } else if (painting) {
