@@ -571,7 +571,7 @@ function buildArrowGeometry(a, b) {
   const pb = map.latLngToContainerPoint(b);
   const dx = pb.x - pa.x, dy = pb.y - pa.y;
   const len = Math.hypot(dx, dy);
-  if (len < 20) return null;                      // too short to look like an arrow
+  if (len < 20) return null;
   const ux = dx / len, uy = dy / len;
   const vx = -uy, vy = ux;
   const headLen = Math.min(22, len * 0.55);
@@ -579,13 +579,13 @@ function buildArrowGeometry(a, b) {
   const shaft   = Math.max(1.5, headW * 0.32);
   const hx = pb.x - ux * headLen, hy = pb.y - uy * headLen;
   const pts = [
-    { x: pa.x + vx * shaft, y: pa.y + vy * shaft },   // shaft start +
-    { x: hx   + vx * shaft, y: hy   + vy * shaft },   // shaft end + (base of head, near side)
-    { x: hx   + vx * headW, y: hy   + vy * headW },   // head base +
-    { x: pb.x,              y: pb.y              },   // tip
-    { x: hx   - vx * headW, y: hy   - vy * headW },   // head base -
-    { x: hx   - vx * shaft, y: hy   - vy * shaft },   // shaft end -
-    { x: pa.x - vx * shaft, y: pa.y - vy * shaft }    // shaft start -
+    { x: pa.x + vx * shaft, y: pa.y + vy * shaft },
+    { x: hx   + vx * shaft, y: hy   + vy * shaft },
+    { x: hx   + vx * headW, y: hy   + vy * headW },
+    { x: pb.x,              y: pb.y              },
+    { x: hx   - vx * headW, y: hy   - vy * headW },
+    { x: hx   - vx * shaft, y: hy   - vy * shaft },
+    { x: pa.x - vx * shaft, y: pa.y - vy * shaft }
   ];
   return pts.map(p => map.containerPointToLatLng(L.point(p.x, p.y)));
 }
@@ -627,7 +627,7 @@ function finishArrow() {
   if (!pts) return;
   const layer = L.polygon(pts, arrowStyle(0.95)).addTo(arrowLayer);
   arrows.push({ layer });
-  resetArrowTimer();                  // resets the SHARED timer → all arrows vanish together
+  resetArrowTimer();   // resets the SHARED timer → all arrows vanish together
 }
 function cancelArrowDraw() {
   arrowing = false; arrowStart = null; arrowEnd = null;
@@ -636,7 +636,6 @@ function cancelArrowDraw() {
 function updArrowT() { $('arrowv').textContent = (+$('arrowT').value).toFixed(1).replace('.', decSep()) + ' ' + t('sec'); }
 $('arrowT').oninput = () => {
   updArrowT();
-  // Changing the slider restarts the shared countdown so the current arrows live for the new duration from now.
   if (arrows.length) resetArrowTimer();
 };
 
@@ -1297,6 +1296,7 @@ document.addEventListener('keydown', e => {
 function clearData() {
   flushAnim();
   cancelDraw();
+  cancelArrowDraw();
   clearArrows();
   zones.slice().forEach(delZone);
   flags.forEach(f => flagLayer.removeLayer(f.m)); flags = [];
