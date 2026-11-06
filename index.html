@@ -274,12 +274,12 @@ h_del:['Click (tap) a flag to delete it. Right-click also deletes.','Кликн�
 h_ua:['Place a UA flag in a liberated zone or near its edge. Right-click a flag to delete it.','Ставь флаг УКР в освобождённой зоне или у её границы. ПКМ по флагу — удалить.'],
 h_ru:['Place a RU flag in an occupied zone or near its edge. Right-click a flag to delete it.','Ставь флаг РФ в оккупированной зоне или у её границы. ПКМ по флагу — удалить.'],
 h_border:['Hold and drag to draw a border line (release to finish). Start a stroke on an existing border to redraw it. Right-click a border (or use Delete marker) to remove it. Pan: Shift + drag or middle mouse button.','Зажми и води, чтобы нарисовать линию границы (отпусти — готово). Начни штрих на существующей границе — она будет перерисована. ПКМ по границе (или режим «Удалить значок») — удалить. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
-h_arrow:['Drag from start to end to draw a temporary arrow. Its colour is the selected zone colour. All arrows disappear together after the "Arrow lifetime" delay, and every new arrow resets that delay. Pan: Shift + drag or middle mouse button.','Потяни от начала к концу, чтобы нарисовать временную стрелку. Её цвет — цвет выбранной зоны. Все стрелки исчезают одновременно по истечении «Времени жизни стрелки», и каждая новая стрелка сбрасывает таймер. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
+h_arrow:['Drag along the map to draw a freehand temporary arrow. Its colour is the selected zone colour. All arrows fade out together after the "Arrow lifetime" delay, and every new arrow resets that delay. Pan: Shift + drag or middle mouse button.','Зажми и веди, чтобы нарисовать временную стрелку от руки. Её цвет — цвет выбранной зоны. Все стрелки плавно исчезают по истечении «Времени жизни стрелки», и каждая новая стрелка сбрасывает таймер. Движение: Shift + перетаскивание или средняя кнопка мыши.'],
 ht_draw:['One finger: drag to trace the outline (closes on release). Two fingers pan and zoom the map.','Один палец: веди, чтобы обвести контур (замкнётся при отпускании). Два пальца — движение и масштаб карты.'],
 ht_paint:['Touch or drag: the colour changes only within the zone. Two fingers pan and zoom the map.','Коснись или веди пальцем — цвет меняется только в пределах зоны. Два пальца — движение и масштаб карты.'],
 ht_erase:['Drag a finger: the eraser removes the zone under it. Two fingers pan and zoom the map.','Веди пальцем — ластик стирает зону под ним. Два пальца — движение и масштаб карты.'],
 ht_border:['One finger: drag to draw a border; start on an existing border to redraw it. Two fingers pan and zoom the map.','Один палец: веди, чтобы нарисовать границу; начни на существующей — перерисуешь её. Два пальца — движение и масштаб карты.'],
-ht_arrow:['One finger: drag to draw a temporary arrow. Two fingers pan and zoom the map.','Один палец: потяни, чтобы нарисовать временную стрелку. Два пальца — движение и масштаб карты.']
+ht_arrow:['One finger: drag to draw a temporary arrow. Two fingers pan and zoom the map.','Один палец: веди, чтобы нарисовать временную стрелку. Два пальца — движение и масштаб карты.']
 };
 const LOC = { en: 'en-US', ru: 'ru-RU' }, LIDX = { en: 0, ru: 1 };
 const SET_KEY = 'frontline-settings';
@@ -563,76 +563,112 @@ function applyBordVis() {
 function updBW() { $('bwv').textContent = (+$('bW').value).toFixed(1).replace('.', decSep()) + ' px'; }
 $('bW').oninput = () => { updBW(); redrawBtmp(); };
 
-// ---------- Arrows (temporary, shared timer) ----------
-let arrows = [], arrowStart = null, arrowEnd = null, arrowPreview = null, arrowing = false, arrowTimer = null;
-// Build a filled-pointed-arrow polygon (shaft + triangular head) in screen pixels, converted back to lat/lng.
-function buildArrowGeometry(a, b) {
-  const pa = map.latLngToContainerPoint(a);
-  const pb = map.latLngToContainerPoint(b);
-  const dx = pb.x - pa.x, dy = pb.y - pa.y;
+// ---------- Arrows (freehand, pointed, fade out smoothly) ----------
+let arrows = [], apts = [], drawingArrow = false, arrowTimer = null, fadeRaf = 0;
+let arrowPreview = null;
+
+function buildArrowHead(pts, color, isPreview) {
+  if (pts.length < 2) return null;
+  const p1 = map.latLngToContainerPoint(pts[pts.length - 2]);
+  const p2 = map.latLngToContainerPoint(pts[pts.length - 1]);
+  const dx = p2.x - p1.x, dy = p2.y - p1.y;
   const len = Math.hypot(dx, dy);
-  if (len < 20) return null;
-  const ux = dx / len, uy = dy / len;
-  const vx = -uy, vy = ux;
-  const headLen = Math.min(22, len * 0.55);
-  const headW   = Math.min(9,  len * 0.28);
-  const shaft   = Math.max(1.5, headW * 0.32);
-  const hx = pb.x - ux * headLen, hy = pb.y - uy * headLen;
-  const pts = [
-    { x: pa.x + vx * shaft, y: pa.y + vy * shaft },
-    { x: hx   + vx * shaft, y: hy   + vy * shaft },
-    { x: hx   + vx * headW, y: hy   + vy * headW },
-    { x: pb.x,              y: pb.y              },
-    { x: hx   - vx * headW, y: hy   - vy * headW },
-    { x: hx   - vx * shaft, y: hy   - vy * shaft },
-    { x: pa.x - vx * shaft, y: pa.y - vy * shaft }
+  if (len < 1) return null;
+  
+  const angle = Math.atan2(dy, dx);
+  const headLen = Math.max(12, Math.min(25, len * 0.6));
+  const headW = Math.max(8, headLen * 0.7);
+  
+  const tip = p2;
+  const base = { x: p2.x - headLen * Math.cos(angle), y: p2.y - headLen * Math.sin(angle) };
+  const left = { x: base.x + headW * Math.sin(angle), y: base.y - headW * Math.cos(angle) };
+  const right = { x: base.x - headW * Math.sin(angle), y: base.y + headW * Math.cos(angle) };
+  
+  const poly = [
+    map.containerPointToLatLng(tip),
+    map.containerPointToLatLng(left),
+    map.containerPointToLatLng(right)
   ];
-  return pts.map(p => map.containerPointToLatLng(L.point(p.x, p.y)));
-}
-function arrowStyle(fill) {
-  return {
-    color: ST[status].color,
-    weight: 1,
-    opacity: fill,
-    fillColor: ST[status].color,
-    fillOpacity: fill,
-    lineJoin: 'round', lineCap: 'round',
+  
+  return L.polygon(poly, {
+    color: color, fillColor: color, weight: 1,
+    opacity: isPreview ? 0.6 : 0.95,
+    fillOpacity: isPreview ? 0.6 : 0.95,
     interactive: false, pane: 'arrows'
-  };
+  });
 }
+
 function redrawArrowPreview() {
   if (arrowPreview) { map.removeLayer(arrowPreview); arrowPreview = null; }
-  if (!arrowStart || !arrowEnd) return;
-  const pts = buildArrowGeometry(arrowStart, arrowEnd);
-  if (!pts) return;
-  arrowPreview = L.polygon(pts, arrowStyle(0.6)).addTo(map);
+  if (apts.length < 2) return;
+  const color = ST[status].color;
+  const group = L.layerGroup().addTo(map);
+  L.polyline(apts, { color, weight: 4, opacity: 0.6, lineCap: 'round', lineJoin: 'round', interactive: false, pane: 'arrows' }).addTo(group);
+  const head = buildArrowHead(apts, color, true);
+  if (head) group.addLayer(head);
+  arrowPreview = group;
 }
+
 function clearArrows() {
-  arrowItemsClearTimer();
-  arrows.forEach(a => arrowLayer.removeLayer(a.layer));
+  clearTimeout(arrowTimer); arrowTimer = null;
+  cancelAnimationFrame(fadeRaf); fadeRaf = 0;
+  arrows.forEach(a => { arrowLayer.removeLayer(a.shaft); arrowLayer.removeLayer(a.head); });
   arrows = [];
 }
-function arrowItemsClearTimer() { if (arrowTimer) { clearTimeout(arrowTimer); arrowTimer = null; } }
+
+function startFade() {
+  const T = 1000; // 1 second fade out
+  const t0 = performance.now();
+  const step = (now) => {
+    const p = Math.min(1, (now - t0) / T);
+    const op = 1 - p;
+    arrows.forEach(a => {
+      a.shaft.setStyle({ opacity: op });
+      a.head.setStyle({ opacity: op, fillOpacity: op });
+    });
+    if (p < 1) fadeRaf = requestAnimationFrame(step);
+    else {
+      arrows.forEach(a => { arrowLayer.removeLayer(a.shaft); arrowLayer.removeLayer(a.head); });
+      arrows = [];
+    }
+  };
+  fadeRaf = requestAnimationFrame(step);
+}
+
 function resetArrowTimer() {
-  arrowItemsClearTimer();
+  clearTimeout(arrowTimer); arrowTimer = null;
+  if (fadeRaf) {
+    cancelAnimationFrame(fadeRaf); fadeRaf = 0;
+    // restore opacity if it was mid-fade
+    arrows.forEach(a => {
+      a.shaft.setStyle({ opacity: 1 });
+      a.head.setStyle({ opacity: 1, fillOpacity: 0.95 });
+    });
+  }
   const ms = Math.max(200, (+$('arrowT').value || 4) * 1000);
-  arrowTimer = setTimeout(() => { clearArrows(); }, ms);
+  arrowTimer = setTimeout(() => { startFade(); }, ms);
 }
+
 function finishArrow() {
-  const a = arrowStart, b = arrowEnd;
-  arrowing = false; arrowStart = null; arrowEnd = null;
   if (arrowPreview) { map.removeLayer(arrowPreview); arrowPreview = null; }
-  if (!a || !b) return;
-  const pts = buildArrowGeometry(a, b);
-  if (!pts) return;
-  const layer = L.polygon(pts, arrowStyle(0.95)).addTo(arrowLayer);
-  arrows.push({ layer });
-  resetArrowTimer();   // resets the SHARED timer → all arrows vanish together
+  const pts = apts;
+  apts = []; drawingArrow = false;
+  if (pts.length < 2) return;
+  
+  const color = ST[status].color;
+  const shaft = L.polyline(pts, { color, weight: 4, opacity: 1, lineCap: 'round', lineJoin: 'round', interactive: false, pane: 'arrows' }).addTo(arrowLayer);
+  const head = buildArrowHead(pts, color, false);
+  if (head) head.addTo(arrowLayer);
+  
+  arrows.push({ shaft, head });
+  resetArrowTimer();
 }
+
 function cancelArrowDraw() {
-  arrowing = false; arrowStart = null; arrowEnd = null;
   if (arrowPreview) { map.removeLayer(arrowPreview); arrowPreview = null; }
+  apts = []; drawingArrow = false;
 }
+
 function updArrowT() { $('arrowv').textContent = (+$('arrowT').value).toFixed(1).replace('.', decSep()) + ' ' + t('sec'); }
 $('arrowT').oninput = () => {
   updArrowT();
@@ -658,7 +694,7 @@ function commit() {
 }
 function resetHist() { hist = [snap()]; hi = 0; updHist(); }
 function afterChange() {
-  if (restoring || drawing || painting || erasing || drawingB || arrowing) return;
+  if (restoring || drawing || painting || erasing || drawingB || drawingArrow) return;
   commit(); scheduleSave();
 }
 function restore(str) {
@@ -1184,15 +1220,15 @@ function ptrDown(cp, ll) {
     if (cfg.showBorders === false) { cfg.showBorders = true; $('showBord').checked = true; saveCfg(); applyBordVis(); }
     drawingB = true; bTarget = nearestBorder(cp, 12); bpts = [ll]; redrawBtmp();
   }
-  else if (mode === 'arrow') { arrowing = true; arrowStart = ll; arrowEnd = ll; redrawArrowPreview(); }
+  else if (mode === 'arrow') { drawingArrow = true; apts = [ll]; redrawArrowPreview(); }
 }
 function ptrMove(cp, ll) {
   if (drawing) {
     if (map.latLngToContainerPoint(pts[pts.length - 1]).distanceTo(cp) >= 6) { pts.push(ll); redrawTmp(); }
   } else if (drawingB) {
     if (map.latLngToContainerPoint(bpts[bpts.length - 1]).distanceTo(cp) >= 5) { bpts.push(ll); redrawBtmp(); }
-  } else if (arrowing) {
-    arrowEnd = ll; redrawArrowPreview();
+  } else if (drawingArrow) {
+    if (map.latLngToContainerPoint(apts[apts.length - 1]).distanceTo(cp) >= 4) { apts.push(ll); redrawArrowPreview(); }
   } else if (erasing) {
     eraseTo(cp);
   } else if (painting) {
@@ -1203,20 +1239,20 @@ function ptrMove(cp, ll) {
   }
 }
 function ptrUp() {
-  const had = drawing || painting || erasing || drawingB || arrowing;
+  const had = drawing || painting || erasing || drawingB || drawingArrow;
   if (painting) renderStats();
   if (drawing) { lastDrag = Date.now(); finishFree(); }
   if (drawingB) { lastDrag = Date.now(); finishBorder(); }
-  if (arrowing) { lastDrag = Date.now(); finishArrow(); }
-  drawing = painting = erasing = drawingB = arrowing = false; panFrom = null;
+  if (drawingArrow) { lastDrag = Date.now(); finishArrow(); }
+  drawing = painting = erasing = drawingB = drawingArrow = false; panFrom = null;
   if (had) afterChange();
 }
 function abortStroke() {
-  const had = drawing || painting || erasing || drawingB || arrowing;
+  const had = drawing || painting || erasing || drawingB || drawingArrow;
   if (drawing) cancelDraw();
   if (drawingB) cancelBorder();
-  if (arrowing) cancelArrowDraw();
-  drawing = painting = erasing = drawingB = arrowing = false;
+  if (drawingArrow) cancelArrowDraw();
+  drawing = painting = erasing = drawingB = drawingArrow = false;
   if (had) afterChange();
 }
 map.on('mousedown', e => {
